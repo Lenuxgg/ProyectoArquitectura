@@ -7,9 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Interfaces\" />
-    <Folder Include="DTOs\" />
-    <Folder Include="Services\" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Arquitectura.Domain\Arquitectura.Domain.csproj" />
+    <ProjectReference Include="..\Arquitectura.Infrastructure\Arquitectura.Infrastructure.csproj" />
+    <ProjectReference Include="..\Arquitectura.Shared\Arquitectura.Shared.csproj" />
   </ItemGroup>
 
 </Project>
