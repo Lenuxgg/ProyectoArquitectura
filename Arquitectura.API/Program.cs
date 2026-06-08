@@ -1,20 +1,25 @@
-using Arquitectura.Application.Interfaces.Administracion;
+﻿using Arquitectura.Application.Interfaces.Administracion;
+using Arquitectura.Application.Interfaces.Empleados;
 using Arquitectura.Application.Services.Administracion;
+using Arquitectura.Application.Services.Empleados;
 using Arquitectura.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ?? Base de datos ?????????????????????????????????????????????
+// ── Base de datos ─────────────────────────────────────────────
 builder.Services.AddDbContext<ArquitecturaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// ?? Servicios - M�dulo Administraci�n ?????????????????????????
+// ── Servicios - Módulo Administración ─────────────────────────
 builder.Services.AddScoped<IRolService, RolService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
-// ?? Controllers + Swagger ?????????????????????????????????????
+// ── Servicios - Módulo Empleados ──────────────────────────────
+builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
+
+// ── Controllers + Swagger ─────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -23,11 +28,11 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Arquitectura API",
         Version = "v1",
-        Description = "API del Sistema de Administraci�n General para Firma de Arquitectura"
+        Description = "API del Sistema de Administración General para Firma de Arquitectura"
     });
 });
 
-// ?? CORS ??????????????????????????????????????????????????????
+// ── CORS ──────────────────────────────────────────────────────
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -42,7 +47,7 @@ app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arquitectura API v1");
-    c.RoutePrefix = string.Empty; // Swagger abre en la ra�z
+    c.RoutePrefix = string.Empty;
 });
 
 app.UseAuthorization();

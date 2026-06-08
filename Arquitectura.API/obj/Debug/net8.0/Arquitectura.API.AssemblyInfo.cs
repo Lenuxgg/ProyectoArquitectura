@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Arquitectura.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5d452344306d6cc27ff799628361f85843a220ec")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+16dbd7d716e8a10d11fceb8d57dd88ba374ab730")]
 [assembly: System.Reflection.AssemblyProductAttribute("Arquitectura.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Arquitectura.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
