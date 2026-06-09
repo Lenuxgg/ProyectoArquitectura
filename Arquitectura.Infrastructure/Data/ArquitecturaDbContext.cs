@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Arquitectura.Infrastructure.Data;
 
+
+
 public class ArquitecturaDbContext : DbContext
 {
     public ArquitecturaDbContext(DbContextOptions<ArquitecturaDbContext> options)
@@ -11,12 +13,14 @@ public class ArquitecturaDbContext : DbContext
     public DbSet<Roles> Roles => Set<Roles>();
     public DbSet<Usuario> Usuario => Set<Usuario>();
     public DbSet<UserRoles> UserRoles => Set<UserRoles>();
+    public DbSet<CategoriaFinanciera> CategoriaFinanciera => Set<CategoriaFinanciera>();
+
+public DbSet<Transaccion> Transacciones => Set<Transaccion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        // --- Roles ---
         modelBuilder.Entity<Roles>(e =>
         {
             e.ToTable("Roles");
@@ -24,7 +28,6 @@ public class ArquitecturaDbContext : DbContext
             e.Property(x => x.Nombre).HasMaxLength(50).IsRequired();
         });
 
-        // --- Usuario ---
         modelBuilder.Entity<Usuario>(e =>
         {
             e.ToTable("Usuario", tb => tb.HasTrigger("trg_Auditoria_Usuario")); // ← CAMBIÁ ESTA LÍNEA
@@ -41,7 +44,6 @@ public class ArquitecturaDbContext : DbContext
             e.Property(x => x.FechaCreacion).HasDefaultValueSql("GETDATE()");
         });
 
-        // --- UserRoles (clave compuesta) ---
         modelBuilder.Entity<UserRoles>(e =>
         {
             e.ToTable("UserRoles");
@@ -54,6 +56,31 @@ public class ArquitecturaDbContext : DbContext
             e.HasOne(x => x.Roles)
              .WithMany(r => r.UserRoles)
              .HasForeignKey(x => x.RolesId);
+        });
+
+        modelBuilder.Entity<Transaccion>(e =>
+        {
+            e.ToTable("Transacciones", tb => tb.HasTrigger("trg_Auditoria_Transacciones"));
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.Tipo)
+                .HasMaxLength(10)
+                .IsRequired();
+
+            e.Property(x => x.Monto)
+                .HasPrecision(14, 2);
+
+            e.Property(x => x.FechaRegistro)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.HasOne(x => x.Categoria)
+                .WithMany()
+                .HasForeignKey(x => x.CategoriaId);
+
+            e.HasOne(x => x.Usuario)
+                .WithMany()
+                .HasForeignKey(x => x.UsuarioId);
         });
     }
 }

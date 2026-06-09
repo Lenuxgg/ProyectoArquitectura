@@ -5,8 +5,12 @@ using Arquitectura.Application.Services.Empleados;
 using Arquitectura.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Arquitectura.Application.Interfaces.Contabilidad;
+using Arquitectura.Application.Services.Contabilidad;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IContabilidadService, ContabilidadService>();
 
 // ── Base de datos ─────────────────────────────────────────────
 builder.Services.AddDbContext<ArquitecturaDbContext>(options =>
@@ -31,6 +35,8 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API del Sistema de Administración General para Firma de Arquitectura"
     });
 });
+
+
 
 // ── CORS ──────────────────────────────────────────────────────
 builder.Services.AddCors(options =>
