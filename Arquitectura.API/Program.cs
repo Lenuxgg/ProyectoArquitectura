@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Arquitectura.Application.Interfaces.Contabilidad;
 using Arquitectura.Application.Services.Contabilidad;
+using Arquitectura.Application.Interfaces.Seguimiento;
+using Arquitectura.Application.Services.Seguimiento;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +24,11 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 // ── Servicios - Módulo Empleados ──────────────────────────────
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
+
+// ── Servicios - Módulo Seguimiento ────────────────────────────
+builder.Services.AddScoped<IProyectoService, ProyectoService>();
+builder.Services.AddScoped<IComentarioProyectoService, ComentarioProyectoService>();
+builder.Services.AddScoped<ITareaService, TareaService>();
 
 // ── Controllers + Swagger ─────────────────────────────────────
 builder.Services.AddControllers();

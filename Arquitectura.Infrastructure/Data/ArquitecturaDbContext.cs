@@ -3,8 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Arquitectura.Infrastructure.Data;
 
-
-
 public class ArquitecturaDbContext : DbContext
 {
     public ArquitecturaDbContext(DbContextOptions<ArquitecturaDbContext> options)
@@ -14,8 +12,15 @@ public class ArquitecturaDbContext : DbContext
     public DbSet<Usuario> Usuario => Set<Usuario>();
     public DbSet<UserRoles> UserRoles => Set<UserRoles>();
     public DbSet<CategoriaFinanciera> CategoriaFinanciera => Set<CategoriaFinanciera>();
+    public DbSet<Transaccion> Transacciones => Set<Transaccion>();
 
-public DbSet<Transaccion> Transacciones => Set<Transaccion>();
+    // Seguimiento
+    public DbSet<Proyecto> Proyectos => Set<Proyecto>();
+    public DbSet<Tarea> Tareas => Set<Tarea>();
+    public DbSet<ComentarioProyecto> ComentarioProyectos => Set<ComentarioProyecto>();
+    public DbSet<ComentarioTarea> ComentarioTareas => Set<ComentarioTarea>();
+    public DbSet<ProyectoEmpleado> ProyectoEmpleados => Set<ProyectoEmpleado>();
+    public DbSet<TareaAsignacion> TareaAsignaciones => Set<TareaAsignacion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,7 +35,7 @@ public DbSet<Transaccion> Transacciones => Set<Transaccion>();
 
         modelBuilder.Entity<Usuario>(e =>
         {
-            e.ToTable("Usuario", tb => tb.HasTrigger("trg_Auditoria_Usuario")); // ← CAMBIÁ ESTA LÍNEA
+            e.ToTable("Usuario", tb => tb.HasTrigger("trg_Auditoria_Usuario"));
             e.HasKey(x => x.Id);
             e.Property(x => x.Nombre).HasMaxLength(100).IsRequired();
             e.Property(x => x.Apellidos).HasMaxLength(100).IsRequired();
@@ -77,6 +82,159 @@ public DbSet<Transaccion> Transacciones => Set<Transaccion>();
             e.HasOne(x => x.Categoria)
                 .WithMany()
                 .HasForeignKey(x => x.CategoriaId);
+
+            e.HasOne(x => x.Usuario)
+                .WithMany()
+                .HasForeignKey(x => x.UsuarioId);
+        });
+
+        // ============================================================
+        // MÓDULO SEGUIMIENTO
+        // ============================================================
+
+        modelBuilder.Entity<Proyecto>(e =>
+        {
+            e.ToTable("Proyectos", tb => tb.HasTrigger("trg_Auditoria_Proyectos"));
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.Nombre)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            e.Property(x => x.Descripcion);
+
+            e.Property(x => x.FechaInicio)
+                .HasColumnType("date")
+                .HasDefaultValueSql("GETDATE()");
+
+            e.Property(x => x.FechaFin)
+                .HasColumnType("date");
+
+            e.Property(x => x.Estado)
+                .HasMaxLength(30)
+                .HasDefaultValue("Activo")
+                .IsRequired();
+
+            e.Property(x => x.FechaCreacion)
+                .HasDefaultValueSql("GETDATE()");
+        });
+
+        modelBuilder.Entity<Tarea>(e =>
+        {
+            e.ToTable("Tareas", tb =>
+            {
+                tb.HasTrigger("trg_Auditoria_Tareas");
+                tb.HasTrigger("trg_Tareas_ActualizaProyecto");
+            });
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.Titulo)
+                .HasMaxLength(200)
+                .IsRequired();
+
+            e.Property(x => x.Estado)
+                .HasMaxLength(30)
+                .HasDefaultValue("Pendiente")
+                .IsRequired();
+
+            e.Property(x => x.Descripcion);
+
+            e.Property(x => x.FechaInicio)
+                .HasColumnType("date");
+
+            e.Property(x => x.FechaFin)
+                .HasColumnType("date");
+
+            e.Property(x => x.FechaCreacion)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.HasOne(x => x.Proyecto)
+                .WithMany(p => p.Tareas)
+                .HasForeignKey(x => x.ProyectoId);
+        });
+
+        modelBuilder.Entity<ComentarioProyecto>(e =>
+        {
+            e.ToTable("ComentarioProyectos");
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.ArchivoRuta)
+                .HasMaxLength(500);
+
+            e.Property(x => x.Text)
+                .IsRequired();
+
+            e.Property(x => x.Fecha)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.HasOne(x => x.Proyecto)
+                .WithMany(p => p.Comentarios)
+                .HasForeignKey(x => x.ProyectoId);
+        });
+
+        modelBuilder.Entity<ComentarioTarea>(e =>
+        {
+            e.ToTable("ComentarioTareas");
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.Texto)
+                .IsRequired();
+
+            e.Property(x => x.ArchivoRuta)
+                .HasMaxLength(500);
+
+            e.Property(x => x.Fecha)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.HasOne(x => x.Tarea)
+                .WithMany(t => t.Comentarios)
+                .HasForeignKey(x => x.TareaId);
+
+            e.HasOne(x => x.Usuario)
+                .WithMany()
+                .HasForeignKey(x => x.UsuarioId);
+        });
+
+        modelBuilder.Entity<ProyectoEmpleado>(e =>
+        {
+            e.ToTable("ProyectoEmpleados");
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.FechaAsignacion)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.Property(x => x.Activo)
+                .HasDefaultValue(true);
+
+            e.HasOne(x => x.Proyecto)
+                .WithMany(p => p.ProyectoEmpleados)
+                .HasForeignKey(x => x.ProyectoId);
+
+            e.HasOne(x => x.Usuario)
+                .WithMany()
+                .HasForeignKey(x => x.UsuarioId);
+        });
+
+        modelBuilder.Entity<TareaAsignacion>(e =>
+        {
+            e.ToTable("TareaAsignaciones");
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.FechaAsignacion)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.Property(x => x.Activo)
+                .HasDefaultValue(true);
+
+            e.HasOne(x => x.Tarea)
+                .WithMany(t => t.Asignaciones)
+                .HasForeignKey(x => x.TareaId);
 
             e.HasOne(x => x.Usuario)
                 .WithMany()

@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj": {}
+    "C:\\projects\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj": {}
   },
   "projects": {
-    "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj": {
+    "C:\\projects\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj",
+        "projectUniqueName": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj",
         "projectName": "Arquitectura.Application",
-        "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj",
-        "packagesPath": "C:\\Users\\jhult\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Application\\obj\\",
+        "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj",
+        "packagesPath": "C:\\Users\\Felipe\\.nuget\\packages\\",
+        "outputPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\jhult\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Felipe\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -30,17 +30,16 @@
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj": {
-                "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj"
+              "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj": {
+                "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj"
               },
-              "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj"
+              "C:\\projects\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj": {
+                "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj"
               },
-              "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj": {
-                "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj"
+              "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj": {
+                "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj"
               }
             }
           }
@@ -55,11 +54,10 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.300"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
@@ -83,24 +81,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj": {
+    "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj",
+        "projectUniqueName": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj",
         "projectName": "Arquitectura.Domain",
-        "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj",
-        "packagesPath": "C:\\Users\\jhult\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\obj\\",
+        "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj",
+        "packagesPath": "C:\\Users\\Felipe\\.nuget\\packages\\",
+        "outputPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\jhult\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Felipe\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -113,7 +111,6 @@
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -128,11 +125,10 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.300"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "imports": [
             "net461",
@@ -150,24 +146,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj": {
+    "C:\\projects\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj",
+        "projectUniqueName": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj",
         "projectName": "Arquitectura.Infrastructure",
-        "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\jhult\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Infrastructure\\obj\\",
+        "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Felipe\\.nuget\\packages\\",
+        "outputPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\jhult\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Felipe\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -180,14 +176,13 @@
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj": {
-                "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj"
+              "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj": {
+                "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj"
               },
-              "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj": {
-                "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj"
+              "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj": {
+                "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj"
               }
             }
           }
@@ -202,11 +197,10 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.300"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.EntityFrameworkCore.SqlServer": {
@@ -236,24 +230,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj": {
+    "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj",
+        "projectUniqueName": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj",
         "projectName": "Arquitectura.Shared",
-        "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj",
-        "packagesPath": "C:\\Users\\jhult\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\obj\\",
+        "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj",
+        "packagesPath": "C:\\Users\\Felipe\\.nuget\\packages\\",
+        "outputPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\jhult\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Felipe\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -266,7 +260,6 @@
         },
         "frameworks": {
           "net8.0": {
-            "framework": "net8.0",
             "targetAlias": "net8.0",
             "projectReferences": {}
           }
@@ -281,11 +274,10 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "10.0.300"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "imports": [
             "net461",
@@ -303,7 +295,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

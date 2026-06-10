@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 3,
   "targets": {
     "net8.0": {
       "Azure.Core/1.35.0": {
@@ -2781,23 +2781,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\jhult\\.nuget\\packages\\": {},
+    "C:\\Users\\Felipe\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj",
+      "projectUniqueName": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj",
       "projectName": "Arquitectura.Application",
-      "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj",
-      "packagesPath": "C:\\Users\\jhult\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Application\\obj\\",
+      "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Application\\Arquitectura.Application.csproj",
+      "packagesPath": "C:\\Users\\Felipe\\.nuget\\packages\\",
+      "outputPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Application\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\jhult\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Felipe\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -2810,17 +2810,16 @@
       },
       "frameworks": {
         "net8.0": {
-          "framework": "net8.0",
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj": {
-              "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj"
+            "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj": {
+              "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Domain\\Arquitectura.Domain.csproj"
             },
-            "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj": {
-              "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj"
+            "C:\\projects\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj": {
+              "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Infrastructure\\Arquitectura.Infrastructure.csproj"
             },
-            "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj": {
-              "projectPath": "C:\\Users\\jhult\\OneDrive\\Escritorio\\Proyectos U\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj"
+            "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj": {
+              "projectPath": "C:\\projects\\ProyectoArquitectura\\Arquitectura.Shared\\Arquitectura.Shared.csproj"
             }
           }
         }
@@ -2835,11 +2834,10 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.300"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
-        "framework": "net8.0",
         "targetAlias": "net8.0",
         "dependencies": {
           "Microsoft.EntityFrameworkCore": {
@@ -2863,7 +2861,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
