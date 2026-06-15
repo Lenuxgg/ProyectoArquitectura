@@ -81,7 +81,7 @@ public class ProyectosController : ControllerBase
         if (!resultado)
             return BadRequest("No se pudo asignar el empleado al proyecto. Verifique que el proyecto y el usuario existan, o que no esté asignado previamente.");
 
-        return Ok("Empleado asignado al proyecto correctamente.");
+        return Ok("Empleado asignado al proyecto con rol correctamente.");
     }
 
     [HttpPut("asignacion/{asignacionId}")]
@@ -92,7 +92,7 @@ public class ProyectosController : ControllerBase
         if (!resultado)
             return NotFound("No se encontró la asignación o el usuario indicado no existe.");
 
-        return Ok("Asignación editada correctamente.");
+        return Ok("Rol del empleado en el proyecto editado correctamente.");
     }
 
     [HttpDelete("asignacion/{asignacionId}")]
@@ -104,5 +104,12 @@ public class ProyectosController : ControllerBase
             return NotFound("No se encontró la asignación.");
 
         return Ok("Empleado eliminado del proyecto correctamente.");
+    }
+
+    [HttpGet("{proyectoId}/empleados")]
+    public async Task<IActionResult> ObtenerEmpleadosPorProyecto(int proyectoId)
+    {
+        var empleados = await _proyectoService.ObtenerEmpleadosPorProyectoAsync(proyectoId);
+        return Ok(empleados);
     }
 }

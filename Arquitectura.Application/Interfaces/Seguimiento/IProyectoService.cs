@@ -21,4 +21,6 @@ public interface IProyectoService
     Task<bool> EditarAsignacionEmpleadoAsync(int asignacionId, EditarAsignacionProyectoDto dto);
 
     Task<bool> EliminarEmpleadoProyectoAsync(int asignacionId);
+
+    Task<List<ProyectoEmpleadoDto>> ObtenerEmpleadosPorProyectoAsync(int proyectoId);
 }

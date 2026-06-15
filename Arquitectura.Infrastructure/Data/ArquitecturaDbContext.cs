@@ -205,6 +205,10 @@ public class ArquitecturaDbContext : DbContext
 
             e.HasKey(x => x.Id);
 
+            e.Property(x => x.RolProyecto)
+                .HasMaxLength(50)
+                .IsRequired();
+
             e.Property(x => x.FechaAsignacion)
                 .HasDefaultValueSql("GETDATE()");
 

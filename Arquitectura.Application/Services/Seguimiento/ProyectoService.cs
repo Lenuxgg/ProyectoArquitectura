@@ -129,8 +129,11 @@ public class ProyectoService : IProyectoService
 
     public async Task<bool> AsignarEmpleadoAsync(AsignarEmpleadoProyectoDto dto)
     {
-        var proyectoExiste = await _context.Proyectos.AnyAsync(p => p.Id == dto.ProyectoId);
-        var usuarioExiste = await _context.Usuario.AnyAsync(u => u.Id == dto.UsuarioId);
+        var proyectoExiste = await _context.Proyectos
+            .AnyAsync(p => p.Id == dto.ProyectoId);
+
+        var usuarioExiste = await _context.Usuario
+            .AnyAsync(u => u.Id == dto.UsuarioId);
 
         if (!proyectoExiste || !usuarioExiste)
             return false;
@@ -147,6 +150,7 @@ public class ProyectoService : IProyectoService
         {
             ProyectoId = dto.ProyectoId,
             UsuarioId = dto.UsuarioId,
+            RolProyecto = dto.RolProyecto,
             FechaAsignacion = DateTime.Now,
             Activo = true
         };
@@ -164,12 +168,14 @@ public class ProyectoService : IProyectoService
         if (asignacion == null)
             return false;
 
-        var usuarioExiste = await _context.Usuario.AnyAsync(u => u.Id == dto.UsuarioId);
+        var usuarioExiste = await _context.Usuario
+            .AnyAsync(u => u.Id == dto.UsuarioId);
 
         if (!usuarioExiste)
             return false;
 
         asignacion.UsuarioId = dto.UsuarioId;
+        asignacion.RolProyecto = dto.RolProyecto;
         asignacion.Activo = dto.Activo;
 
         await _context.SaveChangesAsync();
@@ -188,5 +194,23 @@ public class ProyectoService : IProyectoService
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    public async Task<List<ProyectoEmpleadoDto>> ObtenerEmpleadosPorProyectoAsync(int proyectoId)
+    {
+        return await _context.ProyectoEmpleados
+            .Include(x => x.Usuario)
+            .Where(x => x.ProyectoId == proyectoId)
+            .Select(x => new ProyectoEmpleadoDto
+            {
+                Id = x.Id,
+                ProyectoId = x.ProyectoId,
+                UsuarioId = x.UsuarioId,
+                NombreEmpleado = x.Usuario.Nombre + " " + x.Usuario.Apellidos,
+                RolProyecto = x.RolProyecto,
+                FechaAsignacion = x.FechaAsignacion,
+                Activo = x.Activo
+            })
+            .ToListAsync();
     }
 }

@@ -8,6 +8,8 @@ public class ProyectoEmpleado
 
     public int UsuarioId { get; set; }
 
+    public string RolProyecto { get; set; } = string.Empty;
+
     public DateTime FechaAsignacion { get; set; } = DateTime.Now;
 
     public bool Activo { get; set; } = true;
