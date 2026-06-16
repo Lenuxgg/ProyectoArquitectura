@@ -1,5 +1,6 @@
 ﻿using Arquitectura.Application.DTOs.Administracion;
 using Arquitectura.Application.Interfaces.Administracion;
+using Arquitectura.Application.DTOs.Auth;
 using Arquitectura.Domain.Entities;
 using Arquitectura.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -147,13 +148,18 @@ public class UsuarioService : IUsuarioService
     }
 
     public async Task<UsuarioDto?> LoginAsync(LoginDto dto)
-    {
-        var hash = HashPassword(dto.Password);
-        var usuario = await _context.Usuario
-            .Include(u => u.UserRoles).ThenInclude(ur => ur.Roles)
-            .FirstOrDefaultAsync(u => u.Email == dto.Email &&
-                                      u.PasswordHash == hash &&
-                                      u.Estado == "Activo");
-        return usuario == null ? null : MapToDto(usuario);
-    }
+{
+    var usuario = await _context.Usuario
+        .Include(u => u.UserRoles)
+        .ThenInclude(ur => ur.Roles)
+        .FirstOrDefaultAsync(u => u.Email == dto.Email);
+
+    if (usuario == null)
+        return null;
+
+    if (usuario.PasswordHash != HashPassword(dto.Password))
+        return null;
+
+    return MapToDto(usuario);
+}
 }

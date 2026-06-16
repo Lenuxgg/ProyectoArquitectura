@@ -1,5 +1,7 @@
 ﻿using Arquitectura.Application.DTOs.Administracion;
+using Arquitectura.Application.DTOs.Auth;
 using Arquitectura.Application.Interfaces.Administracion;
+using Arquitectura.Application.Interfaces.Auth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arquitectura.API.Controllers;
@@ -10,9 +12,17 @@ namespace Arquitectura.API.Controllers;
 public class UsuariosController : ControllerBase
 {
     private readonly IUsuarioService _service;
-    public UsuariosController(IUsuarioService service) => _service = service;
+    private readonly IAuthService _authService;
 
-    /// <summary>Obtiene todos los usuarios activos.</summary>
+    public UsuariosController(
+        IUsuarioService service,
+        IAuthService authService)
+    {
+        _service = service;
+        _authService = authService;
+    }
+
+    // GET: api/Usuarios
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -20,73 +30,105 @@ public class UsuariosController : ControllerBase
         return Ok(lista);
     }
 
-    /// <summary>Obtiene un usuario por su ID.</summary>
+    // GET: api/Usuarios/5
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var usuario = await _service.GetByIdAsync(id);
-        return usuario == null ? NotFound($"Usuario con ID {id} no encontrado.") : Ok(usuario);
+
+        if (usuario == null)
+            return NotFound($"Usuario con ID {id} no encontrado.");
+
+        return Ok(usuario);
     }
 
-    /// <summary>Busca usuarios por nombre, apellido o correo.</summary>
+    // GET: api/Usuarios/buscar?termino=jeremy
     [HttpGet("buscar")]
     public async Task<IActionResult> Buscar([FromQuery] string termino)
     {
         if (string.IsNullOrWhiteSpace(termino))
             return BadRequest("El término de búsqueda no puede estar vacío.");
+
         var lista = await _service.BuscarAsync(termino);
         return Ok(lista);
     }
 
-    /// <summary>Registra un nuevo usuario.</summary>
+    // POST: api/Usuarios
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CrearUsuarioDto dto)
     {
         var usuario = await _service.CreateAsync(dto);
-        return CreatedAtAction(nameof(GetById), new { id = usuario.Id }, usuario);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = usuario.Id },
+            usuario
+        );
     }
 
-    /// <summary>Actualiza el perfil de un usuario existente.</summary>
+    // PUT: api/Usuarios/5
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] ActualizarUsuarioDto dto)
+    public async Task<IActionResult> Update(
+        int id,
+        [FromBody] ActualizarUsuarioDto dto)
     {
         var usuario = await _service.UpdateAsync(id, dto);
-        return usuario == null ? NotFound($"Usuario con ID {id} no encontrado.") : Ok(usuario);
+
+        if (usuario == null)
+            return NotFound($"Usuario con ID {id} no encontrado.");
+
+        return Ok(usuario);
     }
 
-    /// <summary>Da de baja a un usuario (baja lógica).</summary>
+    // DELETE: api/Usuarios/5
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         var resultado = await _service.DeleteAsync(id);
-        return resultado ? NoContent() : NotFound($"Usuario con ID {id} no encontrado.");
+
+        if (!resultado)
+            return NotFound($"Usuario con ID {id} no encontrado.");
+
+        return NoContent();
     }
 
-    /// <summary>Inicia sesión con email y contraseña.</summary>
+    // POST: api/Usuarios/login
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto dto)
+    public async Task<IActionResult> Login(
+        [FromBody] Arquitectura.Application.DTOs.Auth.LoginDto dto)
     {
-        var usuario = await _service.LoginAsync(dto);
-        if (usuario == null)
-            return Unauthorized("Credenciales incorrectas o usuario inactivo.");
-        return Ok(usuario);
+        var response = await _authService.LoginAsync(dto);
+
+        if (response == null)
+            return Unauthorized("Credenciales inválidas.");
+
+        return Ok(response);
     }
 
-    /// <summary>Asigna un rol a un usuario.</summary>
+    // POST: api/Usuarios/asignar-rol
     [HttpPost("asignar-rol")]
-    public async Task<IActionResult> AsignarRol([FromBody] AsignarRolDto dto)
+    public async Task<IActionResult> AsignarRol(
+        [FromBody] AsignarRolDto dto)
     {
         var resultado = await _service.AsignarRolAsync(dto);
+
         if (!resultado)
             return Conflict("El usuario ya tiene ese rol asignado.");
+
         return Ok("Rol asignado correctamente.");
     }
 
-    /// <summary>Remueve un rol de un usuario.</summary>
+    // DELETE: api/Usuarios/{usuarioId}/rol/{rolId}
     [HttpDelete("{usuarioId:int}/rol/{rolId:int}")]
-    public async Task<IActionResult> RemoverRol(int usuarioId, int rolId)
+    public async Task<IActionResult> RemoverRol(
+        int usuarioId,
+        int rolId)
     {
         var resultado = await _service.RemoverRolAsync(usuarioId, rolId);
-        return resultado ? NoContent() : NotFound("Asignación de rol no encontrada.");
+
+        if (!resultado)
+            return NotFound("Asignación de rol no encontrada.");
+
+        return NoContent();
     }
 }

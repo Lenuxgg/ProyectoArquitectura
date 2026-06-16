@@ -1,4 +1,5 @@
 ﻿using Arquitectura.Application.DTOs.Administracion;
+using Arquitectura.Application.DTOs.Auth;
 
 namespace Arquitectura.Application.Interfaces.Administracion;
 

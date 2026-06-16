@@ -9,10 +9,17 @@ using Arquitectura.Application.Interfaces.Contabilidad;
 using Arquitectura.Application.Services.Contabilidad;
 using Arquitectura.Application.Interfaces.Seguimiento;
 using Arquitectura.Application.Services.Seguimiento;
+using Arquitectura.Application.Interfaces.Auth;
+using Arquitectura.Application.Services.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IContabilidadService, ContabilidadService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 // ── Base de datos ─────────────────────────────────────────────
 builder.Services.AddDbContext<ArquitecturaDbContext>(options =>
@@ -29,6 +36,25 @@ builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 builder.Services.AddScoped<IProyectoService, ProyectoService>();
 builder.Services.AddScoped<IComentarioProyectoService, ComentarioProyectoService>();
 builder.Services.AddScoped<ITareaService, TareaService>();
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
 
 // ── Controllers + Swagger ─────────────────────────────────────
 builder.Services.AddControllers();
@@ -63,6 +89,8 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty;
 });
 
+
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
