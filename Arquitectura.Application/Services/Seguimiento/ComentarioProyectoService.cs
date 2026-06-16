@@ -94,4 +94,25 @@ public class ComentarioProyectoService : IComentarioProyectoService
 
         return true;
     }
+
+    public async Task<ComentarioProyectoDto?> AdjuntarArchivoAsync(int comentarioId, string archivoRuta)
+    {
+        var comentario = await _context.ComentarioProyectos.FindAsync(comentarioId);
+
+        if (comentario == null)
+            return null;
+
+        comentario.ArchivoRuta = archivoRuta;
+
+        await _context.SaveChangesAsync();
+
+        return new ComentarioProyectoDto
+        {
+            Id = comentario.Id,
+            ProyectoId = comentario.ProyectoId,
+            Text = comentario.Text,
+            ArchivoRuta = comentario.ArchivoRuta,
+            Fecha = comentario.Fecha
+        };
+    }
 }

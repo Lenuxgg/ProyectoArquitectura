@@ -213,4 +213,59 @@ public class ProyectoService : IProyectoService
             })
             .ToListAsync();
     }
+    public async Task<DocumentoProyectoDto?> AdjuntarDocumentoProyectoAsync(int proyectoId, string nombre, string rutaArchivo)
+    {
+        var proyectoExiste = await _context.Proyectos.AnyAsync(p => p.Id == proyectoId);
+
+        if (!proyectoExiste)
+            return null;
+
+        var documento = new DocumentoProyecto
+        {
+            ProyectoId = proyectoId,
+            Nombre = nombre,
+            RutaArchivo = rutaArchivo,
+            FechaCarga = DateTime.Now
+        };
+
+        _context.DocumentoProyectos.Add(documento);
+        await _context.SaveChangesAsync();
+
+        return new DocumentoProyectoDto
+        {
+            Id = documento.Id,
+            ProyectoId = documento.ProyectoId,
+            Nombre = documento.Nombre,
+            RutaArchivo = documento.RutaArchivo,
+            FechaCarga = documento.FechaCarga
+        };
+    }
+
+    public async Task<List<DocumentoProyectoDto>> ObtenerDocumentosPorProyectoAsync(int proyectoId)
+    {
+        return await _context.DocumentoProyectos
+            .Where(d => d.ProyectoId == proyectoId)
+            .Select(d => new DocumentoProyectoDto
+            {
+                Id = d.Id,
+                ProyectoId = d.ProyectoId,
+                Nombre = d.Nombre,
+                RutaArchivo = d.RutaArchivo,
+                FechaCarga = d.FechaCarga
+            })
+            .ToListAsync();
+    }
+
+    public async Task<bool> EliminarDocumentoProyectoAsync(int documentoId)
+    {
+        var documento = await _context.DocumentoProyectos.FindAsync(documentoId);
+
+        if (documento == null)
+            return false;
+
+        _context.DocumentoProyectos.Remove(documento);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
 }

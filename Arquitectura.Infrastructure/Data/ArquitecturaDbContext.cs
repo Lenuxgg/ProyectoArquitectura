@@ -21,6 +21,7 @@ public class ArquitecturaDbContext : DbContext
     public DbSet<ComentarioTarea> ComentarioTareas => Set<ComentarioTarea>();
     public DbSet<ProyectoEmpleado> ProyectoEmpleados => Set<ProyectoEmpleado>();
     public DbSet<TareaAsignacion> TareaAsignaciones => Set<TareaAsignacion>();
+    public DbSet<DocumentoProyecto> DocumentoProyectos => Set<DocumentoProyecto>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -222,6 +223,28 @@ public class ArquitecturaDbContext : DbContext
             e.HasOne(x => x.Usuario)
                 .WithMany()
                 .HasForeignKey(x => x.UsuarioId);
+        });
+
+        modelBuilder.Entity<DocumentoProyecto>(e =>
+        {
+            e.ToTable("DocumentoProyectos");
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.Nombre)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            e.Property(x => x.RutaArchivo)
+                .HasMaxLength(500)
+                .IsRequired();
+
+            e.Property(x => x.FechaCarga)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.HasOne(x => x.Proyecto)
+                .WithMany(p => p.Documentos)
+                .HasForeignKey(x => x.ProyectoId);
         });
 
         modelBuilder.Entity<TareaAsignacion>(e =>

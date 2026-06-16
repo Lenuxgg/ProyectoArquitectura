@@ -23,4 +23,10 @@ public interface IProyectoService
     Task<bool> EliminarEmpleadoProyectoAsync(int asignacionId);
 
     Task<List<ProyectoEmpleadoDto>> ObtenerEmpleadosPorProyectoAsync(int proyectoId);
+
+    Task<DocumentoProyectoDto?> AdjuntarDocumentoProyectoAsync(int proyectoId, string nombre, string rutaArchivo);
+
+    Task<List<DocumentoProyectoDto>> ObtenerDocumentosPorProyectoAsync(int proyectoId);
+
+    Task<bool> EliminarDocumentoProyectoAsync(int documentoId);
 }

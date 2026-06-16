@@ -13,4 +13,6 @@ public interface IComentarioProyectoService
     Task<ComentarioProyectoDto> CrearAsync(CrearComentarioProyectoDto dto);
 
     Task<bool> EliminarAsync(int id);
+
+    Task<ComentarioProyectoDto?> AdjuntarArchivoAsync(int comentarioId, string archivoRuta);
 }

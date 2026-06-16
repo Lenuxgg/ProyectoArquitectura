@@ -25,4 +25,6 @@ public class Proyecto
     public ICollection<ComentarioProyecto> Comentarios { get; set; } = new List<ComentarioProyecto>();
 
     public ICollection<ProyectoEmpleado> ProyectoEmpleados { get; set; } = new List<ProyectoEmpleado>();
+
+    public ICollection<DocumentoProyecto> Documentos { get; set; } = new List<DocumentoProyecto>();
 }
