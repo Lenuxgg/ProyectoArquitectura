@@ -1,5 +1,26 @@
-.vs/
+# Build folders
 bin/
 obj/
+
+# Visual Studio
+.vs/
 *.user
 *.suo
+
+# Rider
+.idea/
+
+# Logs
+*.log
+
+# NuGet
+packages/
+*.nupkg
+
+# Config locales
+appsettings.Development.json
+appsettings.Local.json
+
+# OS files
+.DS_Store
+Thumbs.db
