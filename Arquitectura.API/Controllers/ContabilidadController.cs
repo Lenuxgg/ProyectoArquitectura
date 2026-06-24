@@ -45,9 +45,7 @@ public class ContabilidadController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// CONT-002 Registrar egreso
-    /// </summary>
+
     [HttpPost("egresos")]
     public async Task<IActionResult> RegistrarEgreso(
         [FromBody] RegistrarTransaccionDto dto)
@@ -72,5 +70,30 @@ public class ContabilidadController : ControllerBase
                 mensaje = ex.Message
             });
         }
+    }
+
+    [HttpGet("ingresos")]
+    public async Task<IActionResult> ObtenerIngresos()
+    {
+        var lista = await _contabilidadService.ObtenerIngresosAsync();
+        return Ok(lista);
+    }
+
+    [HttpGet("egresos")]
+    public async Task<IActionResult> ObtenerEgresos()
+    {
+        var lista = await _contabilidadService.ObtenerEgresosAsync();
+        return Ok(lista);
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> EliminarTransaccion(int id)
+    {
+        var eliminado = await _contabilidadService.EliminarTransaccionAsync(id);
+
+        if (!eliminado)
+            return NotFound("Transacción no encontrada.");
+
+        return NoContent();
     }
 }
