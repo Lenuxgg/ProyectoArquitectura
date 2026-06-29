@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Tarea - CEGA</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>Editar Tarea</h1>
+        <p>Actualización de información y estado de la tarea</p>
+    </header>
+
+    <nav class="navbar">
+        <a href="../index.html">Inicio</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a id="volverDetalle" href="#">Volver al Proyecto</a>
+    </nav>
+
+    <main class="container">
+        <section class="form-card">
+            <h2>Datos de la tarea</h2>
+
+            <input type="hidden" id="tareaId">
+            <input type="hidden" id="proyectoId">
+
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="titulo">
+            </div>
+
+            <div class="form-group">
+                <label>Estado</label>
+                <select id="estado">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="En Progreso">En Progreso</option>
+                    <option value="Terminada">Terminada</option>
+                    <option value="Cancelada">Cancelada</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="descripcion"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de inicio</label>
+                <input type="date" id="fechaInicio">
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de fin</label>
+                <input type="date" id="fechaFin">
+            </div>
+
+            <button class="btn-secondary" onclick="editarTarea()">Guardar Cambios</button>
+            <a id="btnCancelar" class="btn-danger" href="#">Cancelar</a>
+
+            <p id="mensajeTarea" class="message"></p>
+        </section>
+
+        <section class="form-card" style="margin-top: 20px;">
+            <h2>Documento de la tarea</h2>
+            <p>
+                Esta sección queda preparada para subir documentos a tareas.
+                Si el endpoint de documentos de tareas está disponible en Swagger,
+                se conectará desde este formulario.
+            </p>
+
+            <div class="form-group">
+                <label>Subir documento</label>
+                <input type="file" id="archivoTarea">
+            </div>
+
+            <button class="btn-secondary" onclick="subirDocumentoTarea()">Subir documento</button>
+            <p id="mensajeDocumentoTarea" class="message"></p>
+        </section>
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/tareas.js"></script>
+    <script>
+    cargarTareaParaEditar();
+    </script>
+
+</body>
+</html>

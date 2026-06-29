@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalle Proyecto - CEGA</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>Detalle del Proyecto</h1>
+        <p>Información, documentos y tareas asociadas</p>
+    </header>
+
+    <nav class="navbar">
+        <a href="../index.html">Inicio</a>
+        <a href="proyectos.html">Proyectos</a>
+    </nav>
+
+    <main class="container">
+
+        <section class="card">
+            <h2 id="tituloProyecto">Proyecto</h2>
+            <p><strong>ID:</strong> <span id="detalleId"></span></p>
+            <p><strong>Descripción:</strong> <span id="detalleDescripcion"></span></p>
+            <p><strong>Estado:</strong> <span id="detalleEstado"></span></p>
+            <p><strong>Fecha inicio:</strong> <span id="detalleFechaInicio"></span></p>
+            <p><strong>Fecha fin:</strong> <span id="detalleFechaFin"></span></p>
+
+            <div class="actions">
+                <a id="btnEditarProyecto" class="btn-warning" href="#">Editar Proyecto</a>
+                <a id="btnCrearTarea" class="btn-primary" href="#">Crear Tarea</a>
+            </div>
+        </section>
+
+        <section class="detail-grid">
+
+            <div class="card">
+                <h2>Documentos del Proyecto</h2>
+
+                <div class="form-group">
+                    <label>Subir documento o imagen</label>
+                    <input type="file" id="archivoProyecto">
+                </div>
+
+                <button class="btn-secondary" onclick="subirDocumentoProyecto()">Subir documento</button>
+                <p id="mensajeDocumento" class="message"></p>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Ruta</th>
+                                <th>Fecha</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaDocumentos">
+                            <tr>
+                                <td colspan="3">Cargando documentos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Tareas del Proyecto</h2>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Título</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaTareasProyecto">
+                            <tr>
+                                <td colspan="4">Cargando tareas...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/proyectos.js"></script>
+    <script src="../js/tareas.js"></script>
+    <script>
+    cargarDetalleProyecto();
+    </script>
+
+</body>
+</html>

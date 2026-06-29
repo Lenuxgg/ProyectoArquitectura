@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Tarea - CEGA</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>Crear Tarea</h1>
+        <p>Registro de tarea asociada a un proyecto</p>
+    </header>
+
+    <nav class="navbar">
+        <a href="../index.html">Inicio</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a id="volverDetalle" href="#">Volver al Proyecto</a>
+    </nav>
+
+    <main class="container">
+        <section class="form-card">
+            <h2>Datos de la tarea</h2>
+
+            <input type="hidden" id="proyectoId">
+
+            <div class="form-group">
+                <label>Proyecto ID</label>
+                <input type="number" id="proyectoIdVisible" disabled>
+            </div>
+
+            <div class="form-group">
+                <label>Título</label>
+                <input type="text" id="titulo" placeholder="Ejemplo: Revisión de planos">
+            </div>
+
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="descripcion" placeholder="Descripción de la tarea"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de inicio</label>
+                <input type="date" id="fechaInicio">
+            </div>
+
+            <div class="form-group">
+                <label>Fecha de fin</label>
+                <input type="date" id="fechaFin">
+            </div>
+
+            <button class="btn-secondary" onclick="crearTarea()">Guardar Tarea</button>
+            <a id="btnCancelar" class="btn-danger" href="#">Cancelar</a>
+
+            <p id="mensajeTarea" class="message"></p>
+        </section>
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/tareas.js"></script>
+    <script>
+    prepararFormularioCrearTarea();
+    </script>
+
+</body>
+</html>

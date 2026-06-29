@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Proyectos - CEGA</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>Gestión de Proyectos</h1>
+        <p>Listado general de proyectos registrados</p>
+    </header>
+
+    <nav class="navbar">
+        <a href="../index.html">Inicio</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="crear-proyecto.html">Crear Proyecto</a>
+    </nav>
+
+    <main class="container">
+        <div class="actions">
+            <h2>Proyectos</h2>
+            <a class="btn-primary" href="crear-proyecto.html">Nuevo Proyecto</a>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                        <th>Fecha Inicio</th>
+                        <th>Fecha Fin</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProyectos">
+                    <tr>
+                        <td colspan="7">Cargando proyectos...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <footer>
+        <p>Sprint 3 - Vista de proyectos</p>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/proyectos.js"></script>
+    <script>
+    cargarProyectos();
+    </script>
+
+</body>
+</html>

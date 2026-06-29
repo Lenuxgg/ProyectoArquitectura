@@ -182,4 +182,4 @@ public class ProyectosController : ControllerBase
 
         return $"/uploads/{carpeta}/{nombreArchivo}";
     }
-}
+} 
