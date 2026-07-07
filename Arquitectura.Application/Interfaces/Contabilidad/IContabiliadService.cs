@@ -29,4 +29,12 @@ public interface IContabilidadService
     Task<DesgloseInformeFinancieroDto> ObtenerDesgloseInformeFinancieroAsync();
 
     Task<bool> RegistrarSalarioEmpleadoAsync(int usuarioId,RegistrarSalarioEmpleadoDto dto);
+
+    Task<ValidacionNominaDto> RevisarInconsistenciasNominaAsync(int anio, int mes);
+
+    Task<NominaResultadoDto> ProcesarNominaAsync(ProcesarNominaDto dto, int usuarioId);
+
+    Task<List<NominaResultadoDto>> ObtenerNominasAsync();
+
+    Task<NominaResultadoDto?> ObtenerNominaPorIdAsync(int id);
 }

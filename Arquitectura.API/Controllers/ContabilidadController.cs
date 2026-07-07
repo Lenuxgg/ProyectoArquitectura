@@ -185,4 +185,72 @@ public class ContabilidadController : ControllerBase
             });
         }
     }
+
+    [HttpGet("nomina/inconsistencias")]
+    public async Task<IActionResult> RevisarInconsistenciasNomina(
+        [FromQuery] int anio,
+        [FromQuery] int mes)
+    {
+        try
+        {
+            var resultado = await _contabilidadService
+                .RevisarInconsistenciasNominaAsync(anio, mes);
+
+            return Ok(resultado);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                mensaje = ex.Message
+            });
+        }
+    }
+
+    [HttpPost("nomina/procesar")]
+    public async Task<IActionResult> ProcesarNomina(
+        [FromBody] ProcesarNominaDto dto)
+    {
+        try
+        {
+            int usuarioId = 1;
+
+            var resultado = await _contabilidadService
+                .ProcesarNominaAsync(dto, usuarioId);
+
+            return Ok(new
+            {
+                mensaje = "Nómina procesada correctamente.",
+                nomina = resultado
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                mensaje = ex.Message
+            });
+        }
+    }
+
+    [HttpGet("nomina")]
+    public async Task<IActionResult> ObtenerNominas()
+    {
+        var resultado = await _contabilidadService.ObtenerNominasAsync();
+        return Ok(resultado);
+    }
+
+    /// <summary>
+    /// Obtiene una nómina por Id.
+    /// </summary>
+    [HttpGet("nomina/{id:int}")]
+    public async Task<IActionResult> ObtenerNominaPorId(int id)
+    {
+        var resultado = await _contabilidadService.ObtenerNominaPorIdAsync(id);
+
+        if (resultado == null)
+            return NotFound("Nómina no encontrada.");
+
+        return Ok(resultado);
+    }
 }

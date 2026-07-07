@@ -13,6 +13,8 @@ public class ArquitecturaDbContext : DbContext
     public DbSet<UserRoles> UserRoles => Set<UserRoles>();
     public DbSet<CategoriaFinanciera> CategoriaFinanciera => Set<CategoriaFinanciera>();
     public DbSet<Transaccion> Transacciones => Set<Transaccion>();
+    public DbSet<Nomina> Nomina => Set<Nomina>();
+    public DbSet<NominaDetalle> NominaDetalle => Set<NominaDetalle>();
 
     // Seguimiento
     public DbSet<Proyecto> Proyectos => Set<Proyecto>();
@@ -83,6 +85,81 @@ public class ArquitecturaDbContext : DbContext
             e.HasOne(x => x.Categoria)
                 .WithMany()
                 .HasForeignKey(x => x.CategoriaId);
+
+            e.HasOne(x => x.Usuario)
+                .WithMany()
+                .HasForeignKey(x => x.UsuarioId);
+        });
+
+        modelBuilder.Entity<Nomina>(e =>
+        {
+            e.ToTable("Nomina");
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.PeriodoInicio)
+                .HasColumnType("date")
+                .IsRequired();
+
+            e.Property(x => x.PeriodoFin)
+                .HasColumnType("date")
+                .IsRequired();
+
+            e.Property(x => x.Estado)
+                .HasMaxLength(20)
+                .HasDefaultValue("Pendiente")
+                .IsRequired();
+
+            e.Property(x => x.TotalBruto)
+                .HasPrecision(14, 2);
+
+            e.Property(x => x.TotalDeducciones)
+                .HasPrecision(14, 2);
+
+            e.Property(x => x.TotalNeto)
+                .HasPrecision(14, 2);
+
+            e.Property(x => x.FechaRegistro)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.HasIndex(x => new { x.PeriodoInicio, x.PeriodoFin })
+                .IsUnique();
+
+            e.HasOne(x => x.Usuario)
+                .WithMany()
+                .HasForeignKey(x => x.UsuarioId);
+        });
+
+        modelBuilder.Entity<NominaDetalle>(e =>
+        {
+            e.ToTable("NominaDetalle", tb =>
+            {
+                tb.HasTrigger("trg_Nomina_ValidaInconsistencias");
+            });
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.SalarioBase)
+                .HasPrecision(12, 2);
+
+            e.Property(x => x.Deducciones)
+                .HasPrecision(12, 2);
+
+            e.Property(x => x.Bonificaciones)
+                .HasPrecision(12, 2);
+
+            e.Property(x => x.SalarioNeto)
+                .HasPrecision(12, 2);
+
+            e.Property(x => x.DetalleInconsistencia)
+                .HasMaxLength(300);
+
+            e.HasIndex(x => new { x.NominaId, x.UsuarioId })
+                .IsUnique();
+
+            e.HasOne(x => x.Nomina)
+                .WithMany(n => n.Detalles)
+                .HasForeignKey(x => x.NominaId);
 
             e.HasOne(x => x.Usuario)
                 .WithMany()
