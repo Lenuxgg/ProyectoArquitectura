@@ -82,14 +82,15 @@ var app = builder.Build();
 
 app.UseCors("AllowAll");
 
+app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arquitectura API v1");
-    c.RoutePrefix = string.Empty;
-});
+    c.RoutePrefix = "swagger"; // antes era string.Empty
+}); 
 
 
 app.UseAuthentication();
