@@ -17,6 +17,8 @@ using Arquitectura.Application.Services.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Arquitectura.Application.Interfaces.Exportaciones;
+using Arquitectura.Application.Services.Exportaciones;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -51,8 +53,12 @@ builder.Services.AddScoped<IProyectoService, ProyectoService>();
 builder.Services.AddScoped<IComentarioProyectoService, ComentarioProyectoService>();
 builder.Services.AddScoped<ITareaService, TareaService>();
 
+builder.Services.AddScoped<IExportacionService, ExportacionService>();
 
+// ── Servicios - Módulo Exportaciones ────────────────────────────
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+
+
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
