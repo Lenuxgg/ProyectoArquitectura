@@ -5,6 +5,9 @@ using Arquitectura.Application.Services.Empleados;
 using Arquitectura.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Arquitectura.API.Middlewares;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 using Arquitectura.Application.Interfaces.Contabilidad;
 using Arquitectura.Application.Services.Contabilidad;
 using Arquitectura.Application.Interfaces.Seguimiento;
@@ -17,6 +20,17 @@ using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<GzipCompressionProvider>();
+});
+
+builder.Services.Configure<GzipCompressionProviderOptions>(options =>
+{
+    options.Level = CompressionLevel.Fastest;
+});
 
 builder.Services.AddScoped<IContabilidadService, ContabilidadService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -56,6 +70,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+
 // ── Controllers + Swagger ─────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -69,8 +84,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
-
 // ── CORS ──────────────────────────────────────────────────────
 builder.Services.AddCors(options =>
 {
@@ -81,10 +94,10 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors("AllowAll");
-
+app.UseResponseCompression();
+app.UseMiddleware<ResponseTimeMiddleware>();
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {

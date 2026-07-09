@@ -240,9 +240,6 @@ public class ContabilidadController : ControllerBase
         return Ok(resultado);
     }
 
-    /// <summary>
-    /// Obtiene una nómina por Id.
-    /// </summary>
     [HttpGet("nomina/{id:int}")]
     public async Task<IActionResult> ObtenerNominaPorId(int id)
     {
