@@ -15,6 +15,7 @@ public class ArquitecturaDbContext : DbContext
     public DbSet<Transaccion> Transacciones => Set<Transaccion>();
     public DbSet<Nomina> Nomina => Set<Nomina>();
     public DbSet<NominaDetalle> NominaDetalle => Set<NominaDetalle>();
+    public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
 
     // Seguimiento
     public DbSet<Proyecto> Proyectos => Set<Proyecto>();
@@ -343,6 +344,37 @@ public class ArquitecturaDbContext : DbContext
             e.HasOne(x => x.Usuario)
                 .WithMany()
                 .HasForeignKey(x => x.UsuarioId);
+        });
+
+        modelBuilder.Entity<Notificacion>(e =>
+        {
+            e.ToTable("Notificaciones");
+
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.Titulo)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            e.Property(x => x.Mensaje)
+                .HasMaxLength(500)
+                .IsRequired();
+
+            e.Property(x => x.Tipo)
+                .HasMaxLength(30)
+                .HasDefaultValue("Info")
+                .IsRequired();
+
+            e.Property(x => x.Leida)
+                .HasDefaultValue(false);
+
+            e.Property(x => x.FechaCreacion)
+                .HasDefaultValueSql("GETDATE()");
+
+            e.HasOne(x => x.Usuario)
+                .WithMany()
+                .HasForeignKey(x => x.UsuarioId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }
