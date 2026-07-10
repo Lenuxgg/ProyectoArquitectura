@@ -40,7 +40,15 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
 
 // ── Base de datos ─────────────────────────────────────────────
 builder.Services.AddDbContext<ArquitecturaDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null);
+        }));
 
 // ── Servicios - Módulo Administración ─────────────────────────
 builder.Services.AddScoped<IRolService, RolService>();
