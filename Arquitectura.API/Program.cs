@@ -21,6 +21,8 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Arquitectura.Application.Interfaces.Cuenta;
+using Arquitectura.Application.Services.Cuenta;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,6 +65,9 @@ builder.Services.AddScoped<IExportacionService, ExportacionService>();
 
 // ── Servicios - Módulo Notificaciones ─────────────────────────
 builder.Services.AddScoped<INotificacionService, NotificacionService>();
+
+// ── Servicios - Módulo Cuenta ────────────────────────────────
+builder.Services.AddScoped<ICuentaService, CuentaService>();
 
 // ── JWT ───────────────────────────────────────────────────────
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -12,7 +12,6 @@ public class RolesController : ControllerBase
     private readonly IRolService _service;
     public RolesController(IRolService service) => _service = service;
 
-    /// <summary>Obtiene todos los roles del sistema.</summary>
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -20,7 +19,6 @@ public class RolesController : ControllerBase
         return Ok(roles);
     }
 
-    /// <summary>Obtiene un rol por su ID.</summary>
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -28,7 +26,6 @@ public class RolesController : ControllerBase
         return rol == null ? NotFound($"Rol con ID {id} no encontrado.") : Ok(rol);
     }
 
-    /// <summary>Crea un nuevo rol.</summary>
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CrearRolDto dto)
     {
@@ -36,7 +33,6 @@ public class RolesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = rol.Id }, rol);
     }
 
-    /// <summary>Actualiza un rol existente.</summary>
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] ActualizarRolDto dto)
     {
@@ -44,7 +40,6 @@ public class RolesController : ControllerBase
         return rol == null ? NotFound($"Rol con ID {id} no encontrado.") : Ok(rol);
     }
 
-    /// <summary>Elimina un rol por su ID.</summary>
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {

@@ -22,7 +22,6 @@ public class UsuariosController : ControllerBase
         _authService = authService;
     }
 
-    // GET: api/Usuarios
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -30,7 +29,6 @@ public class UsuariosController : ControllerBase
         return Ok(lista);
     }
 
-    // GET: api/Usuarios/5
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
@@ -42,7 +40,6 @@ public class UsuariosController : ControllerBase
         return Ok(usuario);
     }
 
-    // GET: api/Usuarios/buscar?termino=jeremy
     [HttpGet("buscar")]
     public async Task<IActionResult> Buscar([FromQuery] string termino)
     {
@@ -53,7 +50,6 @@ public class UsuariosController : ControllerBase
         return Ok(lista);
     }
 
-    // POST: api/Usuarios
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CrearUsuarioDto dto)
     {
@@ -66,7 +62,6 @@ public class UsuariosController : ControllerBase
         );
     }
 
-    // PUT: api/Usuarios/5
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(
         int id,
@@ -79,8 +74,7 @@ public class UsuariosController : ControllerBase
 
         return Ok(usuario);
     }
-
-    // DELETE: api/Usuarios/5
+    
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -92,7 +86,6 @@ public class UsuariosController : ControllerBase
         return NoContent();
     }
 
-    // POST: api/Usuarios/login
     [HttpPost("login")]
     public async Task<IActionResult> Login(
         [FromBody] Arquitectura.Application.DTOs.Auth.LoginDto dto)
@@ -105,7 +98,6 @@ public class UsuariosController : ControllerBase
         return Ok(response);
     }
 
-    // POST: api/Usuarios/asignar-rol
     [HttpPost("asignar-rol")]
     public async Task<IActionResult> AsignarRol(
         [FromBody] AsignarRolDto dto)
@@ -118,7 +110,6 @@ public class UsuariosController : ControllerBase
         return Ok("Rol asignado correctamente.");
     }
 
-    // DELETE: api/Usuarios/{usuarioId}/rol/{rolId}
     [HttpDelete("{usuarioId:int}/rol/{rolId:int}")]
     public async Task<IActionResult> RemoverRol(
         int usuarioId,
