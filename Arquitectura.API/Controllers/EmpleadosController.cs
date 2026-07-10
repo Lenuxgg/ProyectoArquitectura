@@ -1,5 +1,6 @@
 ﻿using Arquitectura.Application.DTOs.Empleados;
 using Arquitectura.Application.Interfaces.Empleados;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arquitectura.API.Controllers;
@@ -7,6 +8,7 @@ namespace Arquitectura.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize]
 public class EmpleadosController : ControllerBase
 {
     private readonly IEmpleadoService _service;

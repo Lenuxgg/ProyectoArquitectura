@@ -25,7 +25,6 @@ public class AuthService : IAuthService
         _configuration = configuration;
     }
 
-    // Método para hashear la contraseña
     private static string HashPassword(string password)
     {
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
@@ -37,12 +36,13 @@ public class AuthService : IAuthService
         var usuario = await _context.Usuario
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Roles)
-            .FirstOrDefaultAsync(u => u.Email == dto.Email);
+            .FirstOrDefaultAsync(u =>
+                u.Email == dto.Email &&
+                u.Estado != "Baja");
 
         if (usuario == null)
             return null;
 
-        // Comparar hash con hash
         if (usuario.PasswordHash != HashPassword(dto.Password))
             return null;
 

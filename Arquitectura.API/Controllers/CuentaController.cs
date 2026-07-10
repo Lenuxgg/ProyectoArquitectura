@@ -1,6 +1,8 @@
 using Arquitectura.Application.DTOs.Cuenta;
 using Arquitectura.Application.Interfaces.Cuenta;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Arquitectura.API.Controllers;
 
@@ -8,6 +10,17 @@ namespace Arquitectura.API.Controllers;
 [Route("api/[controller]")]
 public class CuentaController : ControllerBase
 {
+
+    private int? ObtenerUsuarioIdAutenticado()
+    {
+        var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(usuarioIdClaim, out var usuarioId))
+            return null;
+
+        return usuarioId;
+    }
+
     private readonly ICuentaService _cuentaService;
 
     public CuentaController(ICuentaService cuentaService)
@@ -15,15 +28,20 @@ public class CuentaController : ControllerBase
         _cuentaService = cuentaService;
     }
     
-    [HttpPost("{usuarioId:int}/solicitar-baja")]
+    [Authorize]
+    [HttpPost("solicitar-baja")]
     public async Task<IActionResult> SolicitarBajaCuenta(
-        int usuarioId,
         [FromBody] SolicitarBajaCuentaDto dto)
     {
         try
         {
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
+
             var procesada = await _cuentaService
-                .SolicitarBajaCuentaAsync(usuarioId, dto);
+                .SolicitarBajaCuentaAsync(usuarioId.Value, dto);
 
             if (!procesada)
                 return NotFound("La cuenta no existe o ya se encuentra dada de baja.");
@@ -31,7 +49,7 @@ public class CuentaController : ControllerBase
             return Ok(new
             {
                 mensaje = "La solicitud de baja fue procesada correctamente.",
-                usuarioId
+                usuarioId = usuarioId.Value
             });
         }
         catch (Exception ex)

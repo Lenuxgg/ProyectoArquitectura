@@ -1,20 +1,35 @@
 using Arquitectura.Application.DTOs.Contabilidad;
 using Arquitectura.Application.Interfaces.Contabilidad;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Arquitectura.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+
+
 public class ContabilidadController : ControllerBase
 {
     private readonly IContabilidadService _contabilidadService;
+
+    private int? ObtenerUsuarioIdAutenticado()
+    {
+        var usuarioIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (!int.TryParse(usuarioIdClaim, out var usuarioId))
+            return null;
+
+        return usuarioId;
+    }
 
     public ContabilidadController(IContabilidadService contabilidadService)
     {
         _contabilidadService = contabilidadService;
     }
 
+    [Authorize]
     [HttpPost("ingresos")]
     public async Task<IActionResult> RegistrarIngreso(
         [FromBody] RegistrarTransaccionDto dto)
@@ -22,10 +37,13 @@ public class ContabilidadController : ControllerBase
         try
         {
 
-            int usuarioId = 1;
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
 
             var id = await _contabilidadService
-                .RegistrarIngresoAsync(dto, usuarioId);
+            .RegistrarIngresoAsync(dto, usuarioId.Value);
 
             return Ok(new
             {
@@ -43,16 +61,20 @@ public class ContabilidadController : ControllerBase
     }
 
 
+    [Authorize]
     [HttpPost("egresos")]
     public async Task<IActionResult> RegistrarEgreso(
         [FromBody] RegistrarTransaccionDto dto)
     {
         try
         {
-            int usuarioId = 1;
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
 
             var id = await _contabilidadService
-                .RegistrarEgresoAsync(dto, usuarioId);
+            .RegistrarEgresoAsync(dto, usuarioId.Value);
 
             return Ok(new
             {
@@ -207,17 +229,21 @@ public class ContabilidadController : ControllerBase
         }
     }
 
+    [Authorize]
     [HttpPost("nomina/procesar")]
     public async Task<IActionResult> ProcesarNomina(
         [FromBody] ProcesarNominaDto dto)
     {
         try
         {
-            int usuarioId = 1;
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
 
             var resultado = await _contabilidadService
-                .ProcesarNominaAsync(dto, usuarioId);
-
+                .ProcesarNominaAsync(dto, usuarioId.Value);
+                
             return Ok(new
             {
                 mensaje = "Nómina procesada correctamente.",
