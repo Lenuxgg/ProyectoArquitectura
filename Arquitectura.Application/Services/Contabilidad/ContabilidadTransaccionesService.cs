@@ -19,6 +19,15 @@ public partial class ContabilidadService
         if (categoria == null)
             throw new Exception("La categoría de ingreso no existe o está inactiva.");
 
+        if (dto.ProyectoId.HasValue)
+        {
+            var proyectoExiste = await _context.Proyectos
+                .AnyAsync(p => p.Id == dto.ProyectoId.Value);
+
+            if (!proyectoExiste)
+                throw new Exception("El proyecto seleccionado no existe.");
+        }
+
         var transaccion = new Transaccion
         {
             CategoriaId = dto.CategoriaId,
@@ -27,6 +36,7 @@ public partial class ContabilidadService
             Descripcion = dto.Descripcion,
             Fecha = dto.Fecha == default ? DateTime.Today : dto.Fecha,
             UsuarioId = usuarioId,
+            ProyectoId = dto.ProyectoId,
             FechaRegistro = DateTime.Now,
             Activo = true
         };
@@ -51,6 +61,15 @@ public partial class ContabilidadService
         if (categoria == null)
             throw new Exception("La categoría de egreso no existe o está inactiva.");
 
+        if (dto.ProyectoId.HasValue)
+        {
+            var proyectoExiste = await _context.Proyectos
+                .AnyAsync(p => p.Id == dto.ProyectoId.Value);
+
+            if (!proyectoExiste)
+                throw new Exception("El proyecto seleccionado no existe.");
+        }
+
         var transaccion = new Transaccion
         {
             CategoriaId = dto.CategoriaId,
@@ -59,6 +78,7 @@ public partial class ContabilidadService
             Descripcion = dto.Descripcion,
             Fecha = dto.Fecha == default ? DateTime.Today : dto.Fecha,
             UsuarioId = usuarioId,
+            ProyectoId = dto.ProyectoId,
             FechaRegistro = DateTime.Now,
             Activo = true
         };
@@ -74,7 +94,10 @@ public partial class ContabilidadService
     {
         return await _context.Transacciones
             .Include(t => t.Categoria)
+            .Include(t => t.Proyecto)
             .Where(t => t.Tipo == "Ingreso" && t.Activo)
+            .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Id)
             .Select(t => new TransaccionDto
             {
                 Id = t.Id,
@@ -83,7 +106,9 @@ public partial class ContabilidadService
                 Monto = t.Monto,
                 Descripcion = t.Descripcion,
                 Fecha = t.Fecha,
-                UsuarioId = t.UsuarioId
+                UsuarioId = t.UsuarioId,
+                ProyectoId = t.ProyectoId,
+                ProyectoNombre = t.Proyecto != null ? t.Proyecto.Nombre : null
             })
             .ToListAsync();
     }
@@ -92,7 +117,10 @@ public partial class ContabilidadService
     {
         return await _context.Transacciones
             .Include(t => t.Categoria)
+            .Include(t => t.Proyecto)
             .Where(t => t.Tipo == "Egreso" && t.Activo)
+            .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Id)
             .Select(t => new TransaccionDto
             {
                 Id = t.Id,
@@ -101,7 +129,9 @@ public partial class ContabilidadService
                 Monto = t.Monto,
                 Descripcion = t.Descripcion,
                 Fecha = t.Fecha,
-                UsuarioId = t.UsuarioId
+                UsuarioId = t.UsuarioId,
+                ProyectoId = t.ProyectoId,
+                ProyectoNombre = t.Proyecto != null ? t.Proyecto.Nombre : null
             })
             .ToListAsync();
     }
@@ -125,8 +155,10 @@ public partial class ContabilidadService
     {
         return await _context.Transacciones
             .Include(t => t.Categoria)
+            .Include(t => t.Proyecto)
             .Where(t => t.Activo)
             .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Id)
             .Select(t => new TransaccionDto
             {
                 Id = t.Id,
@@ -135,12 +167,16 @@ public partial class ContabilidadService
                 Descripcion = t.Descripcion,
                 Fecha = t.Fecha,
                 Categoria = t.Categoria.Nombre,
-                UsuarioId = t.UsuarioId
+                UsuarioId = t.UsuarioId,
+                ProyectoId = t.ProyectoId,
+                ProyectoNombre = t.Proyecto != null ? t.Proyecto.Nombre : null
             })
             .ToListAsync();
     }
 
-    public async Task<bool> RegistrarSalarioEmpleadoAsync(int usuarioId,RegistrarSalarioEmpleadoDto dto)
+    public async Task<bool> RegistrarSalarioEmpleadoAsync(
+        int usuarioId,
+        RegistrarSalarioEmpleadoDto dto)
     {
         if (dto.Salario <= 0)
             throw new Exception("El salario debe ser mayor que cero.");

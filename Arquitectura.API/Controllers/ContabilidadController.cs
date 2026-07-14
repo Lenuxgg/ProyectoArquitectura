@@ -130,6 +130,17 @@ public class ContabilidadController : ControllerBase
         return Ok(reporte);
     }
 
+    [HttpGet("proyecto/{proyectoId:int}")]
+    public async Task<IActionResult> ObtenerReportePorProyecto(int proyectoId)
+    {
+        var reporte = await _contabilidadService.ObtenerReportePorProyectoAsync(proyectoId);
+
+        if (reporte == null)
+            return NotFound("Proyecto no encontrado.");
+
+        return Ok(reporte);
+    }
+
     [HttpGet("informe/desglose")]
     public async Task<IActionResult> ObtenerDesgloseInformeFinanciero()
     {
@@ -276,4 +287,6 @@ public class ContabilidadController : ControllerBase
 
         return Ok(resultado);
     }
+
+    
 }

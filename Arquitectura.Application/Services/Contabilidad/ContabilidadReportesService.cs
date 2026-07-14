@@ -28,6 +28,55 @@ public partial class ContabilidadService
         };
     }
 
+    public async Task<ReporteProyectoFinancieroDto?> ObtenerReportePorProyectoAsync(int proyectoId)
+    {
+        var proyecto = await _context.Proyectos
+            .FirstOrDefaultAsync(p => p.Id == proyectoId);
+
+        if (proyecto == null)
+            return null;
+
+        var transacciones = await _context.Transacciones
+            .Include(t => t.Categoria)
+            .Include(t => t.Proyecto)
+            .Where(t => t.Activo && t.ProyectoId == proyectoId)
+            .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Id)
+            .Select(t => new TransaccionDto
+            {
+                Id = t.Id,
+                Tipo = t.Tipo,
+                Monto = t.Monto,
+                Descripcion = t.Descripcion,
+                Fecha = t.Fecha,
+                Categoria = t.Categoria.Nombre,
+                UsuarioId = t.UsuarioId,
+                ProyectoId = t.ProyectoId,
+                ProyectoNombre = t.Proyecto != null ? t.Proyecto.Nombre : null
+            })
+            .ToListAsync();
+
+        var totalIngresos = transacciones
+            .Where(t => t.Tipo == "Ingreso")
+            .Sum(t => t.Monto);
+
+        var totalEgresos = transacciones
+            .Where(t => t.Tipo == "Egreso")
+            .Sum(t => t.Monto);
+
+        return new ReporteProyectoFinancieroDto
+        {
+            ProyectoId = proyecto.Id,
+            ProyectoNombre = proyecto.Nombre,
+            TotalIngresos = totalIngresos,
+            TotalEgresos = totalEgresos,
+            Balance = totalIngresos - totalEgresos,
+            CantidadIngresos = transacciones.Count(t => t.Tipo == "Ingreso"),
+            CantidadEgresos = transacciones.Count(t => t.Tipo == "Egreso"),
+            Transacciones = transacciones
+        };
+    }
+
     public async Task<CierreCajaDto> ObtenerCierreDiarioAsync(DateTime fecha)
     {
         var fechaInicio = fecha.Date;

@@ -22,6 +22,10 @@ public class Transaccion
 
     public bool Activo { get; set; }
 
+    public int? ProyectoId { get; set; }
+
+    public Proyecto? Proyecto { get; set; }
+
     public CategoriaFinanciera Categoria { get; set; } = null!;
 
     public Usuario Usuario { get; set; } = null!;

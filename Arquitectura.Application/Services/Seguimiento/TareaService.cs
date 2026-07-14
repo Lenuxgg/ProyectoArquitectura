@@ -3,16 +3,22 @@ using Arquitectura.Application.Interfaces.Seguimiento;
 using Arquitectura.Domain.Entities;
 using Arquitectura.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Arquitectura.Application.DTOs.Notificaciones;
+using Arquitectura.Application.Interfaces.Notificaciones;
 
 namespace Arquitectura.Application.Services.Seguimiento;
 
 public class TareaService : ITareaService
 {
     private readonly ArquitecturaDbContext _context;
+    private readonly INotificacionService _notificacionService;
 
-    public TareaService(ArquitecturaDbContext context)
+    public TareaService(
+        ArquitecturaDbContext context,
+        INotificacionService notificacionService)
     {
         _context = context;
+        _notificacionService = notificacionService;
     }
 
     public async Task<List<TareaDto>> ObtenerTodasAsync()
@@ -136,7 +142,9 @@ public class TareaService : ITareaService
 
     public async Task<bool> MarcarComoTerminadaAsync(int id)
     {
-        var tarea = await _context.Tareas.FindAsync(id);
+        var tarea = await _context.Tareas
+            .Include(t => t.Proyecto)
+            .FirstOrDefaultAsync(t => t.Id == id);
 
         if (tarea == null)
             return false;
@@ -147,21 +155,35 @@ public class TareaService : ITareaService
 
         await _context.SaveChangesAsync();
 
+        await _notificacionService.CrearNotificacionAsync(new CrearNotificacionDto
+        {
+            Titulo = "Tarea terminada",
+            Mensaje = $"La tarea '{tarea.Titulo}' del proyecto '{tarea.Proyecto.Nombre}' fue marcada como terminada.",
+            Tipo = "Exito",
+            UsuarioId = null
+        });
+
         return true;
     }
 
     public async Task<bool> AsignarEmpleadoAsync(AsignarEmpleadoTareaDto dto)
     {
-        var tareaExiste = await _context.Tareas.AnyAsync(t => t.Id == dto.TareaId);
-        var usuarioExiste = await _context.Usuario.AnyAsync(u => u.Id == dto.UsuarioId);
+        var tarea = await _context.Tareas
+            .Include(t => t.Proyecto)
+            .FirstOrDefaultAsync(t => t.Id == dto.TareaId);
 
-        if (!tareaExiste || !usuarioExiste)
+        var usuario = await _context.Usuario
+            .FirstOrDefaultAsync(u =>
+                u.Id == dto.UsuarioId &&
+                u.Estado != "Baja");
+
+        if (tarea == null || usuario == null)
             return false;
 
         var yaExiste = await _context.TareaAsignaciones
             .AnyAsync(x => x.TareaId == dto.TareaId &&
-                           x.UsuarioId == dto.UsuarioId &&
-                           x.Activo);
+                        x.UsuarioId == dto.UsuarioId &&
+                        x.Activo);
 
         if (yaExiste)
             return false;
@@ -176,6 +198,14 @@ public class TareaService : ITareaService
 
         _context.TareaAsignaciones.Add(asignacion);
         await _context.SaveChangesAsync();
+
+        await _notificacionService.CrearNotificacionAsync(new CrearNotificacionDto
+        {
+            Titulo = "Asignación a tarea",
+            Mensaje = $"Has sido asignado a la tarea '{tarea.Titulo}' del proyecto '{tarea.Proyecto.Nombre}'.",
+            Tipo = "Info",
+            UsuarioId = dto.UsuarioId
+        });
 
         return true;
     }

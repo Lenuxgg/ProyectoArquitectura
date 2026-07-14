@@ -27,4 +27,6 @@ public class Proyecto
     public ICollection<ProyectoEmpleado> ProyectoEmpleados { get; set; } = new List<ProyectoEmpleado>();
 
     public ICollection<DocumentoProyecto> Documentos { get; set; } = new List<DocumentoProyecto>();
+    
+    public ICollection<Transaccion> Transacciones { get; set; } = new List<Transaccion>();
 }

@@ -3,16 +3,22 @@ using Arquitectura.Application.Interfaces.Seguimiento;
 using Arquitectura.Domain.Entities;
 using Arquitectura.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Arquitectura.Application.DTOs.Notificaciones;
+using Arquitectura.Application.Interfaces.Notificaciones;
 
 namespace Arquitectura.Application.Services.Seguimiento;
 
 public class ProyectoService : IProyectoService
 {
     private readonly ArquitecturaDbContext _context;
+    private readonly INotificacionService _notificacionService;
 
-    public ProyectoService(ArquitecturaDbContext context)
+    public ProyectoService(
+        ArquitecturaDbContext context,
+        INotificacionService notificacionService)
     {
         _context = context;
+        _notificacionService = notificacionService;
     }
 
     public async Task<List<ProyectoDto>> ObtenerTodosAsync()
@@ -129,19 +135,21 @@ public class ProyectoService : IProyectoService
 
     public async Task<bool> AsignarEmpleadoAsync(AsignarEmpleadoProyectoDto dto)
     {
-        var proyectoExiste = await _context.Proyectos
-            .AnyAsync(p => p.Id == dto.ProyectoId);
+        var proyecto = await _context.Proyectos
+            .FirstOrDefaultAsync(p => p.Id == dto.ProyectoId);
 
-        var usuarioExiste = await _context.Usuario
-            .AnyAsync(u => u.Id == dto.UsuarioId);
+        var usuario = await _context.Usuario
+            .FirstOrDefaultAsync(u =>
+                u.Id == dto.UsuarioId &&
+                u.Estado != "Baja");
 
-        if (!proyectoExiste || !usuarioExiste)
+        if (proyecto == null || usuario == null)
             return false;
 
         var yaExiste = await _context.ProyectoEmpleados
             .AnyAsync(x => x.ProyectoId == dto.ProyectoId &&
-                           x.UsuarioId == dto.UsuarioId &&
-                           x.Activo);
+                        x.UsuarioId == dto.UsuarioId &&
+                        x.Activo);
 
         if (yaExiste)
             return false;
@@ -157,6 +165,14 @@ public class ProyectoService : IProyectoService
 
         _context.ProyectoEmpleados.Add(asignacion);
         await _context.SaveChangesAsync();
+
+        await _notificacionService.CrearNotificacionAsync(new CrearNotificacionDto
+        {
+            Titulo = "Asignación a proyecto",
+            Mensaje = $"Has sido asignado al proyecto '{proyecto.Nombre}' con el rol '{dto.RolProyecto}'.",
+            Tipo = "Info",
+            UsuarioId = dto.UsuarioId
+        });
 
         return true;
     }
@@ -230,6 +246,17 @@ public class ProyectoService : IProyectoService
 
         _context.DocumentoProyectos.Add(documento);
         await _context.SaveChangesAsync();
+
+        var proyecto = await _context.Proyectos
+    .FirstOrDefaultAsync(p => p.Id == proyectoId);
+
+        await _notificacionService.CrearNotificacionAsync(new CrearNotificacionDto
+        {
+            Titulo = "Documento agregado",
+            Mensaje = $"Se agregó el documento '{nombre}' al proyecto '{proyecto?.Nombre ?? "Proyecto"}'.",
+            Tipo = "Info",
+            UsuarioId = null
+        });
 
         return new DocumentoProyectoDto
         {
