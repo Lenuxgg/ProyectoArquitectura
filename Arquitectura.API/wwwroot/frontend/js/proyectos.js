@@ -1,4 +1,4 @@
-﻿async function cargarProyectos() {
+async function cargarProyectos() {
     const tabla = document.getElementById("tablaProyectos");
 
     try {
@@ -26,8 +26,10 @@
                     <td>${p.fechaFin ? formatearFecha(p.fechaFin) : ""}</td>
                     <td>${p.estado}</td>
                     <td>
-                        <a class="btn-primary" href="detalle-proyecto.html?id=${p.id}">Ver Proyecto</a>
-                        <a class="btn-warning" href="editar-proyecto.html?id=${p.id}">Editar</a>
+                        <div class="table-action-buttons">
+                            <a class="btn-primary" href="detalle-proyecto.html?id=${p.id}">Ver Proyecto</a>
+                            <a class="btn-warning" href="editar-proyecto.html?id=${p.id}">Editar</a>
+                        </div>
                     </td>
                 </tr>
             `;

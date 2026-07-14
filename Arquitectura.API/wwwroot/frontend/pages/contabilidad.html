@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../js/theme.js"></script>
+    <title>Contabilidad - CEGA</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>Gestión de Contabilidad</h1>
+        <p>Ingresos, egresos, reportes financieros, cierres de caja y nómina</p>
+    </header>
+
+    <nav class="navbar">
+        <a href="../index.html">Inicio</a>
+        <a href="proyectos.html">Proyectos</a>
+        <a href="contabilidad.html">Contabilidad</a>
+            <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
+    </nav>
+
+    <main class="container">
+
+        <section class="section-card">
+            <h2>Autenticación</h2>
+            <p>Ingrese el token JWT para poder registrar ingresos, egresos y procesar nómina.</p>
+
+            <div class="token-box">
+                <div class="form-group">
+                    <label for="tokenJwt">Token Bearer</label>
+                    <input type="password" id="tokenJwt" placeholder="Pegue aquí el token generado en Auth/login">
+                </div>
+                <div class="token-actions">
+                    <button class="btn-primary" onclick="guardarTokenContabilidad()">Guardar token</button>
+                    <button class="btn-danger" onclick="limpiarTokenContabilidad()">Limpiar</button>
+                </div>
+            </div>
+
+            <p id="mensajeToken" class="message"></p>
+        </section>
+
+        <section class="actions">
+            <h2>Resumen financiero</h2>
+            <button class="btn-secondary" onclick="cargarPanelContabilidad()">Actualizar información</button>
+        </section>
+
+        <section class="dashboard-grid">
+            <article class="summary-card">
+                <h3>Total ingresos</h3>
+                <p id="totalIngresos">₡0.00</p>
+            </article>
+            <article class="summary-card">
+                <h3>Total egresos</h3>
+                <p id="totalEgresos">₡0.00</p>
+            </article>
+            <article class="summary-card">
+                <h3>Balance</h3>
+                <p id="balance">₡0.00</p>
+            </article>
+            <article class="summary-card">
+                <h3>Cant. ingresos</h3>
+                <p id="cantidadIngresos">0</p>
+            </article>
+            <article class="summary-card">
+                <h3>Cant. egresos</h3>
+                <p id="cantidadEgresos">0</p>
+            </article>
+        </section>
+
+        <section class="forms-grid">
+            <article class="form-card">
+                <h2>Registrar ingreso</h2>
+
+                <div class="form-group">
+                    <label for="categoriaIngreso">Categoría</label>
+                    <select id="categoriaIngreso">
+                        <option value="1">Honorarios por proyecto</option>
+                        <option value="2">Consultoría externa</option>
+                        <option value="3">Otros ingresos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="montoIngreso">Monto</label>
+                    <input type="number" id="montoIngreso" min="0.01" step="0.01" placeholder="Ej: 150000">
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaIngreso">Fecha</label>
+                    <input type="date" id="fechaIngreso">
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcionIngreso">Descripción</label>
+                    <textarea id="descripcionIngreso" placeholder="Detalle del ingreso"></textarea>
+                </div>
+
+                <button class="btn-primary" onclick="registrarIngresoFrontend()">Guardar ingreso</button>
+                <p id="mensajeIngreso" class="message"></p>
+            </article>
+
+            <article class="form-card">
+                <h2>Registrar egreso</h2>
+
+                <div class="form-group">
+                    <label for="categoriaEgreso">Categoría</label>
+                    <select id="categoriaEgreso">
+                        <option value="4">Pago de nómina</option>
+                        <option value="5">Gastos operativos</option>
+                        <option value="6">Licencias de software</option>
+                        <option value="7">Otros egresos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="montoEgreso">Monto</label>
+                    <input type="number" id="montoEgreso" min="0.01" step="0.01" placeholder="Ej: 50000">
+                </div>
+
+                <div class="form-group">
+                    <label for="fechaEgreso">Fecha</label>
+                    <input type="date" id="fechaEgreso">
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcionEgreso">Descripción</label>
+                    <textarea id="descripcionEgreso" placeholder="Detalle del egreso"></textarea>
+                </div>
+
+                <button class="btn-danger" onclick="registrarEgresoFrontend()">Guardar egreso</button>
+                <p id="mensajeEgreso" class="message"></p>
+            </article>
+        </section>
+
+        <section class="section-card">
+            <h2>Cierre de caja</h2>
+
+            <div class="form-inline">
+                <div class="form-group">
+                    <label for="tipoCierre">Tipo</label>
+                    <select id="tipoCierre" onchange="cambiarCamposCierre()">
+                        <option value="diario">Diario</option>
+                        <option value="mensual">Mensual</option>
+                        <option value="anual">Anual</option>
+                        <option value="rango">Rango de fechas</option>
+                    </select>
+                </div>
+
+                <div class="form-group campo-cierre campo-diario campo-rango">
+                    <label for="fechaInicioCierre">Fecha inicio</label>
+                    <input type="date" id="fechaInicioCierre">
+                </div>
+
+                <div class="form-group campo-cierre campo-rango">
+                    <label for="fechaFinCierre">Fecha fin</label>
+                    <input type="date" id="fechaFinCierre">
+                </div>
+
+                <div class="form-group campo-cierre campo-mensual campo-anual">
+                    <label for="anioCierre">Año</label>
+                    <input type="number" id="anioCierre" min="2020" max="2100">
+                </div>
+
+                <div class="form-group campo-cierre campo-mensual">
+                    <label for="mesCierre">Mes</label>
+                    <select id="mesCierre">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="btn-primary" onclick="consultarCierreCaja()">Consultar cierre</button>
+            </div>
+            <p id="mensajeCierre" class="message"></p>
+
+            <div class="table-container" style="margin-top:14px;">
+                <table>
+                    <tbody id="resultadoCierre">
+                        <tr><td>Seleccione un cierre para consultar.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section-grid">
+            <article class="section-card">
+                <h2>Ingresos por categoría</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoría</th>
+                                <th>Total</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaIngresosCategoria">
+                            <tr><td colspan="3">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="section-card">
+                <h2>Egresos por categoría</h2>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Categoría</th>
+                                <th>Total</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEgresosCategoria">
+                            <tr><td colspan="3">Cargando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+        </section>
+
+        <section class="section-card">
+            <h2>Historial de transacciones</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Categoría</th>
+                            <th>Descripción</th>
+                            <th>Fecha</th>
+                            <th class="text-right">Monto</th>
+                            <th>Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaTransacciones">
+                        <tr><td colspan="7">Cargando transacciones...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="section-card">
+            <h2>Nómina</h2>
+
+            <div class="form-inline">
+                <div class="form-group">
+                    <label for="anioNomina">Año</label>
+                    <input type="number" id="anioNomina" min="2020" max="2100">
+                </div>
+
+                <div class="form-group">
+                    <label for="mesNomina">Mes</label>
+                    <select id="mesNomina">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Setiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="deduccionNomina">Deducción %</label>
+                    <input type="number" id="deduccionNomina" value="10" min="0" max="100" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="bonificacionNomina">Bonificación general</label>
+                    <input type="number" id="bonificacionNomina" value="0" min="0" step="0.01">
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="btn-secondary" onclick="revisarInconsistenciasNominaFrontend()">Revisar inconsistencias</button>
+                <button class="btn-primary" onclick="procesarNominaFrontend()">Procesar nómina</button>
+                <button class="btn-warning" onclick="cargarNominasFrontend()">Actualizar nóminas</button>
+            </div>
+
+            <p id="mensajeNomina" class="message"></p>
+
+            <h3>Inconsistencias</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Empleado</th>
+                            <th>Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaInconsistencias">
+                        <tr><td colspan="3">No se ha consultado la nómina.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3 style="margin-top:20px;">Nóminas procesadas</h3>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Periodo</th>
+                            <th>Estado</th>
+                            <th class="text-right">Total bruto</th>
+                            <th class="text-right">Deducciones</th>
+                            <th class="text-right">Total neto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaNominas">
+                        <tr><td colspan="6">Cargando nóminas...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>RNF-008 - Vista intuitiva de Contabilidad</p>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/contabilidad.js"></script>
+    <script>
+        inicializarContabilidad();
+    </script>
+
+</body>
+</html>

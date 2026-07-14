@@ -1,4 +1,5 @@
-﻿const API_BASE = window.location.origin + "/api";
+const API_BASE = window.location.origin + "/api";
+window.API_BASE = API_BASE;
 
 function obtenerParametro(nombre) {
     const params = new URLSearchParams(window.location.search);
