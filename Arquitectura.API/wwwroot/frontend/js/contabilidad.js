@@ -60,7 +60,16 @@ async function leerRespuestaError(respuesta) {
 }
 
 async function apiGetContabilidad(ruta) {
-    const respuesta = await fetch(`${CONTABILIDAD_API_BASE}${ruta}`);
+    const token = obtenerTokenContabilidad();
+    const headers = {};
+
+    if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const respuesta = await fetch(`${CONTABILIDAD_API_BASE}${ruta}`, {
+        headers
+    });
 
     if (!respuesta.ok) {
         throw new Error(await leerRespuestaError(respuesta));
@@ -109,6 +118,49 @@ function fechaHoyInput() {
     return new Date().toISOString().substring(0, 10);
 }
 
+function obtenerProyectoIdDesdeSelect(idSelect) {
+    const valor = document.getElementById(idSelect)?.value;
+
+    if (!valor) {
+        return null;
+    }
+
+    return parseInt(valor);
+}
+
+async function cargarProyectosContabilidad() {
+    try {
+        const proyectos = await apiGetContabilidad("/Proyectos");
+
+        llenarSelectProyectos("ingresoProyectoId", proyectos, "Sin proyecto");
+        llenarSelectProyectos("egresoProyectoId", proyectos, "Sin proyecto");
+        llenarSelectProyectos("proyectoReporteId", proyectos, "Seleccione un proyecto");
+    } catch (error) {
+        console.error("Error cargando proyectos:", error);
+        mostrarMensaje("mensajeReporteProyecto", "No se pudieron cargar los proyectos.", "error");
+    }
+}
+
+function llenarSelectProyectos(idSelect, proyectos, textoInicial) {
+    const select = document.getElementById(idSelect);
+
+    if (!select) {
+        return;
+    }
+
+    select.innerHTML = `<option value="">${textoInicial}</option>`;
+
+    if (!proyectos || proyectos.length === 0) {
+        return;
+    }
+
+    proyectos.forEach(proyecto => {
+        select.innerHTML += `
+            <option value="${proyecto.id}">${proyecto.nombre}</option>
+        `;
+    });
+}
+
 function inicializarContabilidad() {
     const hoy = fechaHoyInput();
     const anioActual = new Date().getFullYear();
@@ -125,6 +177,7 @@ function inicializarContabilidad() {
     document.getElementById("tokenJwt").value = obtenerTokenContabilidad();
 
     cambiarCamposCierre();
+    cargarProyectosContabilidad();
     cargarPanelContabilidad();
 }
 
@@ -190,7 +243,7 @@ async function cargarTransaccionesFrontend() {
         const transacciones = await apiGetContabilidad("/Contabilidad");
 
         if (!transacciones || transacciones.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="7">No hay transacciones registradas.</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="8">No hay transacciones registradas.</td></tr>`;
             return;
         }
 
@@ -204,6 +257,7 @@ async function cargarTransaccionesFrontend() {
                     <td>${t.id}</td>
                     <td><span class="badge ${badge}">${t.tipo}</span></td>
                     <td>${t.categoria}</td>
+                    <td>${t.proyectoNombre ?? "Sin proyecto"}</td>
                     <td>${t.descripcion ?? ""}</td>
                     <td>${formatearFechaContabilidad(t.fecha)}</td>
                     <td class="text-right">${formatearMoneda(t.monto)}</td>
@@ -212,7 +266,7 @@ async function cargarTransaccionesFrontend() {
             `;
         });
     } catch (error) {
-        tabla.innerHTML = `<tr><td colspan="7">Error: ${error.message}</td></tr>`;
+        tabla.innerHTML = `<tr><td colspan="8">Error: ${error.message}</td></tr>`;
     }
 }
 
@@ -221,7 +275,8 @@ async function registrarIngresoFrontend() {
         categoriaId: parseInt(document.getElementById("categoriaIngreso").value),
         monto: parseFloat(document.getElementById("montoIngreso").value),
         descripcion: document.getElementById("descripcionIngreso").value.trim(),
-        fecha: document.getElementById("fechaIngreso").value
+        fecha: document.getElementById("fechaIngreso").value,
+        proyectoId: obtenerProyectoIdDesdeSelect("ingresoProyectoId")
     };
 
     if (!dto.monto || dto.monto <= 0) {
@@ -234,6 +289,7 @@ async function registrarIngresoFrontend() {
         mostrarMensaje("mensajeIngreso", "Ingreso registrado correctamente.", "success");
         document.getElementById("montoIngreso").value = "";
         document.getElementById("descripcionIngreso").value = "";
+        document.getElementById("ingresoProyectoId").value = "";
         await cargarPanelContabilidad();
     } catch (error) {
         mostrarMensaje("mensajeIngreso", error.message, "error");
@@ -245,7 +301,8 @@ async function registrarEgresoFrontend() {
         categoriaId: parseInt(document.getElementById("categoriaEgreso").value),
         monto: parseFloat(document.getElementById("montoEgreso").value),
         descripcion: document.getElementById("descripcionEgreso").value.trim(),
-        fecha: document.getElementById("fechaEgreso").value
+        fecha: document.getElementById("fechaEgreso").value,
+        proyectoId: obtenerProyectoIdDesdeSelect("egresoProyectoId")
     };
 
     if (!dto.monto || dto.monto <= 0) {
@@ -258,10 +315,74 @@ async function registrarEgresoFrontend() {
         mostrarMensaje("mensajeEgreso", "Egreso registrado correctamente.", "success");
         document.getElementById("montoEgreso").value = "";
         document.getElementById("descripcionEgreso").value = "";
+        document.getElementById("egresoProyectoId").value = "";
         await cargarPanelContabilidad();
     } catch (error) {
         mostrarMensaje("mensajeEgreso", error.message, "error");
     }
+}
+
+
+async function consultarReporteProyecto() {
+    const proyectoId = obtenerProyectoIdDesdeSelect("proyectoReporteId");
+
+    if (!proyectoId) {
+        mostrarMensaje("mensajeReporteProyecto", "Debe seleccionar un proyecto.", "error");
+        return;
+    }
+
+    try {
+        const reporte = await apiGetContabilidad(`/Contabilidad/proyecto/${proyectoId}`);
+
+        document.getElementById("proyectoTotalIngresos").textContent =
+            formatearMoneda(reporte.totalIngresos);
+
+        document.getElementById("proyectoTotalEgresos").textContent =
+            formatearMoneda(reporte.totalEgresos);
+
+        document.getElementById("proyectoBalance").textContent =
+            formatearMoneda(reporte.balance);
+
+        renderTransaccionesProyecto(reporte.transacciones);
+
+        mostrarMensaje(
+            "mensajeReporteProyecto",
+            `Reporte consultado para ${reporte.proyectoNombre}.`,
+            "success"
+        );
+    } catch (error) {
+        mostrarMensaje("mensajeReporteProyecto", error.message, "error");
+    }
+}
+
+function renderTransaccionesProyecto(transacciones) {
+    const tabla = document.getElementById("tablaTransaccionesProyecto");
+
+    if (!transacciones || transacciones.length === 0) {
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="6">Este proyecto no tiene transacciones registradas.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    tabla.innerHTML = "";
+
+    transacciones.forEach(t => {
+        const badge = t.tipo === "Ingreso" ? "badge-ingreso" : "badge-egreso";
+
+        tabla.innerHTML += `
+            <tr>
+                <td>${t.id}</td>
+                <td><span class="badge ${badge}">${t.tipo}</span></td>
+                <td>${t.categoria}</td>
+                <td>${t.descripcion ?? ""}</td>
+                <td>${formatearFechaContabilidad(t.fecha)}</td>
+                <td class="text-right">${formatearMoneda(t.monto)}</td>
+            </tr>
+        `;
+    });
 }
 
 function cambiarCamposCierre() {

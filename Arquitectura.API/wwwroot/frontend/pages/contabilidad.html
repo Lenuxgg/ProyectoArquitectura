@@ -18,7 +18,7 @@
         <a href="../index.html">Inicio</a>
         <a href="proyectos.html">Proyectos</a>
         <a href="contabilidad.html">Contabilidad</a>
-            <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
+        <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
     </nav>
 
     <main class="container">
@@ -69,6 +69,61 @@
             </article>
         </section>
 
+        <section class="section-card">
+            <h2>Reporte financiero por proyecto</h2>
+            <p>Consulte ingresos, egresos, balance y movimientos asociados a un proyecto específico.</p>
+
+            <div class="form-inline">
+                <div class="form-group">
+                    <label for="proyectoReporteId">Proyecto</label>
+                    <select id="proyectoReporteId">
+                        <option value="">Seleccione un proyecto</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="button-row">
+                <button class="btn-primary" onclick="consultarReporteProyecto()">Consultar proyecto</button>
+            </div>
+
+            <p id="mensajeReporteProyecto" class="message"></p>
+
+            <section class="dashboard-grid" style="margin-top: 14px;">
+                <article class="summary-card">
+                    <h3>Ingresos proyecto</h3>
+                    <p id="proyectoTotalIngresos">₡0</p>
+                </article>
+                <article class="summary-card">
+                    <h3>Egresos proyecto</h3>
+                    <p id="proyectoTotalEgresos">₡0</p>
+                </article>
+                <article class="summary-card">
+                    <h3>Balance proyecto</h3>
+                    <p id="proyectoBalance">₡0</p>
+                </article>
+            </section>
+
+            <div class="table-container" style="margin-top:14px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tipo</th>
+                            <th>Categoría</th>
+                            <th>Descripción</th>
+                            <th>Fecha</th>
+                            <th class="text-right">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaTransaccionesProyecto">
+                        <tr>
+                            <td colspan="6">Seleccione un proyecto para consultar.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
         <section class="forms-grid">
             <article class="form-card">
                 <h2>Registrar ingreso</h2>
@@ -79,6 +134,13 @@
                         <option value="1">Honorarios por proyecto</option>
                         <option value="2">Consultoría externa</option>
                         <option value="3">Otros ingresos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="ingresoProyectoId">Proyecto relacionado</label>
+                    <select id="ingresoProyectoId">
+                        <option value="">Sin proyecto</option>
                     </select>
                 </div>
 
@@ -111,6 +173,13 @@
                         <option value="5">Gastos operativos</option>
                         <option value="6">Licencias de software</option>
                         <option value="7">Otros egresos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="egresoProyectoId">Proyecto relacionado</label>
+                    <select id="egresoProyectoId">
+                        <option value="">Sin proyecto</option>
                     </select>
                 </div>
 
@@ -243,6 +312,7 @@
                             <th>ID</th>
                             <th>Tipo</th>
                             <th>Categoría</th>
+                            <th>Proyecto</th>
                             <th>Descripción</th>
                             <th>Fecha</th>
                             <th class="text-right">Monto</th>
@@ -250,7 +320,7 @@
                         </tr>
                     </thead>
                     <tbody id="tablaTransacciones">
-                        <tr><td colspan="7">Cargando transacciones...</td></tr>
+                        <tr><td colspan="8">Cargando transacciones...</td></tr>
                     </tbody>
                 </table>
             </div>
