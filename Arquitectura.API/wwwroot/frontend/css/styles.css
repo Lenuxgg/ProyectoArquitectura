@@ -591,3 +591,108 @@ th, td {
         flex: 1 1 160px;
     }
 }
+
+
+/* ============================================================
+   Ajustes visuales finales - v8
+   ============================================================ */
+
+:root[data-theme="dark"] .navbar a:hover,
+:root[data-theme="dark"] .navbar a:focus-visible {
+    background: var(--color-accent);
+    color: var(--color-dark);
+}
+
+:root[data-theme="dark"] .btn-danger,
+:root[data-theme="dark"] button.btn-danger,
+:root[data-theme="dark"] a.btn-danger {
+    background: #B91C1C;
+    color: #FFFFFF;
+}
+
+:root[data-theme="dark"] .btn-danger:hover,
+:root[data-theme="dark"] button.btn-danger:hover,
+:root[data-theme="dark"] a.btn-danger:hover {
+    background: #991B1B;
+    filter: none;
+}
+
+.home-container .card {
+    display: flex;
+    flex-direction: column;
+    min-height: 250px;
+}
+
+.home-container .card h2 {
+    white-space: nowrap;
+    font-size: clamp(20px, 2.1vw, 24px);
+}
+
+.home-container .card p {
+    flex: 1;
+}
+
+.home-container .card .btn-primary {
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+.category-report-grid {
+    grid-template-columns: 1fr;
+    gap: 26px;
+}
+
+.category-report-grid .section-card {
+    margin-bottom: 0;
+}
+
+.compact-table {
+    overflow-x: visible;
+}
+
+.compact-table table {
+    min-width: 0;
+    table-layout: fixed;
+}
+
+.compact-table th,
+.compact-table td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.compact-table .text-right,
+.compact-table td:last-child,
+.compact-table th:last-child {
+    text-align: right;
+}
+
+.detail-grid {
+    gap: 34px;
+    align-items: start;
+    margin-top: 28px;
+}
+
+.detail-grid .card {
+    min-height: 330px;
+}
+
+main.container > .card + .detail-grid {
+    margin-top: 30px;
+}
+
+#tablaProyectos .btn-danger {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (max-width: 900px) {
+    .home-container .card h2 {
+        white-space: normal;
+    }
+
+    .compact-table {
+        overflow-x: auto;
+    }
+}

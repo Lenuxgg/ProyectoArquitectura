@@ -122,6 +122,8 @@ async function cargarTareaParaEditar() {
         document.getElementById("volverDetalle").href = `detalle-proyecto.html?id=${proyectoId}`;
         document.getElementById("btnCancelar").href = `detalle-proyecto.html?id=${proyectoId}`;
 
+        await cargarDocumentosTarea(tareaId);
+
     } catch (error) {
         mostrarMensaje("mensajeTarea", error.message, "error");
     }
@@ -206,12 +208,87 @@ async function subirDocumentoTarea() {
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo subir el documento. Verifique que el endpoint exista en Swagger.");
+            const errorTexto = await respuesta.text();
+            throw new Error(errorTexto || "No se pudo subir el documento.");
         }
 
         mostrarMensaje("mensajeDocumentoTarea", "Documento subido correctamente.", "success");
         archivoInput.value = "";
+        await cargarDocumentosTarea(tareaId);
 
+    } catch (error) {
+        mostrarMensaje("mensajeDocumentoTarea", error.message, "error");
+    }
+}
+
+async function cargarDocumentosTarea(tareaId) {
+    const tabla = document.getElementById("tablaDocumentosTarea");
+
+    if (!tabla || !tareaId) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}/documentos`);
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudieron cargar los documentos de la tarea.");
+        }
+
+        const documentos = await respuesta.json();
+
+        if (!documentos || documentos.length === 0) {
+            tabla.innerHTML = `
+                <tr>
+                    <td colspan="4">Esta tarea no tiene documentos registrados.</td>
+                </tr>
+            `;
+            return;
+        }
+
+        tabla.innerHTML = "";
+
+        documentos.forEach(doc => {
+            tabla.innerHTML += `
+                <tr>
+                    <td>${doc.nombre ?? "Documento"}</td>
+                    <td>${formatearFecha(doc.fecha)}</td>
+                    <td><a href="${doc.rutaArchivo}" target="_blank">Abrir</a></td>
+                    <td>
+                        <button class="btn-danger" onclick="eliminarDocumentoTarea(${doc.id})">Eliminar</button>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (error) {
+        tabla.innerHTML = `
+            <tr>
+                <td colspan="4">Error: ${error.message}</td>
+            </tr>
+        `;
+    }
+}
+
+async function eliminarDocumentoTarea(documentoId) {
+    const tareaId = document.getElementById("tareaId").value;
+    const confirmar = confirm("¿Desea eliminar este documento?");
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Tareas/documentos/${documentoId}`, {
+            method: "DELETE"
+        });
+
+        if (!respuesta.ok) {
+            const errorTexto = await respuesta.text();
+            throw new Error(errorTexto || "No se pudo eliminar el documento.");
+        }
+
+        mostrarMensaje("mensajeDocumentoTarea", "Documento eliminado correctamente.", "success");
+        await cargarDocumentosTarea(tareaId);
     } catch (error) {
         mostrarMensaje("mensajeDocumentoTarea", error.message, "error");
     }

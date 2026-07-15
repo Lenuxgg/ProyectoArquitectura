@@ -40,23 +40,39 @@ function obtenerHeadersJson(requiereToken = false) {
     return headers;
 }
 
-async function leerRespuestaError(respuesta) {
-    try {
-        const data = await respuesta.json();
+async function leerContenidoRespuesta(respuesta) {
+    const texto = await respuesta.text();
 
-        if (data?.mensaje) return data.mensaje;
-        if (data?.message) return data.message;
-
-        if (data?.errors) {
-            return Object.values(data.errors).flat().join(" ");
-        }
-
-        if (typeof data === "string") return data;
-
-        return "Ocurrió un error al procesar la solicitud.";
-    } catch {
-        return await respuesta.text() || "Ocurrió un error al procesar la solicitud.";
+    if (!texto) {
+        return null;
     }
+
+    try {
+        return JSON.parse(texto);
+    } catch {
+        return texto;
+    }
+}
+
+async function leerRespuestaError(respuesta) {
+    const data = await leerContenidoRespuesta(respuesta);
+
+    if (!data) {
+        return "Ocurrió un error al procesar la solicitud.";
+    }
+
+    if (typeof data === "string") {
+        return data;
+    }
+
+    if (data.mensaje) return data.mensaje;
+    if (data.message) return data.message;
+
+    if (data.errors) {
+        return Object.values(data.errors).flat().join(" ");
+    }
+
+    return "Ocurrió un error al procesar la solicitud.";
 }
 
 async function apiGetContabilidad(ruta) {
@@ -75,7 +91,7 @@ async function apiGetContabilidad(ruta) {
         throw new Error(await leerRespuestaError(respuesta));
     }
 
-    return await respuesta.json();
+    return await leerContenidoRespuesta(respuesta);
 }
 
 async function apiEnviarContabilidad(ruta, metodo, datos, requiereToken = true) {
@@ -95,7 +111,7 @@ async function apiEnviarContabilidad(ruta, metodo, datos, requiereToken = true) 
         throw new Error(await leerRespuestaError(respuesta));
     }
 
-    return await respuesta.json();
+    return await leerContenidoRespuesta(respuesta);
 }
 
 function formatearMoneda(valor) {
@@ -116,6 +132,82 @@ function formatearFechaContabilidad(fecha) {
 
 function fechaHoyInput() {
     return new Date().toISOString().substring(0, 10);
+}
+
+
+function obtenerValor(objeto, ...nombres) {
+    if (!objeto) {
+        return null;
+    }
+
+    for (const nombre of nombres) {
+        if (objeto[nombre] !== undefined && objeto[nombre] !== null) {
+            return objeto[nombre];
+        }
+    }
+
+    return null;
+}
+
+function obtenerNumero(objeto, ...nombres) {
+    const valor = obtenerValor(objeto, ...nombres);
+    const numero = Number(valor);
+    return Number.isFinite(numero) ? numero : 0;
+}
+
+function obtenerTexto(objeto, ...nombres) {
+    const valor = obtenerValor(objeto, ...nombres);
+    return valor === null || valor === undefined ? "" : String(valor);
+}
+
+function actualizarResumenFinanciero(totalIngresos, totalEgresos, cantidadIngresos, cantidadEgresos) {
+    const balance = totalIngresos - totalEgresos;
+
+    document.getElementById("totalIngresos").textContent = formatearMoneda(totalIngresos);
+    document.getElementById("totalEgresos").textContent = formatearMoneda(totalEgresos);
+    document.getElementById("balance").textContent = formatearMoneda(balance);
+    document.getElementById("cantidadIngresos").textContent = cantidadIngresos;
+    document.getElementById("cantidadEgresos").textContent = cantidadEgresos;
+}
+
+function actualizarResumenDesdeReporte(reporte) {
+    actualizarResumenFinanciero(
+        obtenerNumero(reporte, "totalIngresos", "TotalIngresos"),
+        obtenerNumero(reporte, "totalEgresos", "TotalEgresos"),
+        obtenerNumero(reporte, "cantidadIngresos", "CantidadIngresos"),
+        obtenerNumero(reporte, "cantidadEgresos", "CantidadEgresos")
+    );
+}
+
+function actualizarResumenDesdeTransacciones(transacciones) {
+    let totalIngresos = 0;
+    let totalEgresos = 0;
+    let cantidadIngresos = 0;
+    let cantidadEgresos = 0;
+
+    (transacciones || []).forEach(t => {
+        const tipo = obtenerTexto(t, "tipo", "Tipo");
+        const monto = obtenerNumero(t, "monto", "Monto");
+
+        if (tipo === "Ingreso") {
+            totalIngresos += monto;
+            cantidadIngresos++;
+        }
+
+        if (tipo === "Egreso") {
+            totalEgresos += monto;
+            cantidadEgresos++;
+        }
+    });
+
+    actualizarResumenFinanciero(totalIngresos, totalEgresos, cantidadIngresos, cantidadEgresos);
+}
+
+function reporteTieneDatos(reporte) {
+    return obtenerNumero(reporte, "totalIngresos", "TotalIngresos") > 0 ||
+        obtenerNumero(reporte, "totalEgresos", "TotalEgresos") > 0 ||
+        obtenerNumero(reporte, "cantidadIngresos", "CantidadIngresos") > 0 ||
+        obtenerNumero(reporte, "cantidadEgresos", "CantidadEgresos") > 0;
 }
 
 function obtenerProyectoIdDesdeSelect(idSelect) {
@@ -182,25 +274,29 @@ function inicializarContabilidad() {
 }
 
 async function cargarPanelContabilidad() {
+    const transacciones = await cargarTransaccionesFrontend();
+    actualizarResumenDesdeTransacciones(transacciones);
+
     await Promise.allSettled([
-        cargarReporteFinanciero(),
+        cargarReporteFinanciero(transacciones),
         cargarDesgloseFinanciero(),
-        cargarTransaccionesFrontend(),
         cargarNominasFrontend()
     ]);
 }
 
-async function cargarReporteFinanciero() {
+async function cargarReporteFinanciero(transaccionesLocales = []) {
     try {
         const reporte = await apiGetContabilidad("/Contabilidad/reporte");
 
-        document.getElementById("totalIngresos").textContent = formatearMoneda(reporte.totalIngresos);
-        document.getElementById("totalEgresos").textContent = formatearMoneda(reporte.totalEgresos);
-        document.getElementById("balance").textContent = formatearMoneda(reporte.balance);
-        document.getElementById("cantidadIngresos").textContent = reporte.cantidadIngresos ?? 0;
-        document.getElementById("cantidadEgresos").textContent = reporte.cantidadEgresos ?? 0;
+        if (reporteTieneDatos(reporte) || !transaccionesLocales || transaccionesLocales.length === 0) {
+            actualizarResumenDesdeReporte(reporte);
+        }
     } catch (error) {
-        console.error(error);
+        console.error("No se pudo cargar /Contabilidad/reporte. Se mantiene el resumen calculado desde transacciones.", error);
+
+        if (!transaccionesLocales || transaccionesLocales.length === 0) {
+            actualizarResumenFinanciero(0, 0, 0, 0);
+        }
     }
 }
 
@@ -244,29 +340,42 @@ async function cargarTransaccionesFrontend() {
 
         if (!transacciones || transacciones.length === 0) {
             tabla.innerHTML = `<tr><td colspan="8">No hay transacciones registradas.</td></tr>`;
-            return;
+            return [];
         }
 
         tabla.innerHTML = "";
 
         transacciones.forEach(t => {
-            const badge = t.tipo === "Ingreso" ? "badge-ingreso" : "badge-egreso";
+            const id = obtenerValor(t, "id", "Id");
+            const tipo = obtenerTexto(t, "tipo", "Tipo");
+            const categoria = obtenerTexto(t, "categoria", "Categoria");
+            const proyectoNombre = obtenerValor(t, "proyectoNombre", "ProyectoNombre") || "Sin proyecto";
+            const descripcion = obtenerValor(t, "descripcion", "Descripcion") || "";
+            const fecha = obtenerValor(t, "fecha", "Fecha");
+            const monto = obtenerNumero(t, "monto", "Monto");
+            const usuarioId = obtenerValor(t, "usuarioId", "UsuarioId") || "";
+            const badge = tipo === "Ingreso" ? "badge-ingreso" : "badge-egreso";
 
             tabla.innerHTML += `
                 <tr>
-                    <td>${t.id}</td>
-                    <td><span class="badge ${badge}">${t.tipo}</span></td>
-                    <td>${t.categoria}</td>
-                    <td>${t.proyectoNombre ?? "Sin proyecto"}</td>
-                    <td>${t.descripcion ?? ""}</td>
-                    <td>${formatearFechaContabilidad(t.fecha)}</td>
-                    <td class="text-right">${formatearMoneda(t.monto)}</td>
-                    <td>${t.usuarioId}</td>
+                    <td>${id}</td>
+                    <td><span class="badge ${badge}">${tipo}</span></td>
+                    <td>${categoria}</td>
+                    <td>${proyectoNombre}</td>
+                    <td>${descripcion}</td>
+                    <td>${formatearFechaContabilidad(fecha)}</td>
+                    <td class="text-right">${formatearMoneda(monto)}</td>
+                    <td>${usuarioId}</td>
                 </tr>
             `;
         });
+
+        actualizarResumenDesdeTransacciones(transacciones);
+        return transacciones;
     } catch (error) {
         tabla.innerHTML = `<tr><td colspan="8">Error: ${error.message}</td></tr>`;
+        actualizarResumenFinanciero(0, 0, 0, 0);
+        return [];
     }
 }
 
@@ -335,19 +444,19 @@ async function consultarReporteProyecto() {
         const reporte = await apiGetContabilidad(`/Contabilidad/proyecto/${proyectoId}`);
 
         document.getElementById("proyectoTotalIngresos").textContent =
-            formatearMoneda(reporte.totalIngresos);
+            formatearMoneda(obtenerNumero(reporte, "totalIngresos", "TotalIngresos"));
 
         document.getElementById("proyectoTotalEgresos").textContent =
-            formatearMoneda(reporte.totalEgresos);
+            formatearMoneda(obtenerNumero(reporte, "totalEgresos", "TotalEgresos"));
 
         document.getElementById("proyectoBalance").textContent =
-            formatearMoneda(reporte.balance);
+            formatearMoneda(obtenerNumero(reporte, "balance", "Balance"));
 
-        renderTransaccionesProyecto(reporte.transacciones);
+        renderTransaccionesProyecto(obtenerValor(reporte, "transacciones", "Transacciones") || []);
 
         mostrarMensaje(
             "mensajeReporteProyecto",
-            `Reporte consultado para ${reporte.proyectoNombre}.`,
+            `Reporte consultado para ${obtenerTexto(reporte, "proyectoNombre", "ProyectoNombre")}.`,
             "success"
         );
     } catch (error) {
@@ -370,16 +479,17 @@ function renderTransaccionesProyecto(transacciones) {
     tabla.innerHTML = "";
 
     transacciones.forEach(t => {
-        const badge = t.tipo === "Ingreso" ? "badge-ingreso" : "badge-egreso";
+        const tipo = obtenerTexto(t, "tipo", "Tipo");
+        const badge = tipo === "Ingreso" ? "badge-ingreso" : "badge-egreso";
 
         tabla.innerHTML += `
             <tr>
-                <td>${t.id}</td>
-                <td><span class="badge ${badge}">${t.tipo}</span></td>
-                <td>${t.categoria}</td>
-                <td>${t.descripcion ?? ""}</td>
-                <td>${formatearFechaContabilidad(t.fecha)}</td>
-                <td class="text-right">${formatearMoneda(t.monto)}</td>
+                <td>${obtenerValor(t, "id", "Id")}</td>
+                <td><span class="badge ${badge}">${tipo}</span></td>
+                <td>${obtenerTexto(t, "categoria", "Categoria")}</td>
+                <td>${obtenerValor(t, "descripcion", "Descripcion") || ""}</td>
+                <td>${formatearFechaContabilidad(obtenerValor(t, "fecha", "Fecha"))}</td>
+                <td class="text-right">${formatearMoneda(obtenerNumero(t, "monto", "Monto"))}</td>
             </tr>
         `;
     });
@@ -454,11 +564,14 @@ async function revisarInconsistenciasNominaFrontend() {
         const resultado = await apiGetContabilidad(`/Contabilidad/nomina/inconsistencias?anio=${anio}&mes=${mes}`);
         renderInconsistencias(resultado);
 
-        const mensaje = resultado.tieneInconsistencias
-            ? `Se encontraron ${resultado.totalInconsistencias} inconsistencias.`
+        const tieneInconsistencias = obtenerValor(resultado, "tieneInconsistencias", "TieneInconsistencias");
+        const totalInconsistencias = obtenerValor(resultado, "totalInconsistencias", "TotalInconsistencias") || 0;
+
+        const mensaje = tieneInconsistencias
+            ? `Se encontraron ${totalInconsistencias} inconsistencias.`
             : "No se encontraron inconsistencias.";
 
-        mostrarMensaje("mensajeNomina", mensaje, resultado.tieneInconsistencias ? "error" : "success");
+        mostrarMensaje("mensajeNomina", mensaje, tieneInconsistencias ? "error" : "success");
     } catch (error) {
         mostrarMensaje("mensajeNomina", error.message, "error");
     }
@@ -466,7 +579,7 @@ async function revisarInconsistenciasNominaFrontend() {
 
 function renderInconsistencias(resultado) {
     const tabla = document.getElementById("tablaInconsistencias");
-    const inconsistencias = resultado.inconsistencias || [];
+    const inconsistencias = obtenerValor(resultado, "inconsistencias", "Inconsistencias") || [];
 
     if (inconsistencias.length === 0) {
         tabla.innerHTML = `<tr><td colspan="3">No hay inconsistencias.</td></tr>`;
@@ -478,9 +591,9 @@ function renderInconsistencias(resultado) {
     inconsistencias.forEach(i => {
         tabla.innerHTML += `
             <tr>
-                <td>${i.tipo}</td>
-                <td>${i.nombreEmpleado ?? i.usuarioId ?? "General"}</td>
-                <td>${i.detalle}</td>
+                <td>${obtenerTexto(i, "tipo", "Tipo")}</td>
+                <td>${obtenerTexto(i, "nombreEmpleado", "NombreEmpleado") || obtenerValor(i, "usuarioId", "UsuarioId") || "General"}</td>
+                <td>${obtenerTexto(i, "detalle", "Detalle")}</td>
             </tr>
         `;
     });
@@ -522,12 +635,12 @@ async function cargarNominasFrontend() {
         nominas.forEach(n => {
             tabla.innerHTML += `
                 <tr>
-                    <td>${n.id}</td>
-                    <td>${formatearFechaContabilidad(n.periodoInicio)} - ${formatearFechaContabilidad(n.periodoFin)}</td>
-                    <td><span class="badge badge-neutral">${n.estado}</span></td>
-                    <td class="text-right">${formatearMoneda(n.totalBruto)}</td>
-                    <td class="text-right">${formatearMoneda(n.totalDeducciones)}</td>
-                    <td class="text-right">${formatearMoneda(n.totalNeto)}</td>
+                    <td>${obtenerValor(n, "id", "Id")}</td>
+                    <td>${formatearFechaContabilidad(obtenerValor(n, "periodoInicio", "PeriodoInicio"))} - ${formatearFechaContabilidad(obtenerValor(n, "periodoFin", "PeriodoFin"))}</td>
+                    <td><span class="badge badge-neutral">${obtenerTexto(n, "estado", "Estado")}</span></td>
+                    <td class="text-right">${formatearMoneda(obtenerNumero(n, "totalBruto", "TotalBruto"))}</td>
+                    <td class="text-right">${formatearMoneda(obtenerNumero(n, "totalDeducciones", "TotalDeducciones"))}</td>
+                    <td class="text-right">${formatearMoneda(obtenerNumero(n, "totalNeto", "TotalNeto"))}</td>
                 </tr>
             `;
         });

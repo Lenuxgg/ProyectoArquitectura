@@ -242,4 +242,85 @@ public class TareaService : ITareaService
 
         return true;
     }
+
+    public async Task<DocumentoTareaDto?> AdjuntarDocumentoTareaAsync(
+        int tareaId,
+        int usuarioId,
+        string nombre,
+        string rutaArchivo)
+    {
+        var tareaExiste = await _context.Tareas
+            .AnyAsync(t => t.Id == tareaId);
+
+        if (!tareaExiste)
+            return null;
+
+        var usuarioExiste = await _context.Usuario
+            .AnyAsync(u => u.Id == usuarioId);
+
+        if (!usuarioExiste)
+        {
+            var usuarioActivo = await _context.Usuario
+                .Where(u => u.Estado != "Baja")
+                .OrderBy(u => u.Id)
+                .FirstOrDefaultAsync();
+
+            if (usuarioActivo == null)
+                return null;
+
+            usuarioId = usuarioActivo.Id;
+        }
+
+        var documento = new ComentarioTarea
+        {
+            TareaId = tareaId,
+            UsuarioId = usuarioId,
+            Texto = nombre,
+            ArchivoRuta = rutaArchivo,
+            Fecha = DateTime.Now
+        };
+
+        _context.ComentarioTareas.Add(documento);
+        await _context.SaveChangesAsync();
+
+        return new DocumentoTareaDto
+        {
+            Id = documento.Id,
+            TareaId = documento.TareaId,
+            Nombre = documento.Texto,
+            RutaArchivo = documento.ArchivoRuta ?? string.Empty,
+            Fecha = documento.Fecha
+        };
+    }
+
+    public async Task<List<DocumentoTareaDto>> ObtenerDocumentosPorTareaAsync(int tareaId)
+    {
+        return await _context.ComentarioTareas
+            .Where(c => c.TareaId == tareaId && c.ArchivoRuta != null)
+            .OrderByDescending(c => c.Fecha)
+            .Select(c => new DocumentoTareaDto
+            {
+                Id = c.Id,
+                TareaId = c.TareaId,
+                Nombre = c.Texto,
+                RutaArchivo = c.ArchivoRuta ?? string.Empty,
+                Fecha = c.Fecha
+            })
+            .ToListAsync();
+    }
+
+    public async Task<bool> EliminarDocumentoTareaAsync(int documentoId)
+    {
+        var documento = await _context.ComentarioTareas
+            .FirstOrDefaultAsync(c => c.Id == documentoId && c.ArchivoRuta != null);
+
+        if (documento == null)
+            return false;
+
+        _context.ComentarioTareas.Remove(documento);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
 }

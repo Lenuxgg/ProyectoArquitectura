@@ -30,7 +30,9 @@ public partial class ContabilidadService
         }
 
         var empleadosActivos = await _context.Usuario
-            .Where(u => u.Estado == "Activo")
+            .Where(u =>
+                u.Estado == "Activo" &&
+                !u.Admin)
             .ToListAsync();
 
         if (!empleadosActivos.Any())
@@ -136,6 +138,7 @@ public partial class ContabilidadService
         var empleados = await _context.Usuario
             .Where(u =>
                 u.Estado == "Activo" &&
+                !u.Admin &&
                 u.Salario != null &&
                 u.Salario > 0)
             .OrderBy(u => u.Nombre)

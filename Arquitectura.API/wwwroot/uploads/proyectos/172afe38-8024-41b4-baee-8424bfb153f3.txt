@@ -1,0 +1,674 @@
+-- ============================================================
+--  Arquitectura SA
+--  Base de Datos: Arquitectura
+--  SQL Server Express
+--  Versión: 1.0.0 | Fecha: 2026-06-02
+-- ============================================================
+
+USE master;
+GO
+
+IF EXISTS (SELECT name FROM sys.databases WHERE name = 'Arquitectura')
+    DROP DATABASE Arquitectura;
+GO
+
+CREATE DATABASE Arquitectura;
+GO
+
+USE Arquitectura;
+GO
+
+-- ============================================================
+-- TABLA: Roles
+-- ============================================================
+CREATE TABLE Roles (
+    Id     INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre VARCHAR(50) NOT NULL UNIQUE
+);
+GO
+
+-- ============================================================
+-- TABLA: Usuario
+-- ============================================================
+CREATE TABLE Usuario (
+    Id                 INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre             VARCHAR(100)  NOT NULL,
+    Apellidos          VARCHAR(100)  NOT NULL,
+    Email              VARCHAR(150)  NOT NULL UNIQUE,
+    EmailConfirmed     BIT           NOT NULL DEFAULT 0,
+    Telefono           VARCHAR(20)   NULL,
+    Puesto             VARCHAR(100)  NULL,
+    Salario            DECIMAL(12,2) NULL CHECK (Salario >= 0),
+    FechaContratacion  DATE          NULL,
+    Estado             VARCHAR(20)   NOT NULL DEFAULT 'Activo'
+                       CHECK (Estado IN ('Activo', 'Inactivo', 'Baja')),
+    Admin              BIT           NOT NULL DEFAULT 0,
+    PasswordHash       VARCHAR(256)  NOT NULL,
+    FechaCreacion      DATETIME      NOT NULL DEFAULT GETDATE(),
+    FechaModificacion  DATETIME      NULL
+);
+GO
+
+-- ============================================================
+-- TABLA: UserRoles (relación muchos a muchos Usuario - Roles)
+-- ============================================================
+CREATE TABLE UserRoles (
+    UserId  INT NOT NULL,
+    RolesId INT NOT NULL,
+    CONSTRAINT PK_UserRoles PRIMARY KEY (UserId, RolesId),
+    CONSTRAINT FK_UserRoles_Usuario FOREIGN KEY (UserId)  REFERENCES Usuario(Id),
+    CONSTRAINT FK_UserRoles_Roles   FOREIGN KEY (RolesId) REFERENCES Roles(Id)
+);
+GO
+
+-- ============================================================
+-- TABLA: Proyectos
+-- ============================================================
+CREATE TABLE Proyectos (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre       VARCHAR(200) NOT NULL,
+    Descripcion  VARCHAR(MAX) NULL,
+    FechaInicio  DATE         NOT NULL DEFAULT GETDATE(),
+    FechaFin     DATE         NULL,
+    Estado       VARCHAR(30)  NOT NULL DEFAULT 'Activo'
+                 CHECK (Estado IN ('Activo', 'En Progreso', 'Terminado', 'Cancelado')),
+    FechaCreacion     DATETIME NOT NULL DEFAULT GETDATE(),
+    FechaModificacion DATETIME NULL
+);
+GO
+
+-- ============================================================
+-- TABLA: Tareas
+-- ============================================================
+CREATE TABLE Tareas (
+    Id          INT IDENTITY(1,1) PRIMARY KEY,
+    Titulo      VARCHAR(200) NOT NULL,
+    Estado      VARCHAR(30)  NOT NULL DEFAULT 'Pendiente'
+                CHECK (Estado IN ('Pendiente', 'En Progreso', 'Terminada', 'Cancelada')),
+    ProyectoId  INT          NOT NULL,
+    Descripcion VARCHAR(MAX) NULL,
+    FechaInicio DATE         NULL,
+    FechaFin    DATE         NULL,
+    FechaCreacion     DATETIME NOT NULL DEFAULT GETDATE(),
+    FechaModificacion DATETIME NULL,
+    CONSTRAINT FK_Tareas_Proyectos FOREIGN KEY (ProyectoId) REFERENCES Proyectos(Id)
+);
+GO
+
+-- ============================================================
+-- TABLA: ComentarioProyectos
+-- ============================================================
+CREATE TABLE ComentarioProyectos (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    ProyectoId   INT          NOT NULL,
+    ArchivoRuta  VARCHAR(500) NULL,
+    Text         VARCHAR(MAX) NOT NULL,
+    Fecha        DATETIME     NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_ComProy_Proyectos FOREIGN KEY (ProyectoId) REFERENCES Proyectos(Id)
+);
+GO
+
+-- ============================================================
+-- TABLA: ComentarioTareas
+-- ============================================================
+CREATE TABLE ComentarioTareas (
+    Id          INT IDENTITY(1,1) PRIMARY KEY,
+    Texto       VARCHAR(MAX) NOT NULL,
+    ArchivoRuta VARCHAR(500) NULL,
+    Fecha       DATETIME     NOT NULL DEFAULT GETDATE(),
+    TareaId     INT          NOT NULL,
+    UsuarioId   INT          NOT NULL,
+    CONSTRAINT FK_ComTarea_Tareas   FOREIGN KEY (TareaId)   REFERENCES Tareas(Id),
+    CONSTRAINT FK_ComTarea_Usuario  FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id)
+);
+GO
+
+-- ============================================================
+-- TABLA: DocumentoTareas
+-- ============================================================
+CREATE TABLE DocumentoTareas (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre       VARCHAR(255) NOT NULL,
+    RutaArchivo  VARCHAR(500) NOT NULL,
+    TareasId     INT          NOT NULL,
+    FechaCarga   DATETIME     NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_DocTarea_Tareas FOREIGN KEY (TareasId) REFERENCES Tareas(Id)
+);
+GO
+
+-- ============================================================
+-- TABLA: DocumentoProyectos
+-- ============================================================
+CREATE TABLE DocumentoProyectos (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre       VARCHAR(255) NOT NULL,
+    RutaArchivo  VARCHAR(500) NOT NULL,
+    ProyectoId   INT          NOT NULL,
+    FechaCarga   DATETIME     NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_DocProy_Proyectos FOREIGN KEY (ProyectoId) REFERENCES Proyectos(Id)
+);
+GO
+
+-- ============================================================
+-- ÍNDICES
+-- ============================================================
+CREATE INDEX IX_Usuario_Email        ON Usuario(Email);
+CREATE INDEX IX_Usuario_Estado       ON Usuario(Estado);
+CREATE INDEX IX_Tareas_ProyectoId    ON Tareas(ProyectoId);
+CREATE INDEX IX_Tareas_Estado        ON Tareas(Estado);
+CREATE INDEX IX_ComProy_ProyectoId   ON ComentarioProyectos(ProyectoId);
+CREATE INDEX IX_ComTarea_TareaId     ON ComentarioTareas(TareaId);
+CREATE INDEX IX_ComTarea_UsuarioId   ON ComentarioTareas(UsuarioId);
+GO
+
+-- ============================================================
+-- TRIGGER: Cuando todas las tareas de un proyecto están
+-- Terminadas o Canceladas ? el proyecto se marca Terminado
+-- ============================================================
+CREATE TRIGGER trg_Tareas_ActualizaProyecto
+ON Tareas
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF UPDATE(Estado)
+    BEGIN
+        DECLARE @ProyectoId INT;
+        SELECT @ProyectoId = ProyectoId FROM inserted;
+
+        IF NOT EXISTS (
+            SELECT 1 FROM Tareas
+            WHERE ProyectoId = @ProyectoId
+              AND Estado IN ('Pendiente', 'En Progreso')
+        )
+        BEGIN
+            UPDATE Proyectos
+            SET Estado = 'Terminado',
+                FechaFin = CAST(GETDATE() AS DATE),
+                FechaModificacion = GETDATE()
+            WHERE Id = @ProyectoId
+              AND Estado <> 'Cancelado';
+        END
+    END
+END;
+GO
+
+-- ============================================================
+-- TRIGGER: Auditoría de Usuario
+-- ============================================================
+CREATE TRIGGER trg_Auditoria_Usuario
+ON Usuario
+AFTER INSERT, UPDATE, DELETE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    -- Aquí se puede conectar a una tabla de Bitácora si se agrega en el futuro
+    -- Por ahora registra la FechaModificacion automáticamente en UPDATE
+    IF EXISTS (SELECT 1 FROM inserted) AND EXISTS (SELECT 1 FROM deleted)
+    BEGIN
+        UPDATE Usuario
+        SET FechaModificacion = GETDATE()
+        FROM Usuario u
+        INNER JOIN inserted i ON u.Id = i.Id;
+    END
+END;
+GO
+
+-- ============================================================
+-- TRIGGER: Auditoría de Tareas (FechaModificacion automática)
+-- ============================================================
+CREATE TRIGGER trg_Auditoria_Tareas
+ON Tareas
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE Tareas
+    SET FechaModificacion = GETDATE()
+    FROM Tareas t
+    INNER JOIN inserted i ON t.Id = i.Id;
+END;
+GO
+
+-- ============================================================
+-- TRIGGER: Auditoría de Proyectos (FechaModificacion automática)
+-- ============================================================
+CREATE TRIGGER trg_Auditoria_Proyectos
+ON Proyectos
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE Proyectos
+    SET FechaModificacion = GETDATE()
+    FROM Proyectos p
+    INNER JOIN inserted i ON p.Id = i.Id;
+END;
+GO
+
+-- ============================================================
+-- DATOS INICIALES
+-- ============================================================
+
+-- Roles base
+INSERT INTO Roles (Nombre) VALUES
+    ('Administrador'),
+    ('Empleado'),
+    ('Cliente');
+GO
+
+-- Usuario administrador por defecto
+INSERT INTO Usuario (Nombre, Apellidos, Email, EmailConfirmed, Puesto, Estado, Admin, PasswordHash)
+VALUES ('Admin', 'Sistema', 'admin@arquitectura.cr', 1, 'Administrador General', 'Activo', 1, 'HASH_PLACEHOLDER');
+GO
+
+-- Asignar rol Administrador al usuario por defecto
+INSERT INTO UserRoles (UserId, RolesId) VALUES (1, 1);
+GO
+
+
+-- ============================================================
+--  Arquitectura SA - Módulo Contabilidad
+--  Script INCREMENTAL (no borra la BD existente)
+--  Ejecutar sobre la BD Arquitectura ya creada
+--  Versión: 1.0.1 | Fecha: 2026-06-02
+-- ============================================================
+
+USE Arquitectura;
+GO
+
+-- ============================================================
+-- TABLA: CategoriaFinanciera
+-- Para clasificar ingresos y egresos (CON-001)
+-- ============================================================
+CREATE TABLE CategoriaFinanciera (
+    Id          INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre      VARCHAR(100) NOT NULL UNIQUE,
+    Tipo        VARCHAR(10)  NOT NULL CHECK (Tipo IN ('Ingreso', 'Egreso')),
+    Descripcion VARCHAR(200) NULL,
+    Activo      BIT          NOT NULL DEFAULT 1
+);
+GO
+
+-- ============================================================
+-- TABLA: Transacciones
+-- Registra todos los ingresos y egresos (CON-001)
+-- ============================================================
+CREATE TABLE Transacciones (
+    Id            INT IDENTITY(1,1) PRIMARY KEY,
+    CategoriaId   INT            NOT NULL,
+    Tipo          VARCHAR(10)    NOT NULL CHECK (Tipo IN ('Ingreso', 'Egreso')),
+    Monto         DECIMAL(14,2)  NOT NULL CHECK (Monto > 0),
+    Descripcion   VARCHAR(MAX)   NULL,
+    Fecha         DATE           NOT NULL DEFAULT GETDATE(),
+    UsuarioId     INT            NOT NULL,
+    FechaRegistro DATETIME       NOT NULL DEFAULT GETDATE(),
+    FechaModificacion DATETIME   NULL,
+    Activo        BIT            NOT NULL DEFAULT 1,
+    CONSTRAINT FK_Trans_Categoria FOREIGN KEY (CategoriaId) REFERENCES CategoriaFinanciera(Id),
+    CONSTRAINT FK_Trans_Usuario   FOREIGN KEY (UsuarioId)   REFERENCES Usuario(Id)
+);
+GO
+
+-- ============================================================
+-- TABLA: CierreCaja
+-- Cierres diario, mensual, anual y por rango (CON-003, CON-004)
+-- ============================================================
+CREATE TABLE CierreCaja (
+    Id             INT IDENTITY(1,1) PRIMARY KEY,
+    Tipo           VARCHAR(20)   NOT NULL CHECK (Tipo IN ('Diario', 'Mensual', 'Anual', 'Rango')),
+    FechaInicio    DATE          NOT NULL,
+    FechaFin       DATE          NOT NULL,
+    TotalIngresos  DECIMAL(14,2) NOT NULL DEFAULT 0,
+    TotalEgresos   DECIMAL(14,2) NOT NULL DEFAULT 0,
+    BalanceFinal   DECIMAL(14,2) NOT NULL DEFAULT 0,
+    UsuarioId      INT           NOT NULL,
+    FechaRegistro  DATETIME      NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT FK_Cierre_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id),
+    -- No se permite duplicar el mismo tipo de cierre en el mismo rango
+    CONSTRAINT UQ_CierreCaja UNIQUE (Tipo, FechaInicio, FechaFin)
+);
+GO
+
+-- ============================================================
+-- TABLA: Nomina
+-- Cabecera de cada nómina mensual (CON-007)
+-- ============================================================
+CREATE TABLE Nomina (
+    Id                INT IDENTITY(1,1) PRIMARY KEY,
+    PeriodoInicio     DATE           NOT NULL,
+    PeriodoFin        DATE           NOT NULL,
+    Estado            VARCHAR(20)    NOT NULL DEFAULT 'Pendiente'
+                      CHECK (Estado IN ('Pendiente', 'Validada', 'Aprobada', 'Procesada')),
+    TotalBruto        DECIMAL(14,2)  NOT NULL DEFAULT 0,
+    TotalDeducciones  DECIMAL(14,2)  NOT NULL DEFAULT 0,
+    TotalNeto         DECIMAL(14,2)  NOT NULL DEFAULT 0,
+    UsuarioId         INT            NOT NULL,
+    FechaRegistro     DATETIME       NOT NULL DEFAULT GETDATE(),
+    FechaAprobacion   DATETIME       NULL,
+    CONSTRAINT FK_Nomina_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id),
+    CONSTRAINT UQ_Nomina UNIQUE (PeriodoInicio, PeriodoFin)
+);
+GO
+
+-- ============================================================
+-- TABLA: NominaDetalle
+-- Detalle por empleado en cada nómina (CON-006, CON-007)
+-- ============================================================
+CREATE TABLE NominaDetalle (
+    Id                    INT IDENTITY(1,1) PRIMARY KEY,
+    NominaId              INT           NOT NULL,
+    UsuarioId             INT           NOT NULL,
+    SalarioBase           DECIMAL(12,2) NOT NULL,
+    Deducciones           DECIMAL(12,2) NOT NULL DEFAULT 0,
+    Bonificaciones        DECIMAL(12,2) NOT NULL DEFAULT 0,
+    SalarioNeto           DECIMAL(12,2) NOT NULL,
+    Inconsistencia        BIT           NOT NULL DEFAULT 0,  -- CON-006: flag de error
+    DetalleInconsistencia VARCHAR(300)  NULL,
+    CONSTRAINT FK_NomDet_Nomina  FOREIGN KEY (NominaId)  REFERENCES Nomina(Id),
+    CONSTRAINT FK_NomDet_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id),
+    CONSTRAINT UQ_NominaDetalle  UNIQUE (NominaId, UsuarioId)
+);
+GO
+
+-- ============================================================
+-- ÍNDICES para Contabilidad
+-- ============================================================
+CREATE INDEX IX_Transacciones_Fecha      ON Transacciones(Fecha);
+CREATE INDEX IX_Transacciones_Tipo       ON Transacciones(Tipo);
+CREATE INDEX IX_Transacciones_UsuarioId  ON Transacciones(UsuarioId);
+CREATE INDEX IX_CierreCaja_Tipo          ON CierreCaja(Tipo);
+CREATE INDEX IX_CierreCaja_Fechas        ON CierreCaja(FechaInicio, FechaFin);
+CREATE INDEX IX_NominaDetalle_NominaId   ON NominaDetalle(NominaId);
+CREATE INDEX IX_NominaDetalle_UsuarioId  ON NominaDetalle(UsuarioId);
+GO
+
+-- ============================================================
+-- TRIGGER: FechaModificacion automática en Transacciones
+-- ============================================================
+CREATE TRIGGER trg_Auditoria_Transacciones
+ON Transacciones
+AFTER UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+    UPDATE Transacciones
+    SET FechaModificacion = GETDATE()
+    FROM Transacciones t
+    INNER JOIN inserted i ON t.Id = i.Id;
+END;
+GO
+
+-- ============================================================
+-- TRIGGER: Validar que no se registre una nómina con
+-- empleados duplicados o salario en 0 (CON-006)
+-- ============================================================
+CREATE TRIGGER trg_Nomina_ValidaInconsistencias
+ON NominaDetalle
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Marcar inconsistencia si SalarioBase es 0 o negativo
+    UPDATE NominaDetalle
+    SET Inconsistencia = 1,
+        DetalleInconsistencia = 'Salario base inválido: es 0 o negativo'
+    FROM NominaDetalle nd
+    INNER JOIN inserted i ON nd.Id = i.Id
+    WHERE i.SalarioBase <= 0;
+
+    -- Marcar inconsistencia si SalarioNeto no cuadra
+    UPDATE NominaDetalle
+    SET Inconsistencia = 1,
+        DetalleInconsistencia = 'SalarioNeto no coincide con SalarioBase - Deducciones + Bonificaciones'
+    FROM NominaDetalle nd
+    INNER JOIN inserted i ON nd.Id = i.Id
+    WHERE ABS(i.SalarioNeto - (i.SalarioBase - i.Deducciones + i.Bonificaciones)) > 0.01;
+END;
+GO
+
+-- ============================================================
+-- TRIGGER: No permitir CierreCaja con fechas futuras (CON-004)
+-- ============================================================
+CREATE TRIGGER trg_CierreCaja_ValidaFecha
+ON CierreCaja
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM inserted WHERE FechaFin > CAST(GETDATE() AS DATE))
+    BEGIN
+        ROLLBACK TRANSACTION;
+        RAISERROR('No se pueden seleccionar fechas futuras para el cierre de caja.', 16, 1);
+    END
+END;
+GO
+
+-- ============================================================
+-- DATOS INICIALES: Categorías financieras base
+-- ============================================================
+INSERT INTO CategoriaFinanciera (Nombre, Tipo) VALUES
+    ('Honorarios por proyecto', 'Ingreso'),
+    ('Consultoría externa',     'Ingreso'),
+    ('Otros ingresos',          'Ingreso'),
+    ('Pago de nómina',          'Egreso'),
+    ('Gastos operativos',       'Egreso'),
+    ('Licencias de software',   'Egreso'),
+    ('Otros egresos',           'Egreso');
+GO
+
+
+USE Arquitectura;
+GO
+
+-- ============================================================
+-- TABLA: ProyectoEmpleados
+-- Relaciona empleados/usuarios con proyectos
+-- ============================================================
+IF NOT EXISTS (
+    SELECT 1 
+    FROM sys.tables 
+    WHERE name = 'ProyectoEmpleados'
+)
+BEGIN
+    CREATE TABLE ProyectoEmpleados (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        ProyectoId INT NOT NULL,
+        UsuarioId INT NOT NULL,
+        FechaAsignacion DATETIME NOT NULL DEFAULT GETDATE(),
+        Activo BIT NOT NULL DEFAULT 1,
+
+        CONSTRAINT FK_ProyectoEmpleados_Proyectos 
+            FOREIGN KEY (ProyectoId) REFERENCES Proyectos(Id),
+
+        CONSTRAINT FK_ProyectoEmpleados_Usuario 
+            FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id)
+    );
+END
+GO
+
+-- ============================================================
+-- TABLA: TareaAsignaciones
+-- Relaciona empleados/usuarios con tareas
+-- ============================================================
+IF NOT EXISTS (
+    SELECT 1 
+    FROM sys.tables 
+    WHERE name = 'TareaAsignaciones'
+)
+BEGIN
+    CREATE TABLE TareaAsignaciones (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        TareaId INT NOT NULL,
+        UsuarioId INT NOT NULL,
+        FechaAsignacion DATETIME NOT NULL DEFAULT GETDATE(),
+        Activo BIT NOT NULL DEFAULT 1,
+
+        CONSTRAINT FK_TareaAsignaciones_Tareas 
+            FOREIGN KEY (TareaId) REFERENCES Tareas(Id),
+
+        CONSTRAINT FK_TareaAsignaciones_Usuario 
+            FOREIGN KEY (UsuarioId) REFERENCES Usuario(Id)
+    );
+END
+GO
+
+-- ============================================================
+-- ÍNDICES
+-- ============================================================
+IF NOT EXISTS (
+    SELECT 1 
+    FROM sys.indexes 
+    WHERE name = 'IX_ProyectoEmpleados_ProyectoId'
+)
+BEGIN
+    CREATE INDEX IX_ProyectoEmpleados_ProyectoId 
+    ON ProyectoEmpleados(ProyectoId);
+END
+GO
+
+IF NOT EXISTS (
+    SELECT 1 
+    FROM sys.indexes 
+    WHERE name = 'IX_ProyectoEmpleados_UsuarioId'
+)
+BEGIN
+    CREATE INDEX IX_ProyectoEmpleados_UsuarioId 
+    ON ProyectoEmpleados(UsuarioId);
+END
+GO
+
+IF NOT EXISTS (
+    SELECT 1 
+    FROM sys.indexes 
+    WHERE name = 'IX_TareaAsignaciones_TareaId'
+)
+BEGIN
+    CREATE INDEX IX_TareaAsignaciones_TareaId 
+    ON TareaAsignaciones(TareaId);
+END
+GO
+
+IF NOT EXISTS (
+    SELECT 1 
+    FROM sys.indexes 
+    WHERE name = 'IX_TareaAsignaciones_UsuarioId'
+)
+BEGIN
+    CREATE INDEX IX_TareaAsignaciones_UsuarioId 
+    ON TareaAsignaciones(UsuarioId);
+END
+GO
+
+USE Arquitectura;
+GO
+
+-- ============================================================
+-- INSERTS DE PRUEBA: PROYECTOS
+-- Necesarios para poder crear tareas y comentarios
+-- ============================================================
+
+INSERT INTO Proyectos (Nombre, Descripcion, FechaInicio, Estado)
+VALUES
+('Proyecto Casa Moderna', 'Diseño arquitectónico de vivienda moderna de dos plantas.', GETDATE(), 'Activo'),
+('Proyecto Oficina Home Office', 'Diseño de oficinas para empresa de arquitectura virtual.', GETDATE(), 'En Progreso');
+GO
+
+
+-- ============================================================
+-- INSERTS DE PRUEBA: TAREAS
+-- Usa ProyectoId 1 y 2
+-- ============================================================
+
+INSERT INTO Tareas (Titulo, Estado, ProyectoId, Descripcion, FechaInicio, FechaFin)
+VALUES
+('Diseñar planos iniciales', 'Pendiente', 1, 'Crear los planos base del proyecto Casa Moderna.', GETDATE(), NULL),
+('Revisar distribución de espacios', 'En Progreso', 2, 'Validar distribución interna de oficinas y áreas comunes.', GETDATE(), NULL);
+GO
+
+
+-- ============================================================
+-- INSERTS DE PRUEBA: COMENTARIOS DE PROYECTO
+-- Usa ProyectoId 1 y 2
+-- ============================================================
+
+INSERT INTO ComentarioProyectos (ProyectoId, ArchivoRuta, Text, Fecha)
+VALUES
+(1, NULL, 'Se inició la revisión del diseño preliminar del proyecto.', GETDATE()),
+(2, NULL, 'El cliente solicitó ajustar la distribución de las oficinas.', GETDATE());
+GO
+
+
+-- ============================================================
+-- INSERTS DE PRUEBA: COMENTARIOS DE TAREA
+-- Usa TareaId 1 y 2, UsuarioId 1
+-- ============================================================
+
+INSERT INTO ComentarioTareas (Texto, ArchivoRuta, Fecha, TareaId, UsuarioId)
+VALUES
+('Se avanzó con el primer borrador de los planos.', NULL, GETDATE(), 1, 1),
+('La tarea requiere validación del administrador antes de finalizar.', NULL, GETDATE(), 2, 1);
+GO
+
+
+-- ============================================================
+-- INSERTS DE PRUEBA: ASIGNACIONES DE PROYECTO
+-- Usa ProyectoId 1 y 2, UsuarioId 1
+-- ============================================================
+
+INSERT INTO ProyectoEmpleados (ProyectoId, UsuarioId, FechaAsignacion, Activo)
+VALUES
+(1, 1, GETDATE(), 1),
+(2, 1, GETDATE(), 1);
+GO
+
+
+-- ============================================================
+-- INSERTS DE PRUEBA: ASIGNACIONES DE TAREA
+-- Usa TareaId 1 y 2, UsuarioId 1
+-- ============================================================
+
+INSERT INTO TareaAsignaciones (TareaId, UsuarioId, FechaAsignacion, Activo)
+VALUES
+(1, 1, GETDATE(), 1),
+(2, 1, GETDATE(), 1);
+GO
+
+
+
+
+USE Arquitectura;
+GO
+
+IF COL_LENGTH('ProyectoEmpleados', 'RolProyecto') IS NULL
+BEGIN
+    ALTER TABLE ProyectoEmpleados
+    ADD RolProyecto VARCHAR(50) NOT NULL DEFAULT 'Colaborador';
+END
+GO
+
+
+USE Arquitectura;
+GO
+
+IF NOT EXISTS (
+    SELECT 1 
+    FROM sys.tables 
+    WHERE name = 'DocumentoProyectos'
+)
+BEGIN
+    CREATE TABLE DocumentoProyectos (
+        Id INT IDENTITY(1,1) PRIMARY KEY,
+        Nombre VARCHAR(255) NOT NULL,
+        RutaArchivo VARCHAR(500) NOT NULL,
+        ProyectoId INT NOT NULL,
+        FechaCarga DATETIME NOT NULL DEFAULT GETDATE(),
+
+        CONSTRAINT FK_DocProy_Proyectos 
+            FOREIGN KEY (ProyectoId) REFERENCES Proyectos(Id)
+    );
+END
+GO

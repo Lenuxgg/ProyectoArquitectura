@@ -29,6 +29,7 @@ async function cargarProyectos() {
                         <div class="table-action-buttons">
                             <a class="btn-primary" href="detalle-proyecto.html?id=${p.id}">Ver Proyecto</a>
                             <a class="btn-warning" href="editar-proyecto.html?id=${p.id}">Editar</a>
+                            <button class="btn-danger" type="button" onclick="eliminarProyecto(${p.id})">Eliminar</button>
                         </div>
                     </td>
                 </tr>
@@ -37,6 +38,29 @@ async function cargarProyectos() {
 
     } catch (error) {
         tabla.innerHTML = `<tr><td colspan="7">Error: ${error.message}</td></tr>`;
+    }
+}
+
+
+async function eliminarProyecto(id) {
+    const confirmar = confirm("¿Desea eliminar este proyecto? Esta acción puede fallar si el proyecto tiene tareas, documentos o transacciones relacionadas.");
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudo eliminar el proyecto. Puede tener información relacionada.");
+        }
+
+        await cargarProyectos();
+    } catch (error) {
+        alert(error.message);
     }
 }
 

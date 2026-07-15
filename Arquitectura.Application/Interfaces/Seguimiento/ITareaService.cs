@@ -23,4 +23,14 @@ public interface ITareaService
     Task<bool> EditarAsignacionEmpleadoAsync(int asignacionId, EditarAsignacionTareaDto dto);
 
     Task<bool> EliminarAsignacionEmpleadoAsync(int asignacionId);
+
+    Task<DocumentoTareaDto?> AdjuntarDocumentoTareaAsync(
+        int tareaId,
+        int usuarioId,
+        string nombre,
+        string rutaArchivo);
+
+    Task<List<DocumentoTareaDto>> ObtenerDocumentosPorTareaAsync(int tareaId);
+
+    Task<bool> EliminarDocumentoTareaAsync(int documentoId);
 }

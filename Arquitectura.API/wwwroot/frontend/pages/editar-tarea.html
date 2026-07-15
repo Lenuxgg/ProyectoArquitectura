@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/theme.js"></script>
+    <script src="../js/theme.js?v=9"></script>
     <title>Editar Tarea - CEGA</title>
-    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/styles.css?v=9">
 </head>
 <body>
 
@@ -18,7 +18,7 @@
         <a href="../index.html">Inicio</a>
         <a href="proyectos.html">Proyectos</a>
         <a id="volverDetalle" href="#">Volver al Proyecto</a>
-            <a href="contabilidad.html">Contabilidad</a>
+        <a href="contabilidad.html">Contabilidad</a>
         <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
     </nav>
 
@@ -65,12 +65,10 @@
             <p id="mensajeTarea" class="message"></p>
         </section>
 
-        <section class="form-card" style="margin-top: 20px;">
+        <section class="form-card" style="margin-top: 24px;">
             <h2>Documento de la tarea</h2>
             <p>
-                Esta sección queda preparada para subir documentos a tareas.
-                Si el endpoint de documentos de tareas está disponible en Swagger,
-                se conectará desde este formulario.
+                Desde esta sección puedes adjuntar documentos o imágenes relacionados con la tarea.
             </p>
 
             <div class="form-group">
@@ -80,13 +78,31 @@
 
             <button class="btn-secondary" onclick="subirDocumentoTarea()">Subir documento</button>
             <p id="mensajeDocumentoTarea" class="message"></p>
+
+            <div class="table-container" style="margin-top: 16px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Fecha</th>
+                            <th>Ruta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaDocumentosTarea">
+                        <tr>
+                            <td colspan="4">Cargando documentos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
-    <script src="../js/api.js"></script>
-    <script src="../js/tareas.js"></script>
+    <script src="../js/api.js?v=9"></script>
+    <script src="../js/tareas.js?v=9"></script>
     <script>
-    cargarTareaParaEditar();
+        cargarTareaParaEditar();
     </script>
 
 </body>

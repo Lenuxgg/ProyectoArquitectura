@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Arquitectura.Application.DTOs.Empleados;
 
@@ -36,7 +36,7 @@ public class CrearEmpleadoDto
     [StringLength(100, ErrorMessage = "El puesto no puede superar los 100 caracteres.")]
     public string? Puesto { get; set; }
 
-    [Range(typeof(decimal), "0", "999999999999.99", ErrorMessage = "El salario no puede ser negativo.")]
+    [Range(0.0, 999999999999.99, ErrorMessage = "El salario no puede ser negativo.")]
     public decimal? Salario { get; set; }
 
     public DateTime? FechaContratacion { get; set; }
@@ -55,6 +55,6 @@ public class ActualizarPuestoDto
 
 public class ActualizarSalarioDto
 {
-    [Range(typeof(decimal), "0.01", "999999999999.99", ErrorMessage = "El salario debe ser mayor a 0.")]
+    [Range(0.01, 999999999999.99, ErrorMessage = "El salario debe ser mayor a 0.")]
     public decimal Salario { get; set; }
 }

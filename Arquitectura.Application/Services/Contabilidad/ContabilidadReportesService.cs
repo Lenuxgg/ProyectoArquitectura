@@ -7,13 +7,23 @@ public partial class ContabilidadService
 {
     public async Task<ReporteFinancieroDto> ObtenerReporteFinancieroAsync()
     {
-        var ingresos = await _context.Transacciones
-            .Where(t => t.Tipo == "Ingreso" && t.Activo)
+        var transacciones = await _context.Transacciones
+            .Where(t => t.Activo)
             .ToListAsync();
 
-        var egresos = await _context.Transacciones
-            .Where(t => t.Tipo == "Egreso" && t.Activo)
-            .ToListAsync();
+        var ingresos = transacciones
+            .Where(t => string.Equals(
+                t.Tipo?.Trim(),
+                "Ingreso",
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var egresos = transacciones
+            .Where(t => string.Equals(
+                t.Tipo?.Trim(),
+                "Egreso",
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
 
         var totalIngresos = ingresos.Sum(t => t.Monto);
         var totalEgresos = egresos.Sum(t => t.Monto);
