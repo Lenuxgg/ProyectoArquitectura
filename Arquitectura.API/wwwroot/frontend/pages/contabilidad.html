@@ -10,68 +10,69 @@
 <body>
 
     <header class="main-header">
-        <h1>Gestión de Contabilidad</h1>
-        <p>Ingresos, egresos, reportes financieros, cierres de caja y nómina</p>
+        <h1 id="tituloContabilidad">Gestión de Contabilidad</h1>
+        <p id="descripcionContabilidad">
+            Ingresos, egresos, reportes financieros, cierres de caja y nómina
+        </p>
     </header>
 
     <nav class="navbar">
         <a href="../index.html">Inicio</a>
         <a href="proyectos.html">Proyectos</a>
         <a href="contabilidad.html">Contabilidad</a>
+
+        <div id="usuarioSesion" style="margin-left:auto;"></div>
+
         <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
     </nav>
 
     <main class="container">
 
-        <section class="section-card">
-            <h2>Autenticación</h2>
-            <p>Ingrese el token JWT para poder registrar ingresos, egresos y procesar nómina.</p>
-
-            <div class="token-box">
-                <div class="form-group">
-                    <label for="tokenJwt">Token Bearer</label>
-                    <input type="password" id="tokenJwt" placeholder="Pegue aquí el token generado en Auth/login">
-                </div>
-                <div class="token-actions">
-                    <button class="btn-primary" onclick="guardarTokenContabilidad()">Guardar token</button>
-                    <button class="btn-danger" onclick="limpiarTokenContabilidad()">Limpiar</button>
-                </div>
+        <!-- ===================================================== -->
+        <!-- RESUMEN FINANCIERO GENERAL - SOLO ADMIN -->
+        <!-- ===================================================== -->
+        <section class="section-card" id="seccionResumenAdmin">
+            <div class="actions">
+                <h2>Resumen financiero</h2>
+                <button class="btn-secondary" onclick="cargarPanelContabilidad()">Actualizar información</button>
             </div>
 
-            <p id="mensajeToken" class="message"></p>
+            <section class="dashboard-grid">
+                <article class="summary-card">
+                    <h3>Total ingresos</h3>
+                    <p id="totalIngresos">₡0</p>
+                </article>
+
+                <article class="summary-card">
+                    <h3>Total egresos</h3>
+                    <p id="totalEgresos">₡0</p>
+                </article>
+
+                <article class="summary-card">
+                    <h3>Balance</h3>
+                    <p id="balance">₡0</p>
+                </article>
+
+                <article class="summary-card">
+                    <h3>Cant. ingresos</h3>
+                    <p id="cantidadIngresos">0</p>
+                </article>
+
+                <article class="summary-card">
+                    <h3>Cant. egresos</h3>
+                    <p id="cantidadEgresos">0</p>
+                </article>
+            </section>
         </section>
 
-        <section class="actions">
-            <h2>Resumen financiero</h2>
-            <button class="btn-secondary" onclick="cargarPanelContabilidad()">Actualizar información</button>
-        </section>
-
-        <section class="dashboard-grid">
-            <article class="summary-card">
-                <h3>Total ingresos</h3>
-                <p id="totalIngresos">₡0.00</p>
-            </article>
-            <article class="summary-card">
-                <h3>Total egresos</h3>
-                <p id="totalEgresos">₡0.00</p>
-            </article>
-            <article class="summary-card">
-                <h3>Balance</h3>
-                <p id="balance">₡0.00</p>
-            </article>
-            <article class="summary-card">
-                <h3>Cant. ingresos</h3>
-                <p id="cantidadIngresos">0</p>
-            </article>
-            <article class="summary-card">
-                <h3>Cant. egresos</h3>
-                <p id="cantidadEgresos">0</p>
-            </article>
-        </section>
-
+        <!-- ===================================================== -->
+        <!-- REPORTE POR PROYECTO - ADMIN Y EMPLEADO -->
+        <!-- ===================================================== -->
         <section class="section-card">
             <h2>Reporte financiero por proyecto</h2>
-            <p>Consulte ingresos, egresos, balance y movimientos asociados a un proyecto específico.</p>
+            <p>
+                Consulte ingresos, egresos, balance y movimientos asociados a un proyecto específico.
+            </p>
 
             <div class="form-inline">
                 <div class="form-group">
@@ -93,10 +94,12 @@
                     <h3>Ingresos proyecto</h3>
                     <p id="proyectoTotalIngresos">₡0</p>
                 </article>
+
                 <article class="summary-card">
                     <h3>Egresos proyecto</h3>
                     <p id="proyectoTotalEgresos">₡0</p>
                 </article>
+
                 <article class="summary-card">
                     <h3>Balance proyecto</h3>
                     <p id="proyectoBalance">₡0</p>
@@ -124,7 +127,12 @@
             </div>
         </section>
 
+        <!-- ===================================================== -->
+        <!-- REGISTRO DE INGRESOS Y EGRESOS - ADMIN Y EMPLEADO -->
+        <!-- EMPLEADO SOLO VERÁ SUS PROYECTOS ASIGNADOS -->
+        <!-- ===================================================== -->
         <section class="forms-grid">
+
             <article class="form-card">
                 <h2>Registrar ingreso</h2>
 
@@ -140,7 +148,7 @@
                 <div class="form-group">
                     <label for="ingresoProyectoId">Proyecto relacionado</label>
                     <select id="ingresoProyectoId">
-                        <option value="">Sin proyecto</option>
+                        <option value="">Seleccione un proyecto</option>
                     </select>
                 </div>
 
@@ -179,7 +187,7 @@
                 <div class="form-group">
                     <label for="egresoProyectoId">Proyecto relacionado</label>
                     <select id="egresoProyectoId">
-                        <option value="">Sin proyecto</option>
+                        <option value="">Seleccione un proyecto</option>
                     </select>
                 </div>
 
@@ -201,9 +209,13 @@
                 <button class="btn-danger" onclick="registrarEgresoFrontend()">Guardar egreso</button>
                 <p id="mensajeEgreso" class="message"></p>
             </article>
+
         </section>
 
-        <section class="section-card">
+        <!-- ===================================================== -->
+        <!-- CIERRE DE CAJA - SOLO ADMIN -->
+        <!-- ===================================================== -->
+        <section class="section-card" id="seccionCierreAdmin">
             <h2>Cierre de caja</h2>
 
             <div class="form-inline">
@@ -254,20 +266,28 @@
             <div class="button-row">
                 <button class="btn-primary" onclick="consultarCierreCaja()">Consultar cierre</button>
             </div>
+
             <p id="mensajeCierre" class="message"></p>
 
             <div class="table-container" style="margin-top:14px;">
                 <table>
                     <tbody id="resultadoCierre">
-                        <tr><td>Seleccione un cierre para consultar.</td></tr>
+                        <tr>
+                            <td>Seleccione un cierre para consultar.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <section class="section-grid category-report-grid">
+        <!-- ===================================================== -->
+        <!-- CATEGORÍAS FINANCIERAS - SOLO ADMIN -->
+        <!-- ===================================================== -->
+        <section class="section-grid category-report-grid" id="seccionCategoriasAdmin">
+
             <article class="section-card">
                 <h2>Ingresos por categoría</h2>
+
                 <div class="table-container compact-table">
                     <table>
                         <thead>
@@ -278,7 +298,9 @@
                             </tr>
                         </thead>
                         <tbody id="tablaIngresosCategoria">
-                            <tr><td colspan="3">Cargando...</td></tr>
+                            <tr>
+                                <td colspan="3">Cargando...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -286,6 +308,7 @@
 
             <article class="section-card">
                 <h2>Egresos por categoría</h2>
+
                 <div class="table-container compact-table">
                     <table>
                         <thead>
@@ -296,15 +319,23 @@
                             </tr>
                         </thead>
                         <tbody id="tablaEgresosCategoria">
-                            <tr><td colspan="3">Cargando...</td></tr>
+                            <tr>
+                                <td colspan="3">Cargando...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
             </article>
+
         </section>
 
+        <!-- ===================================================== -->
+        <!-- HISTORIAL DE TRANSACCIONES -->
+        <!-- ADMIN VE TODO / EMPLEADO VE SOLO SUS PROYECTOS -->
+        <!-- ===================================================== -->
         <section class="section-card">
             <h2>Historial de transacciones</h2>
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -320,13 +351,18 @@
                         </tr>
                     </thead>
                     <tbody id="tablaTransacciones">
-                        <tr><td colspan="8">Cargando transacciones...</td></tr>
+                        <tr>
+                            <td colspan="8">Cargando transacciones...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
         </section>
 
-        <section class="section-card">
+        <!-- ===================================================== -->
+        <!-- NÓMINA - SOLO ADMIN -->
+        <!-- ===================================================== -->
+        <section class="section-card" id="seccionNominaAdmin">
             <h2>Nómina</h2>
 
             <div class="form-inline">
@@ -373,6 +409,7 @@
             <p id="mensajeNomina" class="message"></p>
 
             <h3>Inconsistencias</h3>
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -383,12 +420,15 @@
                         </tr>
                     </thead>
                     <tbody id="tablaInconsistencias">
-                        <tr><td colspan="3">No se ha consultado la nómina.</td></tr>
+                        <tr>
+                            <td colspan="3">No se ha consultado la nómina.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
 
             <h3 style="margin-top:20px;">Nóminas procesadas</h3>
+
             <div class="table-container">
                 <table>
                     <thead>
@@ -402,7 +442,9 @@
                         </tr>
                     </thead>
                     <tbody id="tablaNominas">
-                        <tr><td colspan="6">Cargando nóminas...</td></tr>
+                        <tr>
+                            <td colspan="6">Cargando nóminas...</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -415,7 +457,9 @@
     </footer>
 
     <script src="../js/api.js?v=8"></script>
-    <script src="../js/contabilidad.js?v=8"></script>
+    <script src="../js/auth.js?v=8"></script>
+    <script src="../js/contabilidad.js?v=9"></script>
+
     <script>
         inicializarContabilidad();
     </script>

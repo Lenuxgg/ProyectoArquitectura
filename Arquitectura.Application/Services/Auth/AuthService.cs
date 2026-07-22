@@ -55,8 +55,11 @@ public class AuthService : IAuthService
         return new LoginResponseDto
         {
             Token = token,
+            UsuarioId = usuario.Id,
             Nombre = $"{usuario.Nombre} {usuario.Apellidos}",
-            Rol = rol
+            Email = usuario.Email,
+            Rol = rol,
+            EsAdministrador = rol == "Administrador" || usuario.Admin
         };
     }
 

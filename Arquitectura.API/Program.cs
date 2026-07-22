@@ -153,8 +153,6 @@ app.UseResponseCompression();
 
 app.UseMiddleware<ResponseTimeMiddleware>();
 
-app.UseDefaultFiles();
-
 app.UseStaticFiles();
 
 app.UseSwagger();
@@ -170,5 +168,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// ── Ruta inicial hacia Login ──────────────────────────────────
+app.MapGet("/", context =>
+{
+    context.Response.Redirect("/frontend/login.html");
+    return Task.CompletedTask;
+});
 
 app.Run();

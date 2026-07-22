@@ -6,6 +6,8 @@ public interface IProyectoService
 {
     Task<List<ProyectoDto>> ObtenerTodosAsync();
 
+    Task<List<ProyectoDto>> ObtenerPorUsuarioAsync(int usuarioId);
+
     Task<ProyectoDto?> ObtenerPorIdAsync(int id);
 
     Task<ProyectoDto> CrearAsync(CrearProyectoDto dto);

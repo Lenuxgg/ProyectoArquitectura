@@ -1,8 +1,18 @@
 async function cargarProyectos() {
+    validarSesion();
+
     const tabla = document.getElementById("tablaProyectos");
+    const esAdmin = usuarioEsAdmin();
+    const usuarioId = obtenerUsuarioIdActual();
+
+    let url = `${API_BASE}/Proyectos`;
+
+    if (!esAdmin) {
+        url = `${API_BASE}/Proyectos/usuario/${usuarioId}`;
+    }
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Proyectos`);
+        const respuesta = await fetch(url);
         const proyectos = await respuesta.json();
 
         if (!respuesta.ok) {
@@ -10,13 +20,24 @@ async function cargarProyectos() {
         }
 
         if (proyectos.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="7">No hay proyectos registrados.</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="7">No hay proyectos disponibles para este usuario.</td></tr>`;
             return;
         }
 
         tabla.innerHTML = "";
 
         proyectos.forEach(p => {
+            let acciones = `
+                <a class="btn-primary" href="detalle-proyecto.html?id=${p.id}">Ver Proyecto</a>
+                <a class="btn-warning" href="editar-proyecto.html?id=${p.id}">Editar</a>
+            `;
+
+            if (esAdmin) {
+                acciones += `
+                    <button class="btn-danger" onclick="eliminarProyecto(${p.id})">Eliminar</button>
+                `;
+            }
+
             tabla.innerHTML += `
                 <tr>
                     <td>${p.id}</td>
@@ -25,13 +46,7 @@ async function cargarProyectos() {
                     <td>${formatearFecha(p.fechaInicio)}</td>
                     <td>${p.fechaFin ? formatearFecha(p.fechaFin) : ""}</td>
                     <td>${p.estado}</td>
-                    <td>
-                        <div class="table-action-buttons">
-                            <a class="btn-primary" href="detalle-proyecto.html?id=${p.id}">Ver Proyecto</a>
-                            <a class="btn-warning" href="editar-proyecto.html?id=${p.id}">Editar</a>
-                            <button class="btn-danger" type="button" onclick="eliminarProyecto(${p.id})">Eliminar</button>
-                        </div>
-                    </td>
+                    <td>${acciones}</td>
                 </tr>
             `;
         });
@@ -266,6 +281,185 @@ async function cargarDocumentosProyecto(proyectoId) {
 
     } catch (error) {
         tabla.innerHTML = `<tr><td colspan="3">Error: ${error.message}</td></tr>`;
+    }
+}
+
+async function eliminarProyecto(id) {
+    if (!usuarioEsAdmin()) {
+        alert("Solo el administrador puede eliminar proyectos.");
+        return;
+    }
+
+    const confirmar = confirm("¿Desea eliminar este proyecto? Esta acción no se puede deshacer.");
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
+            method: "DELETE"
+        });
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudo eliminar el proyecto.");
+        }
+
+        alert("Proyecto eliminado correctamente.");
+        cargarProyectos();
+
+    } catch (error) {
+        alert("Error: " + error.message);
+    }
+}
+
+async function cargarEmpleadosParaNuevoProyecto() {
+    const contenedor = document.getElementById("listaEmpleadosAsignar");
+
+    if (!contenedor) return;
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Empleados`);
+        const empleados = await respuesta.json();
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudieron cargar los empleados.");
+        }
+
+        if (!empleados || empleados.length === 0) {
+            contenedor.innerHTML = "<p>No hay empleados registrados.</p>";
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Asignar</th>
+                        <th>Empleado</th>
+                        <th>Puesto</th>
+                        <th>Rol en proyecto</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        empleados.forEach(e => {
+            const nombreCompleto = `${e.nombre} ${e.apellidos}`;
+
+            html += `
+                <tr>
+                    <td>
+                        <input type="checkbox" class="empleado-check" value="${e.id}">
+                    </td>
+                    <td>${nombreCompleto}</td>
+                    <td>${e.puesto ?? "Sin puesto"}</td>
+                    <td>
+                        <input 
+                            type="text" 
+                            class="rol-proyecto-input" 
+                            data-usuario-id="${e.id}" 
+                            placeholder="Ej: Arquitecto, Supervisor, Colaborador"
+                            value="${e.puesto ?? "Colaborador"}">
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+        `;
+
+        contenedor.innerHTML = html;
+
+    } catch (error) {
+        contenedor.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+    }
+}
+
+function obtenerEmpleadosSeleccionadosProyecto() {
+    const checks = document.querySelectorAll(".empleado-check:checked");
+    const empleados = [];
+
+    checks.forEach(check => {
+        const usuarioId = parseInt(check.value);
+        const inputRol = document.querySelector(`.rol-proyecto-input[data-usuario-id="${usuarioId}"]`);
+
+        empleados.push({
+            usuarioId: usuarioId,
+            rolProyecto: inputRol?.value?.trim() || "Colaborador"
+        });
+    });
+
+    return empleados;
+}
+
+async function crearProyectoConAsignaciones() {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeProyecto", "Solo el administrador puede crear proyectos.", "error");
+        return;
+    }
+
+    const nombre = document.getElementById("nombre").value.trim();
+    const descripcion = document.getElementById("descripcion").value.trim();
+    const fechaInicio = document.getElementById("fechaInicio").value;
+
+    if (!nombre || !fechaInicio) {
+        mostrarMensaje("mensajeProyecto", "Debe ingresar nombre y fecha de inicio.", "error");
+        return;
+    }
+
+    const proyecto = {
+        nombre: nombre,
+        descripcion: descripcion,
+        fechaInicio: fechaInicio
+    };
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Proyectos`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(proyecto)
+        });
+
+        if (!respuesta.ok) {
+            throw new Error("No se pudo crear el proyecto.");
+        }
+
+        const proyectoCreado = await respuesta.json();
+        const empleadosSeleccionados = obtenerEmpleadosSeleccionadosProyecto();
+
+        for (const empleado of empleadosSeleccionados) {
+            const asignacion = {
+                proyectoId: proyectoCreado.id,
+                usuarioId: empleado.usuarioId,
+                rolProyecto: empleado.rolProyecto
+            };
+
+            const respuestaAsignacion = await fetch(`${API_BASE}/Proyectos/asignar-empleado`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(asignacion)
+            });
+
+            if (!respuestaAsignacion.ok) {
+                console.warn("No se pudo asignar empleado:", asignacion);
+            }
+        }
+
+        mostrarMensaje("mensajeProyecto", "Proyecto creado y empleados asignados correctamente.", "success");
+
+        setTimeout(() => {
+            window.location.href = "proyectos.html";
+        }, 900);
+
+    } catch (error) {
+        mostrarMensaje("mensajeProyecto", error.message, "error");
     }
 }
 

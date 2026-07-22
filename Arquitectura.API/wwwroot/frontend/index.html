@@ -17,11 +17,15 @@
     <nav class="navbar">
         <a href="index.html">Inicio</a>
         <a href="pages/proyectos.html">Proyectos</a>
-        <a href="pages/contabilidad.html">Contabilidad</a>
+        <a id="linkContabilidad" href="pages/contabilidad.html">Contabilidad</a>
+
+        <div id="usuarioSesion" style="margin-left:auto;"></div>
+
         <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
     </nav>
 
     <main class="home-container">
+
         <section class="card">
             <h2>Gestión de Proyectos</h2>
             <p>
@@ -32,28 +36,51 @@
             <a class="btn-primary" href="pages/proyectos.html">Ingresar a Proyectos</a>
         </section>
 
-        <section class="card">
+        <section class="card" id="cardContabilidad">
             <h2>Gestión de Contabilidad</h2>
             <p>
-                Desde este módulo se pueden registrar ingresos, egresos, consultar reportes,
-                revisar cierres de caja y procesar nómina.
+                Desde este módulo se pueden registrar ingresos, egresos, consultar reportes
+                financieros por proyecto y revisar el historial de transacciones.
             </p>
 
             <a class="btn-primary" href="pages/contabilidad.html">Ingresar a Contabilidad</a>
         </section>
 
         <section class="card">
-            <h2>Vista Administrador</h2>
+            <h2>Vista según rol</h2>
             <p>
-                Esta versión se trabaja como panel administrador, con una interfaz alineada
-                a la paleta oficial del proyecto y opción de modo claro u oscuro.
+                El administrador puede ver todos los módulos y todos los proyectos.
+                El empleado solamente visualiza los proyectos y movimientos financieros
+                relacionados con sus proyectos asignados.
             </p>
         </section>
+
     </main>
 
     <footer>
         <p>RNF-008 - Interfaz intuitiva y personalización de apariencia</p>
     </footer>
+
+    <script src="js/auth.js?v=8"></script>
+
+    <script>
+        validarSesion();
+        pintarUsuarioEnNavbar();
+
+        /*
+            Importante:
+            Ya NO se oculta Contabilidad para empleados.
+            El filtro se aplica dentro de contabilidad.js.
+        */
+
+        if (!usuarioEsAdmin()) {
+            const textoAdmin = document.querySelector(".card:last-child h2");
+
+            if (textoAdmin) {
+                textoAdmin.textContent = "Vista Empleado";
+            }
+        }
+    </script>
 
 </body>
 </html>

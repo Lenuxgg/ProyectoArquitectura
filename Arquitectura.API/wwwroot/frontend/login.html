@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - CEGA</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <h1>CEGA - Inicio de Sesión</h1>
+        <p>Ingrese sus credenciales para acceder al sistema</p>
+    </header>
+
+    <main class="home-container">
+        <section class="card">
+            <h2>Acceso al sistema</h2>
+
+            <div class="form-group">
+                <label>Correo electrónico</label>
+                <input type="email" id="email" placeholder="admin@arquitectura.cr">
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="Ingrese su contraseña">
+            </div>
+
+            <button class="btn-primary" onclick="iniciarSesion()">Ingresar</button>
+
+            <p id="mensajeLogin" class="message"></p>
+        </section>
+
+        <section class="card">
+            <h2>Acceso según rol</h2>
+            <p>
+                El sistema permite ingresar como administrador o empleado.
+            </p>
+            <p>
+                El administrador puede consultar todos los módulos y todos los proyectos.
+            </p>
+            <p>
+                El empleado solo podrá visualizar los proyectos donde se encuentre asignado.
+            </p>
+        </section>
+    </main>
+
+    <script src="js/auth.js"></script>
+
+</body>
+</html>

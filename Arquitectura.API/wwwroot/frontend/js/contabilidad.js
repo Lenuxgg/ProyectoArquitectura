@@ -1,11 +1,21 @@
 const CONTABILIDAD_API_BASE = (typeof API_BASE !== "undefined") ? API_BASE : `${window.location.origin}/api`;
 
+let proyectosPermitidosContabilidad = [];
+
+// ============================================================
+// SESIÓN / TOKEN
+// ============================================================
+
 function obtenerTokenContabilidad() {
-    return localStorage.getItem("cega_token_jwt") || "";
+    return localStorage.getItem("cega_token") || localStorage.getItem("cega_token_jwt") || "";
 }
 
 function guardarTokenContabilidad() {
-    const token = document.getElementById("tokenJwt").value.trim();
+    const input = document.getElementById("tokenJwt");
+
+    if (!input) return;
+
+    const token = input.value.trim();
 
     if (!token) {
         mostrarMensaje("mensajeToken", "Debe ingresar un token válido.", "error");
@@ -14,13 +24,20 @@ function guardarTokenContabilidad() {
 
     const tokenLimpio = token.replace(/^Bearer\s+/i, "");
     localStorage.setItem("cega_token_jwt", tokenLimpio);
-    document.getElementById("tokenJwt").value = tokenLimpio;
+    input.value = tokenLimpio;
+
     mostrarMensaje("mensajeToken", "Token guardado correctamente.", "success");
 }
 
 function limpiarTokenContabilidad() {
     localStorage.removeItem("cega_token_jwt");
-    document.getElementById("tokenJwt").value = "";
+
+    const input = document.getElementById("tokenJwt");
+
+    if (input) {
+        input.value = "";
+    }
+
     mostrarMensaje("mensajeToken", "Token eliminado.", "success");
 }
 
@@ -39,6 +56,10 @@ function obtenerHeadersJson(requiereToken = false) {
 
     return headers;
 }
+
+// ============================================================
+// HELPERS API
+// ============================================================
 
 async function leerContenidoRespuesta(respuesta) {
     const texto = await respuesta.text();
@@ -98,7 +119,7 @@ async function apiEnviarContabilidad(ruta, metodo, datos, requiereToken = true) 
     const token = obtenerTokenContabilidad();
 
     if (requiereToken && !token) {
-        throw new Error("Debe guardar un token antes de realizar esta acción.");
+        throw new Error("Debe iniciar sesión antes de realizar esta acción.");
     }
 
     const respuesta = await fetch(`${CONTABILIDAD_API_BASE}${ruta}`, {
@@ -114,8 +135,28 @@ async function apiEnviarContabilidad(ruta, metodo, datos, requiereToken = true) 
     return await leerContenidoRespuesta(respuesta);
 }
 
+// ============================================================
+// HELPERS GENERALES
+// ============================================================
+
+function setTextoSeguro(id, valor) {
+    const elemento = document.getElementById(id);
+
+    if (elemento) {
+        elemento.textContent = valor;
+    }
+}
+
+function setValorSeguro(id, valor) {
+    const elemento = document.getElementById(id);
+
+    if (elemento) {
+        elemento.value = valor;
+    }
+}
+
 function formatearMoneda(valor) {
-    const numero = valor || 0;
+    const numero = Number(valor || 0);
 
     return new Intl.NumberFormat("es-CR", {
         style: "currency",
@@ -133,7 +174,6 @@ function formatearFechaContabilidad(fecha) {
 function fechaHoyInput() {
     return new Date().toISOString().substring(0, 10);
 }
-
 
 function obtenerValor(objeto, ...nombres) {
     if (!objeto) {
@@ -160,14 +200,77 @@ function obtenerTexto(objeto, ...nombres) {
     return valor === null || valor === undefined ? "" : String(valor);
 }
 
+function obtenerProyectoIdDesdeSelect(idSelect) {
+    const valor = document.getElementById(idSelect)?.value;
+
+    if (!valor) {
+        return null;
+    }
+
+    return parseInt(valor);
+}
+
+function proyectoPermitidoParaEmpleado(proyectoId) {
+    if (usuarioEsAdmin()) {
+        return true;
+    }
+
+    if (!proyectoId) {
+        return false;
+    }
+
+    return proyectosPermitidosContabilidad.some(p => p.id === proyectoId);
+}
+
+// ============================================================
+// PERMISOS DE VISTA
+// ============================================================
+
+function aplicarPermisosContabilidad() {
+    if (usuarioEsAdmin()) {
+        return;
+    }
+
+    const seccionesAdmin = [
+        "seccionResumenAdmin",
+        "seccionCierreAdmin",
+        "seccionCategoriasAdmin",
+        "seccionNominaAdmin"
+    ];
+
+    seccionesAdmin.forEach(id => {
+        const elemento = document.getElementById(id);
+
+        if (elemento) {
+            elemento.style.display = "none";
+        }
+    });
+
+    const titulo = document.getElementById("tituloContabilidad");
+
+    if (titulo) {
+        titulo.textContent = "Contabilidad de mis proyectos";
+    }
+
+    const descripcion = document.getElementById("descripcionContabilidad");
+
+    if (descripcion) {
+        descripcion.textContent = "Consulta y registra movimientos financieros relacionados únicamente con los proyectos asignados.";
+    }
+}
+
+// ============================================================
+// RESUMEN FINANCIERO
+// ============================================================
+
 function actualizarResumenFinanciero(totalIngresos, totalEgresos, cantidadIngresos, cantidadEgresos) {
     const balance = totalIngresos - totalEgresos;
 
-    document.getElementById("totalIngresos").textContent = formatearMoneda(totalIngresos);
-    document.getElementById("totalEgresos").textContent = formatearMoneda(totalEgresos);
-    document.getElementById("balance").textContent = formatearMoneda(balance);
-    document.getElementById("cantidadIngresos").textContent = cantidadIngresos;
-    document.getElementById("cantidadEgresos").textContent = cantidadEgresos;
+    setTextoSeguro("totalIngresos", formatearMoneda(totalIngresos));
+    setTextoSeguro("totalEgresos", formatearMoneda(totalEgresos));
+    setTextoSeguro("balance", formatearMoneda(balance));
+    setTextoSeguro("cantidadIngresos", cantidadIngresos);
+    setTextoSeguro("cantidadEgresos", cantidadEgresos);
 }
 
 function actualizarResumenDesdeReporte(reporte) {
@@ -210,23 +313,36 @@ function reporteTieneDatos(reporte) {
         obtenerNumero(reporte, "cantidadEgresos", "CantidadEgresos") > 0;
 }
 
-function obtenerProyectoIdDesdeSelect(idSelect) {
-    const valor = document.getElementById(idSelect)?.value;
-
-    if (!valor) {
-        return null;
-    }
-
-    return parseInt(valor);
-}
+// ============================================================
+// PROYECTOS PARA CONTABILIDAD
+// ============================================================
 
 async function cargarProyectosContabilidad() {
     try {
-        const proyectos = await apiGetContabilidad("/Proyectos");
+        validarSesion();
 
-        llenarSelectProyectos("ingresoProyectoId", proyectos, "Sin proyecto");
-        llenarSelectProyectos("egresoProyectoId", proyectos, "Sin proyecto");
-        llenarSelectProyectos("proyectoReporteId", proyectos, "Seleccione un proyecto");
+        const esAdmin = usuarioEsAdmin();
+        const usuarioId = obtenerUsuarioIdActual();
+
+        let ruta = "/Proyectos";
+
+        if (!esAdmin) {
+            ruta = `/Proyectos/usuario/${usuarioId}`;
+        }
+
+        const proyectos = await apiGetContabilidad(ruta);
+        proyectosPermitidosContabilidad = proyectos || [];
+
+        if (esAdmin) {
+            llenarSelectProyectos("ingresoProyectoId", proyectosPermitidosContabilidad, "Sin proyecto");
+            llenarSelectProyectos("egresoProyectoId", proyectosPermitidosContabilidad, "Sin proyecto");
+        } else {
+            llenarSelectProyectos("ingresoProyectoId", proyectosPermitidosContabilidad, "Seleccione un proyecto asignado");
+            llenarSelectProyectos("egresoProyectoId", proyectosPermitidosContabilidad, "Seleccione un proyecto asignado");
+        }
+
+        llenarSelectProyectos("proyectoReporteId", proyectosPermitidosContabilidad, "Seleccione un proyecto");
+
     } catch (error) {
         console.error("Error cargando proyectos:", error);
         mostrarMensaje("mensajeReporteProyecto", "No se pudieron cargar los proyectos.", "error");
@@ -253,44 +369,71 @@ function llenarSelectProyectos(idSelect, proyectos, textoInicial) {
     });
 }
 
-function inicializarContabilidad() {
+// ============================================================
+// INICIALIZACIÓN
+// ============================================================
+
+async function inicializarContabilidad() {
+    validarSesion();
+    pintarUsuarioEnNavbar();
+    aplicarPermisosContabilidad();
+
     const hoy = fechaHoyInput();
     const anioActual = new Date().getFullYear();
     const mesActual = new Date().getMonth() + 1;
 
-    document.getElementById("fechaIngreso").value = hoy;
-    document.getElementById("fechaEgreso").value = hoy;
-    document.getElementById("fechaInicioCierre").value = hoy;
-    document.getElementById("fechaFinCierre").value = hoy;
-    document.getElementById("anioCierre").value = anioActual;
-    document.getElementById("mesCierre").value = mesActual;
-    document.getElementById("anioNomina").value = anioActual;
-    document.getElementById("mesNomina").value = mesActual;
-    document.getElementById("tokenJwt").value = obtenerTokenContabilidad();
+    setValorSeguro("fechaIngreso", hoy);
+    setValorSeguro("fechaEgreso", hoy);
+    setValorSeguro("fechaInicioCierre", hoy);
+    setValorSeguro("fechaFinCierre", hoy);
+    setValorSeguro("anioCierre", anioActual);
+    setValorSeguro("mesCierre", mesActual);
+    setValorSeguro("anioNomina", anioActual);
+    setValorSeguro("mesNomina", mesActual);
+
+    const tokenJwt = document.getElementById("tokenJwt");
+
+    if (tokenJwt) {
+        tokenJwt.value = obtenerTokenContabilidad();
+    }
 
     cambiarCamposCierre();
-    cargarProyectosContabilidad();
-    cargarPanelContabilidad();
+
+    await cargarProyectosContabilidad();
+    await cargarPanelContabilidad();
 }
 
 async function cargarPanelContabilidad() {
     const transacciones = await cargarTransaccionesFrontend();
-    actualizarResumenDesdeTransacciones(transacciones);
 
-    await Promise.allSettled([
-        cargarReporteFinanciero(transacciones),
-        cargarDesgloseFinanciero(),
-        cargarNominasFrontend()
-    ]);
+    if (usuarioEsAdmin()) {
+        await Promise.allSettled([
+            cargarReporteFinanciero(transacciones),
+            cargarDesgloseFinanciero(),
+            cargarNominasFrontend()
+        ]);
+    } else {
+        actualizarResumenDesdeTransacciones(transacciones);
+    }
 }
 
+// ============================================================
+// REPORTE GENERAL / CATEGORÍAS
+// ============================================================
+
 async function cargarReporteFinanciero(transaccionesLocales = []) {
+    if (!usuarioEsAdmin()) {
+        actualizarResumenDesdeTransacciones(transaccionesLocales);
+        return;
+    }
+
     try {
         const reporte = await apiGetContabilidad("/Contabilidad/reporte");
 
         if (reporteTieneDatos(reporte) || !transaccionesLocales || transaccionesLocales.length === 0) {
             actualizarResumenDesdeReporte(reporte);
         }
+
     } catch (error) {
         console.error("No se pudo cargar /Contabilidad/reporte. Se mantiene el resumen calculado desde transacciones.", error);
 
@@ -301,18 +444,33 @@ async function cargarReporteFinanciero(transaccionesLocales = []) {
 }
 
 async function cargarDesgloseFinanciero() {
+    if (!usuarioEsAdmin()) {
+        return;
+    }
+
     try {
         const desglose = await apiGetContabilidad("/Contabilidad/informe/desglose");
         renderCategorias("tablaIngresosCategoria", desglose.ingresosPorCategoria);
         renderCategorias("tablaEgresosCategoria", desglose.egresosPorCategoria);
+
     } catch (error) {
-        document.getElementById("tablaIngresosCategoria").innerHTML = `<tr><td colspan="3">Error: ${error.message}</td></tr>`;
-        document.getElementById("tablaEgresosCategoria").innerHTML = `<tr><td colspan="3">Error: ${error.message}</td></tr>`;
+        const ingresos = document.getElementById("tablaIngresosCategoria");
+        const egresos = document.getElementById("tablaEgresosCategoria");
+
+        if (ingresos) {
+            ingresos.innerHTML = `<tr><td colspan="3">Error: ${error.message}</td></tr>`;
+        }
+
+        if (egresos) {
+            egresos.innerHTML = `<tr><td colspan="3">Error: ${error.message}</td></tr>`;
+        }
     }
 }
 
 function renderCategorias(idTabla, categorias) {
     const tabla = document.getElementById(idTabla);
+
+    if (!tabla) return;
 
     if (!categorias || categorias.length === 0) {
         tabla.innerHTML = `<tr><td colspan="3">No hay datos registrados.</td></tr>`;
@@ -332,20 +490,38 @@ function renderCategorias(idTabla, categorias) {
     });
 }
 
+// ============================================================
+// TRANSACCIONES
+// ============================================================
+
 async function cargarTransaccionesFrontend() {
     const tabla = document.getElementById("tablaTransacciones");
+
+    if (!tabla) return [];
 
     try {
         const transacciones = await apiGetContabilidad("/Contabilidad");
 
-        if (!transacciones || transacciones.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="8">No hay transacciones registradas.</td></tr>`;
+        let transaccionesFiltradas = transacciones || [];
+
+        if (!usuarioEsAdmin()) {
+            const proyectosPermitidosIds = proyectosPermitidosContabilidad.map(p => p.id);
+
+            transaccionesFiltradas = transaccionesFiltradas.filter(t => {
+                const proyectoId = obtenerValor(t, "proyectoId", "ProyectoId");
+                return proyectosPermitidosIds.includes(proyectoId);
+            });
+        }
+
+        if (!transaccionesFiltradas || transaccionesFiltradas.length === 0) {
+            tabla.innerHTML = `<tr><td colspan="8">No hay transacciones registradas para sus proyectos asignados.</td></tr>`;
+            actualizarResumenFinanciero(0, 0, 0, 0);
             return [];
         }
 
         tabla.innerHTML = "";
 
-        transacciones.forEach(t => {
+        transaccionesFiltradas.forEach(t => {
             const id = obtenerValor(t, "id", "Id");
             const tipo = obtenerTexto(t, "tipo", "Tipo");
             const categoria = obtenerTexto(t, "categoria", "Categoria");
@@ -370,8 +546,9 @@ async function cargarTransaccionesFrontend() {
             `;
         });
 
-        actualizarResumenDesdeTransacciones(transacciones);
-        return transacciones;
+        actualizarResumenDesdeTransacciones(transaccionesFiltradas);
+        return transaccionesFiltradas;
+
     } catch (error) {
         tabla.innerHTML = `<tr><td colspan="8">Error: ${error.message}</td></tr>`;
         actualizarResumenFinanciero(0, 0, 0, 0);
@@ -393,13 +570,30 @@ async function registrarIngresoFrontend() {
         return;
     }
 
+    if (!usuarioEsAdmin() && !dto.proyectoId) {
+        mostrarMensaje("mensajeIngreso", "Debe seleccionar uno de sus proyectos asignados.", "error");
+        return;
+    }
+
+    if (!usuarioEsAdmin() && !proyectoPermitidoParaEmpleado(dto.proyectoId)) {
+        mostrarMensaje("mensajeIngreso", "No tiene permiso para registrar ingresos en ese proyecto.", "error");
+        return;
+    }
+
     try {
         await apiEnviarContabilidad("/Contabilidad/ingresos", "POST", dto, true);
+
         mostrarMensaje("mensajeIngreso", "Ingreso registrado correctamente.", "success");
+
         document.getElementById("montoIngreso").value = "";
         document.getElementById("descripcionIngreso").value = "";
-        document.getElementById("ingresoProyectoId").value = "";
+
+        if (usuarioEsAdmin()) {
+            document.getElementById("ingresoProyectoId").value = "";
+        }
+
         await cargarPanelContabilidad();
+
     } catch (error) {
         mostrarMensaje("mensajeIngreso", error.message, "error");
     }
@@ -419,24 +613,49 @@ async function registrarEgresoFrontend() {
         return;
     }
 
+    if (!usuarioEsAdmin() && !dto.proyectoId) {
+        mostrarMensaje("mensajeEgreso", "Debe seleccionar uno de sus proyectos asignados.", "error");
+        return;
+    }
+
+    if (!usuarioEsAdmin() && !proyectoPermitidoParaEmpleado(dto.proyectoId)) {
+        mostrarMensaje("mensajeEgreso", "No tiene permiso para registrar egresos en ese proyecto.", "error");
+        return;
+    }
+
     try {
         await apiEnviarContabilidad("/Contabilidad/egresos", "POST", dto, true);
+
         mostrarMensaje("mensajeEgreso", "Egreso registrado correctamente.", "success");
+
         document.getElementById("montoEgreso").value = "";
         document.getElementById("descripcionEgreso").value = "";
-        document.getElementById("egresoProyectoId").value = "";
+
+        if (usuarioEsAdmin()) {
+            document.getElementById("egresoProyectoId").value = "";
+        }
+
         await cargarPanelContabilidad();
+
     } catch (error) {
         mostrarMensaje("mensajeEgreso", error.message, "error");
     }
 }
 
+// ============================================================
+// REPORTE FINANCIERO POR PROYECTO
+// ============================================================
 
 async function consultarReporteProyecto() {
     const proyectoId = obtenerProyectoIdDesdeSelect("proyectoReporteId");
 
     if (!proyectoId) {
         mostrarMensaje("mensajeReporteProyecto", "Debe seleccionar un proyecto.", "error");
+        return;
+    }
+
+    if (!proyectoPermitidoParaEmpleado(proyectoId)) {
+        mostrarMensaje("mensajeReporteProyecto", "No tiene permiso para consultar ese proyecto.", "error");
         return;
     }
 
@@ -459,6 +678,7 @@ async function consultarReporteProyecto() {
             `Reporte consultado para ${obtenerTexto(reporte, "proyectoNombre", "ProyectoNombre")}.`,
             "success"
         );
+
     } catch (error) {
         mostrarMensaje("mensajeReporteProyecto", error.message, "error");
     }
@@ -466,6 +686,8 @@ async function consultarReporteProyecto() {
 
 function renderTransaccionesProyecto(transacciones) {
     const tabla = document.getElementById("tablaTransaccionesProyecto");
+
+    if (!tabla) return;
 
     if (!transacciones || transacciones.length === 0) {
         tabla.innerHTML = `
@@ -495,8 +717,15 @@ function renderTransaccionesProyecto(transacciones) {
     });
 }
 
+// ============================================================
+// CIERRES DE CAJA
+// ============================================================
+
 function cambiarCamposCierre() {
-    const tipo = document.getElementById("tipoCierre").value;
+    const tipo = document.getElementById("tipoCierre")?.value;
+
+    if (!tipo) return;
+
     const campos = document.querySelectorAll(".campo-cierre");
 
     campos.forEach(campo => campo.style.display = "none");
@@ -507,6 +736,11 @@ function cambiarCamposCierre() {
 }
 
 async function consultarCierreCaja() {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeCierre", "Solo el administrador puede consultar cierres de caja.", "error");
+        return;
+    }
+
     const tipo = document.getElementById("tipoCierre").value;
     let ruta = "";
 
@@ -536,6 +770,7 @@ async function consultarCierreCaja() {
         const cierre = await apiGetContabilidad(ruta);
         mostrarMensaje("mensajeCierre", "Cierre consultado correctamente.", "success");
         renderCierre(cierre);
+
     } catch (error) {
         mostrarMensaje("mensajeCierre", error.message, "error");
     }
@@ -543,6 +778,8 @@ async function consultarCierreCaja() {
 
 function renderCierre(cierre) {
     const tabla = document.getElementById("resultadoCierre");
+
+    if (!tabla) return;
 
     tabla.innerHTML = `
         <tr><th>Tipo cierre</th><td>${cierre.tipoCierre}</td></tr>
@@ -556,7 +793,16 @@ function renderCierre(cierre) {
     `;
 }
 
+// ============================================================
+// NÓMINA
+// ============================================================
+
 async function revisarInconsistenciasNominaFrontend() {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeNomina", "Solo el administrador puede revisar inconsistencias de nómina.", "error");
+        return;
+    }
+
     const anio = document.getElementById("anioNomina").value;
     const mes = document.getElementById("mesNomina").value;
 
@@ -572,6 +818,7 @@ async function revisarInconsistenciasNominaFrontend() {
             : "No se encontraron inconsistencias.";
 
         mostrarMensaje("mensajeNomina", mensaje, tieneInconsistencias ? "error" : "success");
+
     } catch (error) {
         mostrarMensaje("mensajeNomina", error.message, "error");
     }
@@ -579,6 +826,9 @@ async function revisarInconsistenciasNominaFrontend() {
 
 function renderInconsistencias(resultado) {
     const tabla = document.getElementById("tablaInconsistencias");
+
+    if (!tabla) return;
+
     const inconsistencias = obtenerValor(resultado, "inconsistencias", "Inconsistencias") || [];
 
     if (inconsistencias.length === 0) {
@@ -600,6 +850,11 @@ function renderInconsistencias(resultado) {
 }
 
 async function procesarNominaFrontend() {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeNomina", "Solo el administrador puede procesar nómina.", "error");
+        return;
+    }
+
     const confirmar = confirm("¿Desea procesar la nómina del periodo seleccionado?");
     if (!confirmar) return;
 
@@ -614,6 +869,7 @@ async function procesarNominaFrontend() {
         await apiEnviarContabilidad("/Contabilidad/nomina/procesar", "POST", dto, true);
         mostrarMensaje("mensajeNomina", "Nómina procesada correctamente.", "success");
         await cargarNominasFrontend();
+
     } catch (error) {
         mostrarMensaje("mensajeNomina", error.message, "error");
     }
@@ -621,6 +877,13 @@ async function procesarNominaFrontend() {
 
 async function cargarNominasFrontend() {
     const tabla = document.getElementById("tablaNominas");
+
+    if (!tabla) return;
+
+    if (!usuarioEsAdmin()) {
+        tabla.innerHTML = `<tr><td colspan="6">No disponible para empleados.</td></tr>`;
+        return;
+    }
 
     try {
         const nominas = await apiGetContabilidad("/Contabilidad/nomina");
@@ -644,6 +907,7 @@ async function cargarNominasFrontend() {
                 </tr>
             `;
         });
+
     } catch (error) {
         tabla.innerHTML = `<tr><td colspan="6">Error: ${error.message}</td></tr>`;
     }

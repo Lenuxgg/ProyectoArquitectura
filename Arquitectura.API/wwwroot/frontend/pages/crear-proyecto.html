@@ -11,13 +11,16 @@
 
     <header class="main-header">
         <h1>Crear Nuevo Proyecto</h1>
-        <p>Registro de proyecto desde el frontend</p>
+        <p>Registro de proyecto y asignación inicial de empleados</p>
     </header>
 
     <nav class="navbar">
         <a href="../index.html">Inicio</a>
         <a href="proyectos.html">Proyectos</a>
-            <a href="contabilidad.html">Contabilidad</a>
+        <a href="contabilidad.html">Contabilidad</a>
+
+        <div id="usuarioSesion" style="margin-left:auto;"></div>
+
         <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
     </nav>
 
@@ -40,7 +43,17 @@
                 <input type="date" id="fechaInicio">
             </div>
 
-            <button class="btn-secondary" onclick="crearProyecto()">Guardar Proyecto</button>
+            <h2 style="margin-top: 25px;">Asignar empleados al proyecto</h2>
+            <p>
+                Seleccione los empleados que participarán en el proyecto.
+                El rol se guardará como parte de la asignación.
+            </p>
+
+            <div id="listaEmpleadosAsignar" class="table-container">
+                Cargando empleados...
+            </div>
+
+            <button class="btn-secondary" onclick="crearProyectoConAsignaciones()">Guardar Proyecto</button>
             <a class="btn-danger" href="proyectos.html">Cancelar</a>
 
             <p id="mensajeProyecto" class="message"></p>
@@ -48,7 +61,20 @@
     </main>
 
     <script src="../js/api.js?v=8"></script>
+    <script src="../js/auth.js?v=8"></script>
     <script src="../js/proyectos.js?v=8"></script>
+
+    <script>
+        validarSesion();
+        pintarUsuarioEnNavbar();
+
+        if (!usuarioEsAdmin()) {
+            alert("Solo el administrador puede crear proyectos.");
+            window.location.href = "proyectos.html";
+        }
+
+        cargarEmpleadosParaNuevoProyecto();
+    </script>
 
 </body>
 </html>

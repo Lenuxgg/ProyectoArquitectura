@@ -295,4 +295,21 @@ public class ProyectoService : IProyectoService
 
         return true;
     }
+    public async Task<List<ProyectoDto>> ObtenerPorUsuarioAsync(int usuarioId)
+    {
+        return await _context.ProyectoEmpleados
+            .Include(pe => pe.Proyecto)
+            .Where(pe => pe.UsuarioId == usuarioId && pe.Activo)
+            .Select(pe => new ProyectoDto
+            {
+                Id = pe.Proyecto.Id,
+                Nombre = pe.Proyecto.Nombre,
+                Descripcion = pe.Proyecto.Descripcion,
+                FechaInicio = pe.Proyecto.FechaInicio,
+                FechaFin = pe.Proyecto.FechaFin,
+                Estado = pe.Proyecto.Estado
+            })
+            .Distinct()
+            .ToListAsync();
+    }
 }

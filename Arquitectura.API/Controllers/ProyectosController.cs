@@ -26,6 +26,13 @@ public class ProyectosController : ControllerBase
         return Ok(proyectos);
     }
 
+    [HttpGet("usuario/{usuarioId}")]
+    public async Task<IActionResult> ObtenerPorUsuario(int usuarioId)
+    {
+        var proyectos = await _proyectoService.ObtenerPorUsuarioAsync(usuarioId);
+        return Ok(proyectos);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> ObtenerPorId(int id)
     {
@@ -182,4 +189,4 @@ public class ProyectosController : ControllerBase
 
         return $"/uploads/{carpeta}/{nombreArchivo}";
     }
-} 
+}

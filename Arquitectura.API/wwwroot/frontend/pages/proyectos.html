@@ -11,21 +11,24 @@
 
     <header class="main-header">
         <h1>Gestión de Proyectos</h1>
-        <p>Listado general de proyectos registrados</p>
+        <p id="subtituloProyectos">Listado general de proyectos registrados</p>
     </header>
 
     <nav class="navbar">
         <a href="../index.html">Inicio</a>
         <a href="proyectos.html">Proyectos</a>
-        <a href="crear-proyecto.html">Crear Proyecto</a>
-        <a href="contabilidad.html">Contabilidad</a>
+        <a id="linkCrearProyecto" href="crear-proyecto.html">Crear Proyecto</a>
+        <a id="linkContabilidad" href="contabilidad.html">Contabilidad</a>
+
+        <div id="usuarioSesion" style="margin-left:auto;"></div>
+
         <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
     </nav>
 
     <main class="container">
         <div class="actions">
-            <h2>Proyectos</h2>
-            <a class="btn-primary" href="crear-proyecto.html">Nuevo Proyecto</a>
+            <h2 id="tituloListado">Proyectos</h2>
+            <a id="btnNuevoProyecto" class="btn-primary" href="crear-proyecto.html">Nuevo Proyecto</a>
         </div>
 
         <div class="table-container">
@@ -51,13 +54,41 @@
     </main>
 
     <footer>
-        <p>Sprint 3 - Vista de proyectos</p>
+        <p>Arquitectura</p>
     </footer>
 
     <script src="../js/api.js?v=8"></script>
-    <script src="../js/proyectos.js?v=8"></script>
+    <script src="../js/auth.js?v=8"></script>
+    <script src="../js/proyectos.js?v=9"></script>
+
     <script>
-    cargarProyectos();
+        validarSesion();
+        pintarUsuarioEnNavbar();
+
+        if (!usuarioEsAdmin()) {
+            const btnNuevoProyecto = document.getElementById("btnNuevoProyecto");
+            const linkCrearProyecto = document.getElementById("linkCrearProyecto");
+            const subtituloProyectos = document.getElementById("subtituloProyectos");
+            const tituloListado = document.getElementById("tituloListado");
+
+            if (btnNuevoProyecto) {
+                btnNuevoProyecto.style.display = "none";
+            }
+
+            if (linkCrearProyecto) {
+                linkCrearProyecto.style.display = "none";
+            }
+
+            if (subtituloProyectos) {
+                subtituloProyectos.textContent = "Proyectos asignados al empleado";
+            }
+
+            if (tituloListado) {
+                tituloListado.textContent = "Mis proyectos asignados";
+            }
+        }
+
+        cargarProyectos();
     </script>
 
 </body>
