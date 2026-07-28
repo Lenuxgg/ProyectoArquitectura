@@ -1,4 +1,4 @@
-﻿using Arquitectura.Application.DTOs.Seguimiento;
+using Arquitectura.Application.DTOs.Seguimiento;
 using Arquitectura.Application.Interfaces.Seguimiento;
 using Microsoft.AspNetCore.Mvc;
 
@@ -63,6 +63,7 @@ public class ComentariosProyectosController : ControllerBase
     }
 
     [HttpPost("{comentarioId}/imagen")]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> AdjuntarImagen(int comentarioId, IFormFile archivo)
     {
         if (archivo == null || archivo.Length == 0)
@@ -85,6 +86,7 @@ public class ComentariosProyectosController : ControllerBase
     }
 
     [HttpPost("{comentarioId}/documento")]
+    [Consumes("multipart/form-data")]
     public async Task<IActionResult> AdjuntarDocumento(int comentarioId, IFormFile archivo)
     {
         if (archivo == null || archivo.Length == 0)

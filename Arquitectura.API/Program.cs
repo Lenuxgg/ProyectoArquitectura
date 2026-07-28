@@ -1,4 +1,4 @@
-﻿using System.IO.Compression;
+using System.IO.Compression;
 using System.Text;
 using Arquitectura.API.Middlewares;
 using Arquitectura.Application.Interfaces.Administracion;
@@ -108,6 +108,9 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API del Sistema de Administración General para Firma de Arquitectura"
     });
+
+    // Evita errores de Swagger si existen DTOs con nombres repetidos en namespaces distintos.
+    c.CustomSchemaIds(type => type.FullName?.Replace("+", ".") ?? type.Name);
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {

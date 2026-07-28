@@ -1,3 +1,20 @@
+function obtenerHeadersArchivo() {
+    const token = localStorage.getItem("cega_token");
+
+    return {
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+async function leerErrorFrontend(respuesta, mensajeDefault) {
+    try {
+        const texto = await respuesta.text();
+        return texto || mensajeDefault;
+    } catch {
+        return mensajeDefault;
+    }
+}
+
 async function cargarProyectos() {
     validarSesion();
 
@@ -12,12 +29,15 @@ async function cargarProyectos() {
     }
 
     try {
-        const respuesta = await fetch(url);
-        const proyectos = await respuesta.json();
+        const respuesta = await fetch(url, {
+            headers: obtenerHeadersAuth()
+        });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudieron cargar los proyectos.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudieron cargar los proyectos."));
         }
+
+        const proyectos = await respuesta.json();
 
         if (proyectos.length === 0) {
             tabla.innerHTML = `<tr><td colspan="7">No hay proyectos disponibles para este usuario.</td></tr>`;
@@ -29,11 +49,11 @@ async function cargarProyectos() {
         proyectos.forEach(p => {
             let acciones = `
                 <a class="btn-primary" href="detalle-proyecto.html?id=${p.id}">Ver Proyecto</a>
-                <a class="btn-warning" href="editar-proyecto.html?id=${p.id}">Editar</a>
             `;
 
             if (esAdmin) {
                 acciones += `
+                    <a class="btn-warning" href="editar-proyecto.html?id=${p.id}">Editar</a>
                     <button class="btn-danger" onclick="eliminarProyecto(${p.id})">Eliminar</button>
                 `;
             }
@@ -56,8 +76,12 @@ async function cargarProyectos() {
     }
 }
 
-
 async function eliminarProyecto(id) {
+    if (!usuarioEsAdmin()) {
+        alert("Solo el administrador puede eliminar proyectos.");
+        return;
+    }
+
     const confirmar = confirm("¿Desea eliminar este proyecto? Esta acción puede fallar si el proyecto tiene tareas, documentos o transacciones relacionadas.");
 
     if (!confirmar) {
@@ -66,20 +90,27 @@ async function eliminarProyecto(id) {
 
     try {
         const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: obtenerHeadersAuth()
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo eliminar el proyecto. Puede tener información relacionada.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudo eliminar el proyecto. Puede tener información relacionada."));
         }
 
+        alert("Proyecto eliminado correctamente.");
         await cargarProyectos();
     } catch (error) {
-        alert(error.message);
+        alert("Error: " + error.message);
     }
 }
 
 async function crearProyecto() {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeProyecto", "Solo el administrador puede crear proyectos.", "error");
+        return;
+    }
+
     const nombre = document.getElementById("nombre").value.trim();
     const descripcion = document.getElementById("descripcion").value.trim();
     const fechaInicio = document.getElementById("fechaInicio").value;
@@ -98,12 +129,12 @@ async function crearProyecto() {
     try {
         const respuesta = await fetch(`${API_BASE}/Proyectos`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: obtenerHeadersAuth(),
             body: JSON.stringify(proyecto)
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo crear el proyecto.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudo crear el proyecto."));
         }
 
         mostrarMensaje("mensajeProyecto", "Proyecto creado correctamente.", "success");
@@ -118,6 +149,14 @@ async function crearProyecto() {
 }
 
 async function cargarProyectoParaEditar() {
+    validarSesion();
+
+    if (!usuarioEsAdmin()) {
+        alert("Solo el administrador puede editar proyectos.");
+        window.location.href = "proyectos.html";
+        return;
+    }
+
     const id = obtenerParametro("id");
 
     if (!id) {
@@ -126,12 +165,15 @@ async function cargarProyectoParaEditar() {
     }
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`);
-        const p = await respuesta.json();
+        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
+            headers: obtenerHeadersAuth()
+        });
 
         if (!respuesta.ok) {
-            throw new Error("No se encontró el proyecto.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se encontró el proyecto."));
         }
+
+        const p = await respuesta.json();
 
         document.getElementById("proyectoId").value = p.id;
         document.getElementById("nombre").value = p.nombre;
@@ -146,6 +188,11 @@ async function cargarProyectoParaEditar() {
 }
 
 async function editarProyecto() {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeProyecto", "Solo el administrador puede editar proyectos.", "error");
+        return;
+    }
+
     const id = document.getElementById("proyectoId").value;
 
     const proyecto = {
@@ -164,12 +211,12 @@ async function editarProyecto() {
     try {
         const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: obtenerHeadersAuth(),
             body: JSON.stringify(proyecto)
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo editar el proyecto.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudo editar el proyecto."));
         }
 
         mostrarMensaje("mensajeProyecto", "Proyecto actualizado correctamente.", "success");
@@ -184,6 +231,8 @@ async function editarProyecto() {
 }
 
 async function cargarDetalleProyecto() {
+    validarSesion();
+
     const id = obtenerParametro("id");
 
     if (!id) {
@@ -193,12 +242,15 @@ async function cargarDetalleProyecto() {
     }
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`);
-        const p = await respuesta.json();
+        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
+            headers: obtenerHeadersAuth()
+        });
 
         if (!respuesta.ok) {
-            throw new Error("No se encontró el proyecto.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se encontró el proyecto."));
         }
+
+        const p = await respuesta.json();
 
         document.getElementById("tituloProyecto").textContent = p.nombre;
         document.getElementById("detalleId").textContent = p.id;
@@ -207,8 +259,16 @@ async function cargarDetalleProyecto() {
         document.getElementById("detalleFechaInicio").textContent = formatearFecha(p.fechaInicio);
         document.getElementById("detalleFechaFin").textContent = p.fechaFin ? formatearFecha(p.fechaFin) : "Sin fecha final";
 
-        document.getElementById("btnEditarProyecto").href = `editar-proyecto.html?id=${p.id}`;
-        document.getElementById("btnCrearTarea").href = `crear-tarea.html?proyectoId=${p.id}`;
+        const btnEditarProyecto = document.getElementById("btnEditarProyecto");
+        const btnCrearTarea = document.getElementById("btnCrearTarea");
+
+        if (usuarioEsAdmin()) {
+            btnEditarProyecto.href = `editar-proyecto.html?id=${p.id}`;
+            btnCrearTarea.href = `crear-tarea.html?proyectoId=${p.id}`;
+        } else {
+            btnEditarProyecto.style.display = "none";
+            btnCrearTarea.style.display = "none";
+        }
 
         cargarDocumentosProyecto(p.id);
         cargarTareasDelProyecto(p.id);
@@ -220,6 +280,8 @@ async function cargarDetalleProyecto() {
 }
 
 async function subirDocumentoProyecto() {
+    validarSesion();
+
     const proyectoId = obtenerParametro("id");
     const archivoInput = document.getElementById("archivoProyecto");
 
@@ -234,11 +296,12 @@ async function subirDocumentoProyecto() {
     try {
         const respuesta = await fetch(`${API_BASE}/Proyectos/${proyectoId}/documentos`, {
             method: "POST",
+            headers: obtenerHeadersArchivo(),
             body: formData
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo subir el documento.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudo subir el documento."));
         }
 
         mostrarMensaje("mensajeDocumento", "Documento subido correctamente.", "success");
@@ -255,12 +318,15 @@ async function cargarDocumentosProyecto(proyectoId) {
     const tabla = document.getElementById("tablaDocumentos");
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Proyectos/${proyectoId}/documentos`);
-        const documentos = await respuesta.json();
+        const respuesta = await fetch(`${API_BASE}/Proyectos/${proyectoId}/documentos`, {
+            headers: obtenerHeadersAuth()
+        });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudieron cargar los documentos.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudieron cargar los documentos."));
         }
+
+        const documentos = await respuesta.json();
 
         if (documentos.length === 0) {
             tabla.innerHTML = `<tr><td colspan="3">No hay documentos registrados.</td></tr>`;
@@ -284,47 +350,28 @@ async function cargarDocumentosProyecto(proyectoId) {
     }
 }
 
-async function eliminarProyecto(id) {
-    if (!usuarioEsAdmin()) {
-        alert("Solo el administrador puede eliminar proyectos.");
-        return;
-    }
-
-    const confirmar = confirm("¿Desea eliminar este proyecto? Esta acción no se puede deshacer.");
-
-    if (!confirmar) {
-        return;
-    }
-
-    try {
-        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
-            method: "DELETE"
-        });
-
-        if (!respuesta.ok) {
-            throw new Error("No se pudo eliminar el proyecto.");
-        }
-
-        alert("Proyecto eliminado correctamente.");
-        cargarProyectos();
-
-    } catch (error) {
-        alert("Error: " + error.message);
-    }
-}
-
 async function cargarEmpleadosParaNuevoProyecto() {
+    validarSesion();
+
     const contenedor = document.getElementById("listaEmpleadosAsignar");
 
     if (!contenedor) return;
 
+    if (!usuarioEsAdmin()) {
+        contenedor.innerHTML = "<p>Solo el administrador puede asignar empleados.</p>";
+        return;
+    }
+
     try {
-        const respuesta = await fetch(`${API_BASE}/Empleados`);
-        const empleados = await respuesta.json();
+        const respuesta = await fetch(`${API_BASE}/Empleados`, {
+            headers: obtenerHeadersAuth()
+        });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudieron cargar los empleados.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudieron cargar los empleados."));
         }
+
+        const empleados = await respuesta.json();
 
         if (!empleados || empleados.length === 0) {
             contenedor.innerHTML = "<p>No hay empleados registrados.</p>";
@@ -355,10 +402,10 @@ async function cargarEmpleadosParaNuevoProyecto() {
                     <td>${nombreCompleto}</td>
                     <td>${e.puesto ?? "Sin puesto"}</td>
                     <td>
-                        <input 
-                            type="text" 
-                            class="rol-proyecto-input" 
-                            data-usuario-id="${e.id}" 
+                        <input
+                            type="text"
+                            class="rol-proyecto-input"
+                            data-usuario-id="${e.id}"
                             placeholder="Ej: Arquitecto, Supervisor, Colaborador"
                             value="${e.puesto ?? "Colaborador"}">
                     </td>
@@ -419,14 +466,12 @@ async function crearProyectoConAsignaciones() {
     try {
         const respuesta = await fetch(`${API_BASE}/Proyectos`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: obtenerHeadersAuth(),
             body: JSON.stringify(proyecto)
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo crear el proyecto.");
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudo crear el proyecto."));
         }
 
         const proyectoCreado = await respuesta.json();
@@ -441,9 +486,7 @@ async function crearProyectoConAsignaciones() {
 
             const respuestaAsignacion = await fetch(`${API_BASE}/Proyectos/asignar-empleado`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: obtenerHeadersAuth(),
                 body: JSON.stringify(asignacion)
             });
 

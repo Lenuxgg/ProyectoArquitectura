@@ -1,4 +1,4 @@
-﻿using Arquitectura.Application.DTOs.Seguimiento;
+using Arquitectura.Application.DTOs.Seguimiento;
 using Arquitectura.Application.Interfaces.Seguimiento;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -119,7 +119,8 @@ public class TareasController : ControllerBase
     }
 
     [HttpPost("{tareaId:int}/documentos")]
-    public async Task<IActionResult> AdjuntarDocumentoTarea(int tareaId, [FromForm] IFormFile archivo)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> AdjuntarDocumentoTarea(int tareaId, IFormFile archivo)
     {
         if (archivo == null || archivo.Length == 0)
             return BadRequest("Debe adjuntar un archivo.");
