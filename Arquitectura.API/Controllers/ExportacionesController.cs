@@ -1,10 +1,12 @@
 using Arquitectura.Application.Interfaces.Exportaciones;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arquitectura.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Roles = "Administrador")]
 public class ExportacionesController : ControllerBase
 {
     private readonly IExportacionService _exportacionService;

@@ -233,6 +233,7 @@ function aplicarPermisosContabilidad() {
 
     const seccionesAdmin = [
         "seccionResumenAdmin",
+        "seccionRegistroAdmin",
         "seccionCierreAdmin",
         "seccionCategoriasAdmin",
         "seccionNominaAdmin"
@@ -255,7 +256,7 @@ function aplicarPermisosContabilidad() {
     const descripcion = document.getElementById("descripcionContabilidad");
 
     if (descripcion) {
-        descripcion.textContent = "Consulta y registra movimientos financieros relacionados únicamente con los proyectos asignados.";
+        descripcion.textContent = "Consulta los movimientos financieros relacionados únicamente con los proyectos asignados.";
     }
 }
 
@@ -557,6 +558,11 @@ async function cargarTransaccionesFrontend() {
 }
 
 async function registrarIngresoFrontend() {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeIngreso", "No tiene permisos para registrar ingresos.", "error");
+        return;
+    }
+
     const dto = {
         categoriaId: parseInt(document.getElementById("categoriaIngreso").value),
         monto: parseFloat(document.getElementById("montoIngreso").value),
@@ -600,6 +606,11 @@ async function registrarIngresoFrontend() {
 }
 
 async function registrarEgresoFrontend() {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeEgreso", "No tiene permisos para registrar egresos.", "error");
+        return;
+    }
+
     const dto = {
         categoriaId: parseInt(document.getElementById("categoriaEgreso").value),
         monto: parseFloat(document.getElementById("montoEgreso").value),

@@ -10,6 +10,12 @@ public partial class ContabilidadService
         RegistrarTransaccionDto dto,
         int usuarioId)
     {
+        var usuarioExiste = await _context.Usuario
+            .AnyAsync(u => u.Id == usuarioId && u.Estado != "Baja");
+
+        if (!usuarioExiste)
+            throw new Exception("El usuario autenticado no existe o está dado de baja. Inicie sesión nuevamente.");
+
         var categoria = await _context.CategoriaFinanciera
             .FirstOrDefaultAsync(c =>
                 c.Id == dto.CategoriaId &&
@@ -52,6 +58,12 @@ public partial class ContabilidadService
         RegistrarTransaccionDto dto,
         int usuarioId)
     {
+        var usuarioExiste = await _context.Usuario
+            .AnyAsync(u => u.Id == usuarioId && u.Estado != "Baja");
+
+        if (!usuarioExiste)
+            throw new Exception("El usuario autenticado no existe o está dado de baja. Inicie sesión nuevamente.");
+
         var categoria = await _context.CategoriaFinanciera
             .FirstOrDefaultAsync(c =>
                 c.Id == dto.CategoriaId &&
@@ -92,47 +104,59 @@ public partial class ContabilidadService
 
     public async Task<List<TransaccionDto>> ObtenerIngresosAsync()
     {
-        return await _context.Transacciones
-            .Include(t => t.Categoria)
-            .Include(t => t.Proyecto)
-            .Where(t => t.Tipo == "Ingreso" && t.Activo)
+        return await CrearQueryBaseTransacciones()
+            .Where(t => t.Tipo == "Ingreso")
             .OrderByDescending(t => t.Fecha)
             .ThenByDescending(t => t.Id)
-            .Select(t => new TransaccionDto
-            {
-                Id = t.Id,
-                Tipo = t.Tipo,
-                Categoria = t.Categoria.Nombre,
-                Monto = t.Monto,
-                Descripcion = t.Descripcion,
-                Fecha = t.Fecha,
-                UsuarioId = t.UsuarioId,
-                ProyectoId = t.ProyectoId,
-                ProyectoNombre = t.Proyecto != null ? t.Proyecto.Nombre : null
-            })
+            .Select(t => MapearTransaccionDto(t))
             .ToListAsync();
     }
 
     public async Task<List<TransaccionDto>> ObtenerEgresosAsync()
     {
-        return await _context.Transacciones
-            .Include(t => t.Categoria)
-            .Include(t => t.Proyecto)
-            .Where(t => t.Tipo == "Egreso" && t.Activo)
+        return await CrearQueryBaseTransacciones()
+            .Where(t => t.Tipo == "Egreso")
             .OrderByDescending(t => t.Fecha)
             .ThenByDescending(t => t.Id)
-            .Select(t => new TransaccionDto
-            {
-                Id = t.Id,
-                Tipo = t.Tipo,
-                Categoria = t.Categoria.Nombre,
-                Monto = t.Monto,
-                Descripcion = t.Descripcion,
-                Fecha = t.Fecha,
-                UsuarioId = t.UsuarioId,
-                ProyectoId = t.ProyectoId,
-                ProyectoNombre = t.Proyecto != null ? t.Proyecto.Nombre : null
-            })
+            .Select(t => MapearTransaccionDto(t))
+            .ToListAsync();
+    }
+
+    public async Task<List<TransaccionDto>> ObtenerTransaccionesAsync()
+    {
+        return await CrearQueryBaseTransacciones()
+            .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Id)
+            .Select(t => MapearTransaccionDto(t))
+            .ToListAsync();
+    }
+
+    public async Task<List<TransaccionDto>> ObtenerIngresosPorUsuarioAsync(int usuarioId)
+    {
+        return await CrearQueryTransaccionesPorUsuario(usuarioId)
+            .Where(t => t.Tipo == "Ingreso")
+            .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Id)
+            .Select(t => MapearTransaccionDto(t))
+            .ToListAsync();
+    }
+
+    public async Task<List<TransaccionDto>> ObtenerEgresosPorUsuarioAsync(int usuarioId)
+    {
+        return await CrearQueryTransaccionesPorUsuario(usuarioId)
+            .Where(t => t.Tipo == "Egreso")
+            .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Id)
+            .Select(t => MapearTransaccionDto(t))
+            .ToListAsync();
+    }
+
+    public async Task<List<TransaccionDto>> ObtenerTransaccionesPorUsuarioAsync(int usuarioId)
+    {
+        return await CrearQueryTransaccionesPorUsuario(usuarioId)
+            .OrderByDescending(t => t.Fecha)
+            .ThenByDescending(t => t.Id)
+            .Select(t => MapearTransaccionDto(t))
             .ToListAsync();
     }
 
@@ -149,29 +173,6 @@ public partial class ContabilidadService
         await _context.SaveChangesAsync();
 
         return true;
-    }
-
-    public async Task<List<TransaccionDto>> ObtenerTransaccionesAsync()
-    {
-        return await _context.Transacciones
-            .Include(t => t.Categoria)
-            .Include(t => t.Proyecto)
-            .Where(t => t.Activo)
-            .OrderByDescending(t => t.Fecha)
-            .ThenByDescending(t => t.Id)
-            .Select(t => new TransaccionDto
-            {
-                Id = t.Id,
-                Tipo = t.Tipo,
-                Monto = t.Monto,
-                Descripcion = t.Descripcion,
-                Fecha = t.Fecha,
-                Categoria = t.Categoria.Nombre,
-                UsuarioId = t.UsuarioId,
-                ProyectoId = t.ProyectoId,
-                ProyectoNombre = t.Proyecto != null ? t.Proyecto.Nombre : null
-            })
-            .ToListAsync();
     }
 
     public async Task<bool> RegistrarSalarioEmpleadoAsync(
@@ -195,5 +196,43 @@ public partial class ContabilidadService
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    private IQueryable<Transaccion> CrearQueryBaseTransacciones()
+    {
+        return _context.Transacciones
+            .Include(t => t.Categoria)
+            .Include(t => t.Proyecto)
+            .Where(t => t.Activo);
+    }
+
+    private IQueryable<Transaccion> CrearQueryTransaccionesPorUsuario(int usuarioId)
+    {
+        var proyectosAsignados = _context.ProyectoEmpleados
+            .Where(pe =>
+                pe.UsuarioId == usuarioId &&
+                pe.Activo)
+            .Select(pe => pe.ProyectoId);
+
+        return CrearQueryBaseTransacciones()
+            .Where(t =>
+                t.ProyectoId.HasValue &&
+                proyectosAsignados.Contains(t.ProyectoId.Value));
+    }
+
+    private static TransaccionDto MapearTransaccionDto(Transaccion t)
+    {
+        return new TransaccionDto
+        {
+            Id = t.Id,
+            Tipo = t.Tipo,
+            Categoria = t.Categoria.Nombre,
+            Monto = t.Monto,
+            Descripcion = t.Descripcion,
+            Fecha = t.Fecha,
+            UsuarioId = t.UsuarioId,
+            ProyectoId = t.ProyectoId,
+            ProyectoNombre = t.Proyecto != null ? t.Proyecto.Nombre : null
+        };
     }
 }

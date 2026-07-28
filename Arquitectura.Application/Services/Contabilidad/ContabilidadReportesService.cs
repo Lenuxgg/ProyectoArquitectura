@@ -38,6 +38,58 @@ public partial class ContabilidadService
         };
     }
 
+
+    public async Task<ReporteFinancieroDto> ObtenerReporteFinancieroPorUsuarioAsync(int usuarioId)
+    {
+        var proyectosAsignados = _context.ProyectoEmpleados
+            .Where(pe =>
+                pe.UsuarioId == usuarioId &&
+                pe.Activo)
+            .Select(pe => pe.ProyectoId);
+
+        var transacciones = await _context.Transacciones
+            .Where(t =>
+                t.Activo &&
+                t.ProyectoId.HasValue &&
+                proyectosAsignados.Contains(t.ProyectoId.Value))
+            .ToListAsync();
+
+        var ingresos = transacciones
+            .Where(t => string.Equals(
+                t.Tipo?.Trim(),
+                "Ingreso",
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var egresos = transacciones
+            .Where(t => string.Equals(
+                t.Tipo?.Trim(),
+                "Egreso",
+                StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var totalIngresos = ingresos.Sum(t => t.Monto);
+        var totalEgresos = egresos.Sum(t => t.Monto);
+
+        return new ReporteFinancieroDto
+        {
+            TotalIngresos = totalIngresos,
+            TotalEgresos = totalEgresos,
+            Balance = totalIngresos - totalEgresos,
+            CantidadIngresos = ingresos.Count,
+            CantidadEgresos = egresos.Count
+        };
+    }
+
+    public async Task<bool> UsuarioTieneAccesoAProyectoAsync(int usuarioId, int proyectoId)
+    {
+        return await _context.ProyectoEmpleados
+            .AnyAsync(pe =>
+                pe.UsuarioId == usuarioId &&
+                pe.ProyectoId == proyectoId &&
+                pe.Activo);
+    }
+
     public async Task<ReporteProyectoFinancieroDto?> ObtenerReportePorProyectoAsync(int proyectoId)
     {
         var proyecto = await _context.Proyectos

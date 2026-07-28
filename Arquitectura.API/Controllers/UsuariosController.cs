@@ -1,7 +1,7 @@
-﻿using Arquitectura.Application.DTOs.Administracion;
-using Arquitectura.Application.DTOs.Auth;
+using Arquitectura.Application.DTOs.Administracion;
 using Arquitectura.Application.Interfaces.Administracion;
 using Arquitectura.Application.Interfaces.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Arquitectura.API.Controllers;
@@ -9,6 +9,7 @@ namespace Arquitectura.API.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
+[Authorize(Roles = "Administrador")]
 public class UsuariosController : ControllerBase
 {
     private readonly IUsuarioService _service;
@@ -58,8 +59,7 @@ public class UsuariosController : ControllerBase
         return CreatedAtAction(
             nameof(GetById),
             new { id = usuario.Id },
-            usuario
-        );
+            usuario);
     }
 
     [HttpPut("{id:int}")]
@@ -74,7 +74,7 @@ public class UsuariosController : ControllerBase
 
         return Ok(usuario);
     }
-    
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
@@ -86,6 +86,7 @@ public class UsuariosController : ControllerBase
         return NoContent();
     }
 
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login(
         [FromBody] Arquitectura.Application.DTOs.Auth.LoginDto dto)
@@ -99,8 +100,7 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpPost("asignar-rol")]
-    public async Task<IActionResult> AsignarRol(
-        [FromBody] AsignarRolDto dto)
+    public async Task<IActionResult> AsignarRol([FromBody] AsignarRolDto dto)
     {
         var resultado = await _service.AsignarRolAsync(dto);
 

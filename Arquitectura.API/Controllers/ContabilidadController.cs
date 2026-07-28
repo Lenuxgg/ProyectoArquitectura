@@ -1,18 +1,27 @@
 using Arquitectura.Application.DTOs.Contabilidad;
 using Arquitectura.Application.Interfaces.Contabilidad;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
 namespace Arquitectura.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-
-
+[Authorize]
 public class ContabilidadController : ControllerBase
 {
     private readonly IContabilidadService _contabilidadService;
+
+    public ContabilidadController(IContabilidadService contabilidadService)
+    {
+        _contabilidadService = contabilidadService;
+    }
+
+    private bool UsuarioEsAdministrador()
+    {
+        return User.IsInRole("Administrador");
+    }
 
     private int? ObtenerUsuarioIdAutenticado()
     {
@@ -24,30 +33,30 @@ public class ContabilidadController : ControllerBase
         return usuarioId;
     }
 
-    public ContabilidadController(IContabilidadService contabilidadService)
+    private IActionResult Prohibido(string mensaje)
     {
-        _contabilidadService = contabilidadService;
+        return StatusCode(StatusCodes.Status403Forbidden, new
+        {
+            mensaje
+        });
     }
 
-    [Authorize]
+    [Authorize(Roles = "Administrador")]
     [HttpPost("ingresos")]
-    public async Task<IActionResult> RegistrarIngreso(
-        [FromBody] RegistrarTransaccionDto dto)
+    public async Task<IActionResult> RegistrarIngreso([FromBody] RegistrarTransaccionDto dto)
     {
         try
         {
-
             var usuarioId = ObtenerUsuarioIdAutenticado();
 
             if (usuarioId == null)
                 return Unauthorized("No se pudo identificar el usuario autenticado.");
 
-            var id = await _contabilidadService
-            .RegistrarIngresoAsync(dto, usuarioId.Value);
+            var id = await _contabilidadService.RegistrarIngresoAsync(dto, usuarioId.Value);
 
             return Ok(new
             {
-                mensaje = "Ingreso registrado correctamente",
+                mensaje = "Ingreso registrado correctamente.",
                 id
             });
         }
@@ -60,25 +69,22 @@ public class ContabilidadController : ControllerBase
         }
     }
 
-
-    [Authorize]
+    [Authorize(Roles = "Administrador")]
     [HttpPost("egresos")]
-    public async Task<IActionResult> RegistrarEgreso(
-        [FromBody] RegistrarTransaccionDto dto)
+    public async Task<IActionResult> RegistrarEgreso([FromBody] RegistrarTransaccionDto dto)
     {
         try
         {
             var usuarioId = ObtenerUsuarioIdAutenticado();
 
             if (usuarioId == null)
-            return Unauthorized("No se pudo identificar el usuario autenticado.");
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
 
-            var id = await _contabilidadService
-            .RegistrarEgresoAsync(dto, usuarioId.Value);
+            var id = await _contabilidadService.RegistrarEgresoAsync(dto, usuarioId.Value);
 
             return Ok(new
             {
-                mensaje = "Egreso registrado correctamente",
+                mensaje = "Egreso registrado correctamente.",
                 id
             });
         }
@@ -94,17 +100,40 @@ public class ContabilidadController : ControllerBase
     [HttpGet("ingresos")]
     public async Task<IActionResult> ObtenerIngresos()
     {
-        var lista = await _contabilidadService.ObtenerIngresosAsync();
-        return Ok(lista);
+        if (UsuarioEsAdministrador())
+        {
+            var lista = await _contabilidadService.ObtenerIngresosAsync();
+            return Ok(lista);
+        }
+
+        var usuarioId = ObtenerUsuarioIdAutenticado();
+
+        if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+        var listaEmpleado = await _contabilidadService.ObtenerIngresosPorUsuarioAsync(usuarioId.Value);
+        return Ok(listaEmpleado);
     }
 
     [HttpGet("egresos")]
     public async Task<IActionResult> ObtenerEgresos()
     {
-        var lista = await _contabilidadService.ObtenerEgresosAsync();
-        return Ok(lista);
+        if (UsuarioEsAdministrador())
+        {
+            var lista = await _contabilidadService.ObtenerEgresosAsync();
+            return Ok(lista);
+        }
+
+        var usuarioId = ObtenerUsuarioIdAutenticado();
+
+        if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+        var listaEmpleado = await _contabilidadService.ObtenerEgresosPorUsuarioAsync(usuarioId.Value);
+        return Ok(listaEmpleado);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> EliminarTransaccion(int id)
     {
@@ -119,20 +148,57 @@ public class ContabilidadController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> ObtenerTransacciones()
     {
-        var lista = await _contabilidadService.ObtenerTransaccionesAsync();
-        return Ok(lista);
+        if (UsuarioEsAdministrador())
+        {
+            var lista = await _contabilidadService.ObtenerTransaccionesAsync();
+            return Ok(lista);
+        }
+
+        var usuarioId = ObtenerUsuarioIdAutenticado();
+
+        if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+        var listaEmpleado = await _contabilidadService.ObtenerTransaccionesPorUsuarioAsync(usuarioId.Value);
+        return Ok(listaEmpleado);
     }
 
     [HttpGet("reporte")]
     public async Task<IActionResult> ObtenerReporteFinanciero()
     {
-        var reporte = await _contabilidadService.ObtenerReporteFinancieroAsync();
-        return Ok(reporte);
+        if (UsuarioEsAdministrador())
+        {
+            var reporte = await _contabilidadService.ObtenerReporteFinancieroAsync();
+            return Ok(reporte);
+        }
+
+        var usuarioId = ObtenerUsuarioIdAutenticado();
+
+        if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+        var reporteEmpleado = await _contabilidadService.ObtenerReporteFinancieroPorUsuarioAsync(usuarioId.Value);
+        return Ok(reporteEmpleado);
     }
 
     [HttpGet("proyecto/{proyectoId:int}")]
     public async Task<IActionResult> ObtenerReportePorProyecto(int proyectoId)
     {
+        if (!UsuarioEsAdministrador())
+        {
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+            var tieneAcceso = await _contabilidadService.UsuarioTieneAccesoAProyectoAsync(
+                usuarioId.Value,
+                proyectoId);
+
+            if (!tieneAcceso)
+                return Prohibido("No puede consultar información financiera de un proyecto no asignado.");
+        }
+
         var reporte = await _contabilidadService.ObtenerReportePorProyectoAsync(proyectoId);
 
         if (reporte == null)
@@ -141,6 +207,7 @@ public class ContabilidadController : ControllerBase
         return Ok(reporte);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("informe/desglose")]
     public async Task<IActionResult> ObtenerDesgloseInformeFinanciero()
     {
@@ -148,6 +215,7 @@ public class ContabilidadController : ControllerBase
         return Ok(informe);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("cierre/diario")]
     public async Task<IActionResult> ObtenerCierreDiario([FromQuery] DateTime fecha)
     {
@@ -155,6 +223,7 @@ public class ContabilidadController : ControllerBase
         return Ok(cierre);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("cierre/mensual")]
     public async Task<IActionResult> ObtenerCierreMensual(
         [FromQuery] int anio,
@@ -164,6 +233,7 @@ public class ContabilidadController : ControllerBase
         return Ok(cierre);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("cierre/anual")]
     public async Task<IActionResult> ObtenerCierreAnual([FromQuery] int anio)
     {
@@ -171,6 +241,7 @@ public class ContabilidadController : ControllerBase
         return Ok(cierre);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("cierre/rango")]
     public async Task<IActionResult> ObtenerCierrePorRango(
         [FromQuery] DateTime fechaInicio,
@@ -186,10 +257,14 @@ public class ContabilidadController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(ex.Message);
+            return BadRequest(new
+            {
+                mensaje = ex.Message
+            });
         }
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPut("empleados/{usuarioId:int}/salario")]
     public async Task<IActionResult> RegistrarSalarioEmpleado(
         int usuarioId,
@@ -219,6 +294,7 @@ public class ContabilidadController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("nomina/inconsistencias")]
     public async Task<IActionResult> RevisarInconsistenciasNomina(
         [FromQuery] int anio,
@@ -240,21 +316,20 @@ public class ContabilidadController : ControllerBase
         }
     }
 
-    [Authorize]
+    [Authorize(Roles = "Administrador")]
     [HttpPost("nomina/procesar")]
-    public async Task<IActionResult> ProcesarNomina(
-        [FromBody] ProcesarNominaDto dto)
+    public async Task<IActionResult> ProcesarNomina([FromBody] ProcesarNominaDto dto)
     {
         try
         {
             var usuarioId = ObtenerUsuarioIdAutenticado();
 
             if (usuarioId == null)
-            return Unauthorized("No se pudo identificar el usuario autenticado.");
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
 
             var resultado = await _contabilidadService
                 .ProcesarNominaAsync(dto, usuarioId.Value);
-                
+
             return Ok(new
             {
                 mensaje = "Nómina procesada correctamente.",
@@ -270,6 +345,7 @@ public class ContabilidadController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("nomina")]
     public async Task<IActionResult> ObtenerNominas()
     {
@@ -277,6 +353,7 @@ public class ContabilidadController : ControllerBase
         return Ok(resultado);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpGet("nomina/{id:int}")]
     public async Task<IActionResult> ObtenerNominaPorId(int id)
     {
@@ -287,6 +364,4 @@ public class ContabilidadController : ControllerBase
 
         return Ok(resultado);
     }
-
-    
 }
