@@ -6,6 +6,8 @@ public interface ITareaService
 {
     Task<List<TareaDto>> ObtenerTodasAsync();
 
+    Task<List<TareaDto>> ObtenerPorUsuarioAsync(int usuarioId);
+
     Task<List<TareaDto>> ObtenerPorProyectoAsync(int proyectoId);
 
     Task<TareaDto?> ObtenerPorIdAsync(int id);
@@ -23,6 +25,10 @@ public interface ITareaService
     Task<bool> EditarAsignacionEmpleadoAsync(int asignacionId, EditarAsignacionTareaDto dto);
 
     Task<bool> EliminarAsignacionEmpleadoAsync(int asignacionId);
+
+    Task<bool> UsuarioTieneAccesoATareaAsync(int tareaId, int usuarioId);
+
+    Task<bool> UsuarioTieneAccesoAProyectoAsync(int proyectoId, int usuarioId);
 
     Task<DocumentoTareaDto?> AdjuntarDocumentoTareaAsync(
         int tareaId,

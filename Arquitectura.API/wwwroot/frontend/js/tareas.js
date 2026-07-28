@@ -1,17 +1,69 @@
-﻿async function cargarTareasDelProyecto(proyectoId) {
+﻿function esAdminFrontend() {
+    return typeof usuarioEsAdmin === "function" && usuarioEsAdmin();
+}
+
+function obtenerHeadersAuthTareas() {
+    if (typeof obtenerHeadersAuth === "function") {
+        return obtenerHeadersAuth();
+    }
+
+    const token = localStorage.getItem("cega_token");
+
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+function obtenerHeadersFormDataTareas() {
+    const token = localStorage.getItem("cega_token");
+
+    if (!token) {
+        return {};
+    }
+
+    return {
+        "Authorization": `Bearer ${token}`
+    };
+}
+
+async function leerErrorTareas(respuesta, mensajePorDefecto) {
+    const texto = await respuesta.text();
+
+    if (!texto) {
+        return mensajePorDefecto;
+    }
+
+    try {
+        const json = JSON.parse(texto);
+        return json.message || json.title || texto;
+    } catch {
+        return texto;
+    }
+}
+
+function convertirFechaInput(fecha) {
+    if (!fecha) return "";
+    return fecha.split("T")[0];
+}
+
+async function cargarTareasDelProyecto(proyectoId) {
     const tabla = document.getElementById("tablaTareasProyecto");
 
     if (!tabla) return;
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Tareas/proyecto/${proyectoId}`);
-        const tareas = await respuesta.json();
+        const respuesta = await fetch(`${API_BASE}/Tareas/proyecto/${proyectoId}`, {
+            headers: obtenerHeadersAuthTareas()
+        });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudieron cargar las tareas.");
+            throw new Error(await leerErrorTareas(respuesta, "No se pudieron cargar las tareas."));
         }
 
-        if (tareas.length === 0) {
+        const tareas = await respuesta.json();
+
+        if (!tareas || tareas.length === 0) {
             tabla.innerHTML = `<tr><td colspan="4">Este proyecto no tiene tareas registradas.</td></tr>`;
             return;
         }
@@ -19,15 +71,21 @@
         tabla.innerHTML = "";
 
         tareas.forEach(t => {
+            const acciones = esAdminFrontend()
+                ? `
+                    <a class="btn-warning" href="editar-tarea.html?id=${t.id}&proyectoId=${t.proyectoId}">Editar</a>
+                    <button class="btn-secondary" onclick="terminarTarea(${t.id}, ${t.proyectoId})">Terminar</button>
+                `
+                : `
+                    <a class="btn-secondary" href="editar-tarea.html?id=${t.id}&proyectoId=${t.proyectoId}">Ver documentos</a>
+                `;
+
             tabla.innerHTML += `
                 <tr>
                     <td>${t.id}</td>
                     <td>${t.titulo}</td>
                     <td>${t.estado}</td>
-                    <td>
-                        <a class="btn-warning" href="editar-tarea.html?id=${t.id}&proyectoId=${t.proyectoId}">Editar</a>
-                        <button class="btn-secondary" onclick="terminarTarea(${t.id}, ${t.proyectoId})">Terminar</button>
-                    </td>
+                    <td>${acciones}</td>
                 </tr>
             `;
         });
@@ -38,6 +96,12 @@
 }
 
 function prepararFormularioCrearTarea() {
+    if (!esAdminFrontend()) {
+        alert("Solo un administrador puede crear tareas.");
+        window.location.href = "proyectos.html";
+        return;
+    }
+
     const proyectoId = obtenerParametro("proyectoId");
 
     if (!proyectoId) {
@@ -54,6 +118,11 @@ function prepararFormularioCrearTarea() {
 }
 
 async function crearTarea() {
+    if (!esAdminFrontend()) {
+        mostrarMensaje("mensajeTarea", "Solo un administrador puede crear tareas.", "error");
+        return;
+    }
+
     const proyectoId = document.getElementById("proyectoId").value;
 
     const tarea = {
@@ -72,12 +141,12 @@ async function crearTarea() {
     try {
         const respuesta = await fetch(`${API_BASE}/Tareas`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: obtenerHeadersAuthTareas(),
             body: JSON.stringify(tarea)
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo crear la tarea.");
+            throw new Error(await leerErrorTareas(respuesta, "No se pudo crear la tarea."));
         }
 
         mostrarMensaje("mensajeTarea", "Tarea creada correctamente.", "success");
@@ -102,13 +171,15 @@ async function cargarTareaParaEditar() {
     }
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}`);
-        const t = await respuesta.json();
+        const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}`, {
+            headers: obtenerHeadersAuthTareas()
+        });
 
         if (!respuesta.ok) {
-            throw new Error("No se encontró la tarea.");
+            throw new Error(await leerErrorTareas(respuesta, "No se encontró la tarea."));
         }
 
+        const t = await respuesta.json();
         const proyectoId = proyectoIdParametro || t.proyectoId;
 
         document.getElementById("tareaId").value = t.id;
@@ -122,6 +193,7 @@ async function cargarTareaParaEditar() {
         document.getElementById("volverDetalle").href = `detalle-proyecto.html?id=${proyectoId}`;
         document.getElementById("btnCancelar").href = `detalle-proyecto.html?id=${proyectoId}`;
 
+        aplicarPermisosVisualesEditarTarea();
         await cargarDocumentosTarea(tareaId);
 
     } catch (error) {
@@ -129,7 +201,31 @@ async function cargarTareaParaEditar() {
     }
 }
 
+function aplicarPermisosVisualesEditarTarea() {
+    if (esAdminFrontend()) {
+        return;
+    }
+
+    const campos = ["titulo", "estado", "descripcion", "fechaInicio", "fechaFin"];
+
+    campos.forEach(id => {
+        const campo = document.getElementById(id);
+        if (campo) campo.disabled = true;
+    });
+
+    const botones = document.querySelectorAll("button[onclick='editarTarea()']");
+    botones.forEach(boton => boton.style.display = "none");
+
+    const titulo = document.querySelector(".form-card h2");
+    if (titulo) titulo.textContent = "Detalle de la tarea";
+}
+
 async function editarTarea() {
+    if (!esAdminFrontend()) {
+        mostrarMensaje("mensajeTarea", "Solo un administrador puede editar tareas.", "error");
+        return;
+    }
+
     const tareaId = document.getElementById("tareaId").value;
     const proyectoId = document.getElementById("proyectoId").value;
 
@@ -149,12 +245,12 @@ async function editarTarea() {
     try {
         const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: obtenerHeadersAuthTareas(),
             body: JSON.stringify(tarea)
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo editar la tarea. Revise que el estado sea válido.");
+            throw new Error(await leerErrorTareas(respuesta, "No se pudo editar la tarea. Revise que el estado sea válido."));
         }
 
         mostrarMensaje("mensajeTarea", "Tarea actualizada correctamente.", "success");
@@ -169,17 +265,23 @@ async function editarTarea() {
 }
 
 async function terminarTarea(tareaId, proyectoId) {
+    if (!esAdminFrontend()) {
+        alert("Solo un administrador puede terminar tareas.");
+        return;
+    }
+
     const confirmar = confirm("¿Desea marcar esta tarea como terminada?");
 
     if (!confirmar) return;
 
     try {
         const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}/terminar`, {
-            method: "PUT"
+            method: "PUT",
+            headers: obtenerHeadersAuthTareas()
         });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudo terminar la tarea.");
+            throw new Error(await leerErrorTareas(respuesta, "No se pudo terminar la tarea."));
         }
 
         cargarTareasDelProyecto(proyectoId);
@@ -204,12 +306,12 @@ async function subirDocumentoTarea() {
     try {
         const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}/documentos`, {
             method: "POST",
+            headers: obtenerHeadersFormDataTareas(),
             body: formData
         });
 
         if (!respuesta.ok) {
-            const errorTexto = await respuesta.text();
-            throw new Error(errorTexto || "No se pudo subir el documento.");
+            throw new Error(await leerErrorTareas(respuesta, "No se pudo subir el documento."));
         }
 
         mostrarMensaje("mensajeDocumentoTarea", "Documento subido correctamente.", "success");
@@ -229,10 +331,12 @@ async function cargarDocumentosTarea(tareaId) {
     }
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}/documentos`);
+        const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}/documentos`, {
+            headers: obtenerHeadersAuthTareas()
+        });
 
         if (!respuesta.ok) {
-            throw new Error("No se pudieron cargar los documentos de la tarea.");
+            throw new Error(await leerErrorTareas(respuesta, "No se pudieron cargar los documentos de la tarea."));
         }
 
         const documentos = await respuesta.json();
@@ -249,14 +353,16 @@ async function cargarDocumentosTarea(tareaId) {
         tabla.innerHTML = "";
 
         documentos.forEach(doc => {
+            const acciones = esAdminFrontend()
+                ? `<button class="btn-danger" onclick="eliminarDocumentoTarea(${doc.id})">Eliminar</button>`
+                : `<span class="text-muted">Sin acciones</span>`;
+
             tabla.innerHTML += `
                 <tr>
                     <td>${doc.nombre ?? "Documento"}</td>
                     <td>${formatearFecha(doc.fecha)}</td>
                     <td><a href="${doc.rutaArchivo}" target="_blank">Abrir</a></td>
-                    <td>
-                        <button class="btn-danger" onclick="eliminarDocumentoTarea(${doc.id})">Eliminar</button>
-                    </td>
+                    <td>${acciones}</td>
                 </tr>
             `;
         });
@@ -270,6 +376,11 @@ async function cargarDocumentosTarea(tareaId) {
 }
 
 async function eliminarDocumentoTarea(documentoId) {
+    if (!esAdminFrontend()) {
+        mostrarMensaje("mensajeDocumentoTarea", "Solo un administrador puede eliminar documentos.", "error");
+        return;
+    }
+
     const tareaId = document.getElementById("tareaId").value;
     const confirmar = confirm("¿Desea eliminar este documento?");
 
@@ -279,12 +390,12 @@ async function eliminarDocumentoTarea(documentoId) {
 
     try {
         const respuesta = await fetch(`${API_BASE}/Tareas/documentos/${documentoId}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: obtenerHeadersAuthTareas()
         });
 
         if (!respuesta.ok) {
-            const errorTexto = await respuesta.text();
-            throw new Error(errorTexto || "No se pudo eliminar el documento.");
+            throw new Error(await leerErrorTareas(respuesta, "No se pudo eliminar el documento."));
         }
 
         mostrarMensaje("mensajeDocumentoTarea", "Documento eliminado correctamente.", "success");
@@ -293,3 +404,11 @@ async function eliminarDocumentoTarea(documentoId) {
         mostrarMensaje("mensajeDocumentoTarea", error.message, "error");
     }
 }
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (!esAdminFrontend()) {
+        const btnCrearTarea = document.getElementById("btnCrearTarea");
+        if (btnCrearTarea) btnCrearTarea.style.display = "none";
+    }
+});

@@ -1,5 +1,6 @@
-using Arquitectura.Application.DTOs.Seguimiento;
+﻿using Arquitectura.Application.DTOs.Seguimiento;
 using Arquitectura.Application.Interfaces.Seguimiento;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -7,6 +8,7 @@ namespace Arquitectura.Api.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class TareasController : ControllerBase
 {
     private readonly ITareaService _tareaService;
@@ -23,8 +25,19 @@ public class TareasController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> ObtenerTodas()
     {
-        var tareas = await _tareaService.ObtenerTodasAsync();
-        return Ok(tareas);
+        if (UsuarioEsAdministrador())
+        {
+            var tareas = await _tareaService.ObtenerTodasAsync();
+            return Ok(tareas);
+        }
+
+        var usuarioId = ObtenerUsuarioIdAutenticado();
+
+        if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+        var tareasUsuario = await _tareaService.ObtenerPorUsuarioAsync(usuarioId.Value);
+        return Ok(tareasUsuario);
     }
 
     [HttpGet("{id}")]
@@ -35,16 +48,43 @@ public class TareasController : ControllerBase
         if (tarea == null)
             return NotFound("No se encontró la tarea.");
 
+        if (!UsuarioEsAdministrador())
+        {
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+            var tieneAcceso = await _tareaService.UsuarioTieneAccesoATareaAsync(id, usuarioId.Value);
+
+            if (!tieneAcceso)
+                return StatusCode(403, "No puede consultar una tarea que no pertenece a sus proyectos asignados.");
+        }
+
         return Ok(tarea);
     }
 
     [HttpGet("proyecto/{proyectoId}")]
     public async Task<IActionResult> ObtenerPorProyecto(int proyectoId)
     {
+        if (!UsuarioEsAdministrador())
+        {
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+            var tieneAcceso = await _tareaService.UsuarioTieneAccesoAProyectoAsync(proyectoId, usuarioId.Value);
+
+            if (!tieneAcceso)
+                return StatusCode(403, "No puede consultar tareas de un proyecto no asignado.");
+        }
+
         var tareas = await _tareaService.ObtenerPorProyectoAsync(proyectoId);
         return Ok(tareas);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPost]
     public async Task<IActionResult> Crear([FromBody] CrearTareaDto dto)
     {
@@ -52,6 +92,7 @@ public class TareasController : ControllerBase
         return Ok(tarea);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Editar(int id, [FromBody] EditarTareaDto dto)
     {
@@ -63,6 +104,7 @@ public class TareasController : ControllerBase
         return Ok(tarea);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Eliminar(int id)
     {
@@ -74,6 +116,7 @@ public class TareasController : ControllerBase
         return Ok("Tarea eliminada correctamente.");
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPut("{id}/terminar")]
     public async Task<IActionResult> MarcarComoTerminada(int id)
     {
@@ -85,6 +128,7 @@ public class TareasController : ControllerBase
         return Ok("Tarea marcada como terminada correctamente.");
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPost("asignar-empleado")]
     public async Task<IActionResult> AsignarEmpleado([FromBody] AsignarEmpleadoTareaDto dto)
     {
@@ -96,6 +140,7 @@ public class TareasController : ControllerBase
         return Ok("Empleado asignado a la tarea correctamente.");
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpPut("asignacion/{asignacionId}")]
     public async Task<IActionResult> EditarAsignacion(int asignacionId, [FromBody] EditarAsignacionTareaDto dto)
     {
@@ -107,6 +152,7 @@ public class TareasController : ControllerBase
         return Ok("Asignación editada correctamente.");
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpDelete("asignacion/{asignacionId}")]
     public async Task<IActionResult> EliminarAsignacion(int asignacionId)
     {
@@ -122,6 +168,19 @@ public class TareasController : ControllerBase
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> AdjuntarDocumentoTarea(int tareaId, IFormFile archivo)
     {
+        var usuarioId = ObtenerUsuarioIdAutenticado();
+
+        if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+        if (!UsuarioEsAdministrador())
+        {
+            var tieneAcceso = await _tareaService.UsuarioTieneAccesoATareaAsync(tareaId, usuarioId.Value);
+
+            if (!tieneAcceso)
+                return StatusCode(403, "No puede adjuntar documentos a una tarea que no pertenece a sus proyectos asignados.");
+        }
+
         if (archivo == null || archivo.Length == 0)
             return BadRequest("Debe adjuntar un archivo.");
 
@@ -136,11 +195,10 @@ public class TareasController : ControllerBase
             return BadRequest("Tipo de archivo no permitido.");
 
         var rutaArchivo = await GuardarArchivoTareaAsync(archivo, "tareas");
-        var usuarioId = ObtenerUsuarioIdAutenticado() ?? 1;
 
         var documento = await _tareaService.AdjuntarDocumentoTareaAsync(
             tareaId,
-            usuarioId,
+            usuarioId.Value,
             archivo.FileName,
             rutaArchivo
         );
@@ -154,10 +212,24 @@ public class TareasController : ControllerBase
     [HttpGet("{tareaId:int}/documentos")]
     public async Task<IActionResult> ObtenerDocumentosPorTarea(int tareaId)
     {
+        if (!UsuarioEsAdministrador())
+        {
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+            var tieneAcceso = await _tareaService.UsuarioTieneAccesoATareaAsync(tareaId, usuarioId.Value);
+
+            if (!tieneAcceso)
+                return StatusCode(403, "No puede consultar documentos de una tarea que no pertenece a sus proyectos asignados.");
+        }
+
         var documentos = await _tareaService.ObtenerDocumentosPorTareaAsync(tareaId);
         return Ok(documentos);
     }
 
+    [Authorize(Roles = "Administrador")]
     [HttpDelete("documentos/{documentoId:int}")]
     public async Task<IActionResult> EliminarDocumentoTarea(int documentoId)
     {
@@ -185,6 +257,11 @@ public class TareasController : ControllerBase
         }
 
         return $"/uploads/{carpeta}/{nombreArchivo}";
+    }
+
+    private bool UsuarioEsAdministrador()
+    {
+        return User.IsInRole("Administrador");
     }
 
     private int? ObtenerUsuarioIdAutenticado()

@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="js/theme.js?v=8"></script>
+    <script src="js/theme.js?v=17"></script>
     <title>CEGA - Panel Administrador</title>
-    <link rel="stylesheet" href="css/styles.css?v=8">
+    <link rel="stylesheet" href="css/styles.css?v=17">
 </head>
 <body>
 
@@ -14,14 +14,17 @@
         <p>Panel inicial de administración de proyectos, tareas y contabilidad</p>
     </header>
 
-    <nav class="navbar">
-        <a href="index.html">Inicio</a>
-        <a href="pages/proyectos.html">Proyectos</a>
-        <a id="linkContabilidad" href="pages/contabilidad.html">Contabilidad</a>
+        <nav class="navbar">
+        <div class="navbar-left">
+            <a href="index.html">Inicio</a>
+            <a href="pages/proyectos.html">Proyectos</a>
+            <a id="linkContabilidad" href="pages/contabilidad.html">Contabilidad</a>
+        </div>
 
-        <div id="usuarioSesion" style="margin-left:auto;"></div>
-
-        <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
+        <div class="navbar-right">
+            <div id="usuarioSesion"></div>
+            <button class="theme-toggle" type="button" data-theme-toggle title="Cambiar tema">Modo oscuro</button>
+        </div>
     </nav>
 
     <main class="home-container">
@@ -58,10 +61,10 @@
     </main>
 
     <footer>
-        <p>RNF-008 - Interfaz intuitiva y personalización de apariencia</p>
+        <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
     </footer>
 
-    <script src="js/auth.js?v=8"></script>
+    <script src="js/auth.js?v=17"></script>
 
     <script>
         validarSesion();

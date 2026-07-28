@@ -1,9 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Login - CEGA</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <script src="js/theme.js?v=17"></script>
+    <link rel="stylesheet" href="css/styles.css?v=17">
 </head>
 <body>
 
@@ -12,13 +13,16 @@
         <p>Ingrese sus credenciales para acceder al sistema</p>
     </header>
 
-    <main class="home-container">
-        <section class="card">
+    <main class="home-container login-layout">
+        <section class="card login-card">
+            <div class="login-theme-row">
+                <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
+            </div>
             <h2>Acceso al sistema</h2>
 
             <div class="form-group">
                 <label>Correo electrónico</label>
-                <input type="email" id="email" placeholder="admin@arquitectura.cr">
+                <input type="email" id="email" placeholder="Ingrese su correo">
             </div>
 
             <div class="form-group">
@@ -31,7 +35,7 @@
             <p id="mensajeLogin" class="message"></p>
         </section>
 
-        <section class="card">
+        <section class="card login-help-card">
             <h2>Acceso según rol</h2>
             <p>
                 El sistema permite ingresar como administrador o empleado.
@@ -45,7 +49,7 @@
         </section>
     </main>
 
-    <script src="js/auth.js"></script>
+    <script src="js/auth.js?v=17"></script>
 
 </body>
 </html>

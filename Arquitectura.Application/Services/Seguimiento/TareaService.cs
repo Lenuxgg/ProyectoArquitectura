@@ -1,10 +1,10 @@
-﻿using Arquitectura.Application.DTOs.Seguimiento;
+﻿using Arquitectura.Application.DTOs.Notificaciones;
+using Arquitectura.Application.DTOs.Seguimiento;
+using Arquitectura.Application.Interfaces.Notificaciones;
 using Arquitectura.Application.Interfaces.Seguimiento;
 using Arquitectura.Domain.Entities;
 using Arquitectura.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Arquitectura.Application.DTOs.Notificaciones;
-using Arquitectura.Application.Interfaces.Notificaciones;
 
 namespace Arquitectura.Application.Services.Seguimiento;
 
@@ -24,16 +24,21 @@ public class TareaService : ITareaService
     public async Task<List<TareaDto>> ObtenerTodasAsync()
     {
         return await _context.Tareas
-            .Select(t => new TareaDto
-            {
-                Id = t.Id,
-                Titulo = t.Titulo,
-                Estado = t.Estado,
-                ProyectoId = t.ProyectoId,
-                Descripcion = t.Descripcion,
-                FechaInicio = t.FechaInicio,
-                FechaFin = t.FechaFin
-            })
+            .OrderBy(t => t.ProyectoId)
+            .ThenBy(t => t.Id)
+            .Select(t => MapearTareaDto(t))
+            .ToListAsync();
+    }
+
+    public async Task<List<TareaDto>> ObtenerPorUsuarioAsync(int usuarioId)
+    {
+        return await _context.Tareas
+            .Where(t =>
+                t.Asignaciones.Any(a => a.UsuarioId == usuarioId && a.Activo) ||
+                t.Proyecto.ProyectoEmpleados.Any(pe => pe.UsuarioId == usuarioId && pe.Activo))
+            .OrderBy(t => t.ProyectoId)
+            .ThenBy(t => t.Id)
+            .Select(t => MapearTareaDto(t))
             .ToListAsync();
     }
 
@@ -41,16 +46,8 @@ public class TareaService : ITareaService
     {
         return await _context.Tareas
             .Where(t => t.ProyectoId == proyectoId)
-            .Select(t => new TareaDto
-            {
-                Id = t.Id,
-                Titulo = t.Titulo,
-                Estado = t.Estado,
-                ProyectoId = t.ProyectoId,
-                Descripcion = t.Descripcion,
-                FechaInicio = t.FechaInicio,
-                FechaFin = t.FechaFin
-            })
+            .OrderBy(t => t.Id)
+            .Select(t => MapearTareaDto(t))
             .ToListAsync();
     }
 
@@ -58,21 +55,18 @@ public class TareaService : ITareaService
     {
         return await _context.Tareas
             .Where(t => t.Id == id)
-            .Select(t => new TareaDto
-            {
-                Id = t.Id,
-                Titulo = t.Titulo,
-                Estado = t.Estado,
-                ProyectoId = t.ProyectoId,
-                Descripcion = t.Descripcion,
-                FechaInicio = t.FechaInicio,
-                FechaFin = t.FechaFin
-            })
+            .Select(t => MapearTareaDto(t))
             .FirstOrDefaultAsync();
     }
 
     public async Task<TareaDto> CrearAsync(CrearTareaDto dto)
     {
+        var proyectoExiste = await _context.Proyectos
+            .AnyAsync(p => p.Id == dto.ProyectoId);
+
+        if (!proyectoExiste)
+            throw new Exception("El proyecto seleccionado no existe.");
+
         var tarea = new Tarea
         {
             Titulo = dto.Titulo,
@@ -87,16 +81,7 @@ public class TareaService : ITareaService
         _context.Tareas.Add(tarea);
         await _context.SaveChangesAsync();
 
-        return new TareaDto
-        {
-            Id = tarea.Id,
-            Titulo = tarea.Titulo,
-            Estado = tarea.Estado,
-            ProyectoId = tarea.ProyectoId,
-            Descripcion = tarea.Descripcion,
-            FechaInicio = tarea.FechaInicio,
-            FechaFin = tarea.FechaFin
-        };
+        return MapearTareaDto(tarea);
     }
 
     public async Task<TareaDto?> EditarAsync(int id, EditarTareaDto dto)
@@ -115,16 +100,7 @@ public class TareaService : ITareaService
 
         await _context.SaveChangesAsync();
 
-        return new TareaDto
-        {
-            Id = tarea.Id,
-            Titulo = tarea.Titulo,
-            Estado = tarea.Estado,
-            ProyectoId = tarea.ProyectoId,
-            Descripcion = tarea.Descripcion,
-            FechaInicio = tarea.FechaInicio,
-            FechaFin = tarea.FechaFin
-        };
+        return MapearTareaDto(tarea);
     }
 
     public async Task<bool> EliminarAsync(int id)
@@ -182,8 +158,8 @@ public class TareaService : ITareaService
 
         var yaExiste = await _context.TareaAsignaciones
             .AnyAsync(x => x.TareaId == dto.TareaId &&
-                        x.UsuarioId == dto.UsuarioId &&
-                        x.Activo);
+                           x.UsuarioId == dto.UsuarioId &&
+                           x.Activo);
 
         if (yaExiste)
             return false;
@@ -217,7 +193,8 @@ public class TareaService : ITareaService
         if (asignacion == null)
             return false;
 
-        var usuarioExiste = await _context.Usuario.AnyAsync(u => u.Id == dto.UsuarioId);
+        var usuarioExiste = await _context.Usuario
+            .AnyAsync(u => u.Id == dto.UsuarioId && u.Estado != "Baja");
 
         if (!usuarioExiste)
             return false;
@@ -243,6 +220,26 @@ public class TareaService : ITareaService
         return true;
     }
 
+    public async Task<bool> UsuarioTieneAccesoATareaAsync(int tareaId, int usuarioId)
+    {
+        return await _context.Tareas
+            .AnyAsync(t =>
+                t.Id == tareaId &&
+                (
+                    t.Asignaciones.Any(a => a.UsuarioId == usuarioId && a.Activo) ||
+                    t.Proyecto.ProyectoEmpleados.Any(pe => pe.UsuarioId == usuarioId && pe.Activo)
+                ));
+    }
+
+    public async Task<bool> UsuarioTieneAccesoAProyectoAsync(int proyectoId, int usuarioId)
+    {
+        return await _context.ProyectoEmpleados
+            .AnyAsync(pe =>
+                pe.ProyectoId == proyectoId &&
+                pe.UsuarioId == usuarioId &&
+                pe.Activo);
+    }
+
     public async Task<DocumentoTareaDto?> AdjuntarDocumentoTareaAsync(
         int tareaId,
         int usuarioId,
@@ -256,20 +253,10 @@ public class TareaService : ITareaService
             return null;
 
         var usuarioExiste = await _context.Usuario
-            .AnyAsync(u => u.Id == usuarioId);
+            .AnyAsync(u => u.Id == usuarioId && u.Estado != "Baja");
 
         if (!usuarioExiste)
-        {
-            var usuarioActivo = await _context.Usuario
-                .Where(u => u.Estado != "Baja")
-                .OrderBy(u => u.Id)
-                .FirstOrDefaultAsync();
-
-            if (usuarioActivo == null)
-                return null;
-
-            usuarioId = usuarioActivo.Id;
-        }
+            return null;
 
         var documento = new ComentarioTarea
         {
@@ -323,4 +310,17 @@ public class TareaService : ITareaService
         return true;
     }
 
+    private static TareaDto MapearTareaDto(Tarea tarea)
+    {
+        return new TareaDto
+        {
+            Id = tarea.Id,
+            Titulo = tarea.Titulo,
+            Estado = tarea.Estado,
+            ProyectoId = tarea.ProyectoId,
+            Descripcion = tarea.Descripcion,
+            FechaInicio = tarea.FechaInicio,
+            FechaFin = tarea.FechaFin
+        };
+    }
 }

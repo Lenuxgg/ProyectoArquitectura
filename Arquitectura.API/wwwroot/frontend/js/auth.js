@@ -1,4 +1,4 @@
-﻿const AUTH_API_BASE = window.location.origin + "/api";
+const AUTH_API_BASE = window.location.origin + "/api";
 
 function guardarSesion(data) {
     localStorage.setItem("cega_token", data.token);
@@ -104,8 +104,17 @@ function pintarUsuarioEnNavbar() {
 
     if (!contenedor) return;
 
+    const nombre = sesion.nombre || "Usuario";
+    const rol = sesion.rol || "Sin rol";
+
     contenedor.innerHTML = `
-        <span><strong>${sesion.nombre}</strong> | ${sesion.rol}</span>
-        <button class="btn-danger" onclick="cerrarSesion()">Cerrar sesión</button>
+        <div class="session-box">
+            <div class="session-user">
+                <span class="session-name">${nombre}</span>
+                <span class="session-separator">|</span>
+                <span class="session-role">${rol}</span>
+            </div>
+            <button class="btn-danger" type="button" onclick="cerrarSesion()">Cerrar sesión</button>
+        </div>
     `;
 }

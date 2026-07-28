@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/theme.js?v=8"></script>
+    <script src="../js/theme.js?v=17"></script>
     <title>Contabilidad - CEGA</title>
-    <link rel="stylesheet" href="../css/styles.css?v=8">
+    <link rel="stylesheet" href="../css/styles.css?v=17">
 </head>
 <body>
 
@@ -16,14 +16,17 @@
         </p>
     </header>
 
-    <nav class="navbar">
-        <a href="../index.html">Inicio</a>
-        <a href="proyectos.html">Proyectos</a>
-        <a href="contabilidad.html">Contabilidad</a>
+        <nav class="navbar">
+        <div class="navbar-left">
+            <a href="../index.html">Inicio</a>
+            <a href="proyectos.html">Proyectos</a>
+            <a href="contabilidad.html">Contabilidad</a>
+        </div>
 
-        <div id="usuarioSesion" style="margin-left:auto;"></div>
-
-        <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
+        <div class="navbar-right">
+            <div id="usuarioSesion"></div>
+            <button class="theme-toggle" type="button" data-theme-toggle title="Cambiar tema">Modo oscuro</button>
+        </div>
     </nav>
 
     <main class="container">
@@ -453,15 +456,21 @@
     </main>
 
     <footer>
-        <p>RNF-008 - Vista intuitiva de Contabilidad</p>
+        <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
     </footer>
 
-    <script src="../js/api.js?v=8"></script>
-    <script src="../js/auth.js?v=8"></script>
-    <script src="../js/contabilidad.js?v=9"></script>
+    <script src="../js/api.js?v=17"></script>
+    <script src="../js/auth.js?v=17"></script>
+    <script src="../js/contabilidad.js?v=17"></script>
 
     <script>
         inicializarContabilidad();
+    </script>
+
+
+    <script>
+        validarSesion();
+        pintarUsuarioEnNavbar();
     </script>
 
 </body>
