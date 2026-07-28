@@ -1,26 +1,80 @@
-# Build folders
+# ============================================================
+# Build / compilación
+# ============================================================
 bin/
 obj/
+[Bb]in/
+[Oo]bj/
+publish/
+Publish/
+*.dll
+*.exe
+*.pdb
 
-# Visual Studio
+# ============================================================
+# Visual Studio / VS Code / Rider
+# ============================================================
 .vs/
+.vscode/
+.idea/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
 
-# Rider
-.idea/
-
-# Logs
-*.log
-
+# ============================================================
 # NuGet
+# ============================================================
 packages/
 *.nupkg
 
-# Config locales
+# ============================================================
+# Logs / temporales
+# ============================================================
+*.log
+logs/
+*.tmp
+*.temp
+TestResults/
+
+# ============================================================
+# Configuración sensible local
+# ============================================================
 appsettings.Development.json
 appsettings.Local.json
+appsettings.Production.json
+appsettings.Staging.json
+*.secrets.json
 
-# OS files
+# El ejemplo sí debe subirse al repositorio
+!appsettings.Example.json
+
+# ============================================================
+# Bases de datos locales / respaldos
+# ============================================================
+*.db
+*.sqlite
+*.bak
+*.bacpac
+
+# ============================================================
+# Archivos generados por publicación
+# ============================================================
+Arquitectura.API/publish/
+Arquitectura.API/bin/
+Arquitectura.API/obj/
+Arquitectura.Application/bin/
+Arquitectura.Application/obj/
+Arquitectura.Domain/bin/
+Arquitectura.Domain/obj/
+Arquitectura.Infrastructure/bin/
+Arquitectura.Infrastructure/obj/
+Arquitectura.Shared/bin/
+Arquitectura.Shared/obj/
+
+# ============================================================
+# Archivos del sistema operativo
+# ============================================================
 .DS_Store
 Thumbs.db
+desktop.ini

@@ -128,7 +128,7 @@ public class ArquitecturaDbContext : DbContext
                 .HasForeignKey(x => x.UsuarioId);
 
             e.HasOne(x => x.Proyecto)
-                .WithMany()
+                .WithMany(p => p.Transacciones)
                 .HasForeignKey(x => x.ProyectoId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
