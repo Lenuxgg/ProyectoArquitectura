@@ -976,3 +976,1781 @@ footer p {
         white-space: normal;
     }
 }
+
+
+/* ============================================================
+   Ajustes v23 - Proyectos completos, contabilidad empleados e inicio
+   ============================================================ */
+
+.home-container {
+    max-width: 980px;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+.home-container .card {
+    min-height: 230px;
+}
+
+.project-full-view .container {
+    max-width: 1400px;
+}
+
+.project-full-view .form-card,
+.project-full-view .card,
+.project-full-view .section-card {
+    width: 100%;
+}
+
+.project-full-view .detail-grid,
+.project-detail-full {
+    grid-template-columns: 1fr;
+}
+
+.project-full-view .table-container {
+    overflow-x: visible;
+}
+
+.project-full-view .table-container table {
+    min-width: 0;
+    table-layout: auto;
+}
+
+.project-full-view th,
+.project-full-view td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+#seccionRegistroMovimientos {
+    margin-top: 24px;
+}
+
+.btn-small {
+    padding: 7px 10px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
+}
+
+.table-container td .btn-small {
+    margin: 2px 0;
+}
+
+@media (max-width: 900px) {
+    .project-full-view .table-container {
+        overflow-x: auto;
+    }
+
+    .project-full-view .table-container table {
+        min-width: 700px;
+    }
+}
+
+
+/* ============================================================
+   Ajustes v24 - Inicio, crear proyecto y vista completa
+   ============================================================ */
+
+.home-clean {
+    max-width: 980px;
+    justify-content: center;
+}
+
+.home-clean .card {
+    min-height: 230px;
+}
+
+.project-page-container {
+    max-width: 1400px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.project-create-view .project-create-card {
+    max-width: none;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.section-heading h2 {
+    margin-bottom: 6px;
+}
+
+.section-heading p {
+    margin-top: 0;
+}
+
+.section-heading-spaced {
+    margin-top: 28px;
+}
+
+.project-form-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) minmax(220px, 360px);
+    gap: 18px 24px;
+    align-items: start;
+}
+
+.project-form-grid .full-span {
+    grid-column: 1 / -1;
+}
+
+.project-create-view textarea {
+    min-height: 135px;
+}
+
+.project-create-view .project-table-container,
+.project-full-view .table-container {
+    width: 100%;
+    overflow-x: visible;
+}
+
+.project-create-view .project-table-container table,
+.project-full-view .table-container table {
+    min-width: 0;
+    width: 100%;
+    table-layout: auto;
+}
+
+.project-create-view .project-table-container th,
+.project-create-view .project-table-container td,
+.project-full-view .table-container th,
+.project-full-view .table-container td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.project-actions-row {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+    .project-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .project-create-view .project-table-container,
+    .project-full-view .table-container {
+        overflow-x: auto;
+    }
+
+    .project-create-view .project-table-container table,
+    .project-full-view .table-container table {
+        min-width: 700px;
+    }
+}
+
+
+/* ============================================================
+   Ajustes v25 - Footer siempre al pie de la página
+   ============================================================ */
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-header,
+.navbar,
+footer {
+    flex-shrink: 0;
+}
+
+main,
+.container,
+.home-container {
+    flex: 1 0 auto;
+}
+
+footer {
+    margin-top: auto;
+}
+
+
+/* ============================================================
+   Ajustes v26 - Evitar cards estiradas en Inicio
+   ============================================================ */
+
+.home-container.home-clean {
+    flex: 1 0 auto;
+    align-content: start;
+    align-items: start;
+    padding-top: 28px;
+}
+
+.home-container.home-clean .card {
+    min-height: 230px;
+    height: auto;
+    align-self: start;
+}
+
+.home-container.home-clean .card p {
+    flex: 0 0 auto;
+}
+
+.home-container.home-clean .card .btn-primary {
+    margin-top: 24px;
+}
+
+
+/* ============================================================
+   Ajustes v27 - Formularios anchos y sin slider innecesario
+   ============================================================ */
+
+.wide-form-view .container,
+.project-full-view .container {
+    max-width: 1400px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.wide-form-card,
+.project-edit-card {
+    max-width: none !important;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.wide-form-grid,
+.project-edit-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    gap: 18px 24px;
+    align-items: start;
+}
+
+.wide-form-grid .full-span,
+.project-edit-grid .full-span {
+    grid-column: 1 / -1;
+}
+
+.wide-form-view textarea,
+.project-full-view textarea {
+    min-height: 135px;
+}
+
+.form-actions-row {
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.wide-form-view .table-container,
+.project-full-view .table-container {
+    width: 100%;
+    overflow-x: visible;
+}
+
+.wide-form-view .table-container table,
+.project-full-view .table-container table {
+    min-width: 0;
+    width: 100%;
+    table-layout: auto;
+}
+
+.wide-form-view .table-container th,
+.wide-form-view .table-container td,
+.project-full-view .table-container th,
+.project-full-view .table-container td {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.document-card {
+    margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+    .wide-form-grid,
+    .project-edit-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .wide-form-view .table-container,
+    .project-full-view .table-container {
+        overflow-x: auto;
+    }
+
+    .wide-form-view .table-container table,
+    .project-full-view .table-container table {
+        min-width: 700px;
+    }
+}
+
+
+/* ============================================================
+   Ajustes v28 - Dashboard analítico
+   ============================================================ */
+
+.dashboard-analytics-page .main-header {
+    display: none;
+}
+
+.dashboard-analytics-page {
+    background:
+        radial-gradient(circle at top left, rgba(232, 202, 78, 0.10), transparent 34%),
+        var(--color-bg);
+}
+
+.dashboard-navbar {
+    position: sticky;
+    top: 0;
+}
+
+.dashboard-shell {
+    width: min(1480px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 28px 0 46px;
+    flex: 1 0 auto;
+}
+
+.dashboard-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 26px;
+    border-radius: 22px;
+    background:
+        linear-gradient(135deg, rgba(232, 202, 78, 0.16), transparent 38%),
+        linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    margin-bottom: 22px;
+}
+
+.dashboard-hero .eyebrow {
+    margin: 0 0 8px;
+    color: var(--color-accent);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 12px;
+}
+
+.dashboard-hero h1 {
+    margin: 0;
+    font-size: clamp(28px, 3vw, 44px);
+    letter-spacing: -0.04em;
+    color: var(--color-text);
+}
+
+.dashboard-hero p {
+    margin: 8px 0 0;
+    color: var(--color-text-secondary);
+    max-width: 700px;
+}
+
+.dashboard-hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.analytics-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.analytics-kpi-card {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 18px;
+    border-radius: 18px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    min-width: 0;
+}
+
+.analytics-kpi-highlight {
+    background:
+        linear-gradient(135deg, rgba(232, 202, 78, 0.85), rgba(244, 222, 138, 0.88));
+    color: #111827;
+    border-color: rgba(232, 202, 78, 0.75);
+}
+
+.analytics-kpi-card p {
+    margin: 0 0 6px;
+    color: var(--color-text-secondary);
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.analytics-kpi-highlight p,
+.analytics-kpi-highlight small {
+    color: rgba(17, 24, 39, 0.72);
+}
+
+.analytics-kpi-card h2 {
+    margin: 0;
+    font-size: clamp(22px, 2vw, 30px);
+    color: inherit;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+}
+
+.analytics-kpi-card small {
+    display: block;
+    margin-top: 7px;
+    color: var(--color-text-secondary);
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.kpi-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(232, 202, 78, 0.16);
+    color: var(--color-accent);
+    font-weight: 900;
+    flex: 0 0 auto;
+}
+
+.kpi-success {
+    background: var(--color-success-bg);
+    color: var(--color-success);
+}
+
+.kpi-danger {
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+}
+
+.analytics-layout {
+    display: grid;
+    grid-template-columns: 1.35fr 0.85fr 0.85fr;
+    gap: 18px;
+    align-items: start;
+}
+
+.analytics-panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    border-radius: 18px;
+    padding: 18px;
+    min-width: 0;
+}
+
+.analytics-panel-wide {
+    grid-column: span 2;
+}
+
+.panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.panel-header h2 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    color: var(--color-text);
+    letter-spacing: -0.02em;
+}
+
+.panel-header p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+    line-height: 1.35;
+}
+
+.panel-header a,
+.panel-badge {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--color-dark);
+    background: var(--color-accent);
+    border-radius: 999px;
+    padding: 7px 10px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.chart-box {
+    height: 315px;
+    position: relative;
+}
+
+.chart-box-small {
+    height: 265px;
+}
+
+.analytics-table-wrap {
+    overflow-x: auto;
+}
+
+.analytics-table {
+    min-width: 620px;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.analytics-table th {
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.analytics-table td {
+    border: none;
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text);
+}
+
+.analytics-table td small {
+    display: block;
+    margin-top: 4px;
+    color: var(--color-text-secondary);
+}
+
+.analytics-status {
+    display: inline-flex;
+    padding: 6px 9px;
+    border-radius: 999px;
+    background: rgba(232, 202, 78, 0.14);
+    color: var(--color-text);
+    font-weight: 800;
+    font-size: 12px;
+}
+
+.activity-list,
+.status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.activity-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
+    align-items: start;
+    padding: 12px;
+    border-radius: 14px;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+}
+
+.activity-item strong {
+    color: var(--color-text);
+}
+
+.activity-item p,
+.activity-item small {
+    margin: 3px 0 0;
+    color: var(--color-text-secondary);
+    line-height: 1.25;
+}
+
+.activity-item b {
+    color: var(--color-text);
+    white-space: nowrap;
+}
+
+.activity-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    margin-top: 4px;
+    background: var(--color-accent);
+}
+
+.activity-income {
+    background: var(--color-success);
+}
+
+.activity-expense {
+    background: var(--color-danger);
+}
+
+.status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    border-radius: 14px;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    color: var(--color-text);
+    font-weight: 800;
+}
+
+.status-row strong {
+    background: var(--color-accent);
+    color: var(--color-dark);
+    min-width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:root[data-theme="dark"] .dashboard-analytics-page {
+    background:
+        radial-gradient(circle at top left, rgba(232, 202, 78, 0.12), transparent 35%),
+        linear-gradient(135deg, #0B1220, #111827 60%, #0F172A);
+}
+
+:root[data-theme="dark"] .dashboard-hero {
+    background:
+        linear-gradient(135deg, rgba(232, 202, 78, 0.13), transparent 38%),
+        linear-gradient(135deg, rgba(31, 41, 55, 0.98), rgba(17, 24, 39, 0.95));
+}
+
+@media (max-width: 1180px) {
+    .analytics-kpi-grid {
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+    }
+
+    .analytics-layout {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .analytics-panel-wide {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 760px) {
+    .dashboard-shell {
+        width: min(100% - 24px, 1480px);
+        padding-top: 18px;
+    }
+
+    .dashboard-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .analytics-kpi-grid,
+    .analytics-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .analytics-panel-wide {
+        grid-column: span 1;
+    }
+
+    .chart-box,
+    .chart-box-small {
+        height: 260px;
+    }
+}
+
+
+/* ============================================================
+   Ajustes v29 - Estilo profesional para módulos y sin emoticonos
+   ============================================================ */
+
+.module-hidden-header {
+    display: none;
+}
+
+.metric-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 38%, transparent);
+    flex: 0 0 auto;
+}
+
+.metric-icon svg {
+    width: 23px;
+    height: 23px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.analytics-kpi-highlight .metric-icon {
+    color: #111827;
+    background: rgba(17, 24, 39, 0.08);
+    border-color: rgba(17, 24, 39, 0.18);
+}
+
+.icon-income {
+    color: var(--color-success);
+    background: var(--color-success-bg);
+    border-color: color-mix(in srgb, var(--color-success) 32%, transparent);
+}
+
+.icon-expense {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border-color: color-mix(in srgb, var(--color-danger) 32%, transparent);
+}
+
+.module-page {
+    background:
+        radial-gradient(circle at top left, rgba(232, 202, 78, 0.08), transparent 32%),
+        var(--color-bg);
+}
+
+.module-shell {
+    width: min(1480px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 26px 0 46px;
+}
+
+.module-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 22px;
+    margin-bottom: 20px;
+    padding: 24px 26px;
+    border: 1px solid var(--color-border);
+    border-radius: 22px;
+    background:
+        linear-gradient(135deg, rgba(232, 202, 78, 0.14), transparent 42%),
+        linear-gradient(135deg, var(--color-surface), var(--color-surface-alt));
+    box-shadow: var(--shadow-soft);
+}
+
+.module-hero .eyebrow {
+    margin: 0 0 8px;
+    color: var(--color-accent);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.module-hero h1 {
+    margin: 0;
+    color: var(--color-text);
+    font-size: clamp(26px, 2.5vw, 38px);
+    letter-spacing: -0.04em;
+}
+
+.module-hero p {
+    margin: 8px 0 0;
+    color: var(--color-text-secondary);
+    max-width: 760px;
+}
+
+.module-page .form-card,
+.module-page .section-card,
+.module-page .card,
+.module-page .table-container,
+.module-page .analytics-panel {
+    border-radius: 18px;
+}
+
+.module-page .form-card,
+.module-page .section-card,
+.module-page .card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+}
+
+.module-page .form-card {
+    max-width: none;
+}
+
+.module-table {
+    padding: 0;
+    overflow-x: auto;
+    border-radius: 16px;
+    box-shadow: none;
+}
+
+.module-table table {
+    min-width: 900px;
+}
+
+.module-page table th {
+    background: transparent;
+    color: var(--color-text-secondary);
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.module-page table td {
+    border-left: none;
+    border-right: none;
+    border-color: var(--color-border);
+}
+
+.module-page tr:nth-child(even) td {
+    background: color-mix(in srgb, var(--color-surface-alt) 78%, transparent);
+}
+
+.project-module-page .btn-primary,
+.accounting-module-page .btn-primary,
+.project-module-page .btn-secondary,
+.accounting-module-page .btn-secondary,
+.project-module-page .btn-warning,
+.accounting-module-page .btn-warning {
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.10);
+}
+
+.project-module-page .detail-grid,
+.project-detail-full {
+    grid-template-columns: 1fr 1fr;
+}
+
+.project-module-page.project-full-view .detail-grid.project-detail-full {
+    grid-template-columns: 1fr 1fr;
+}
+
+.accounting-module-page .dashboard-grid {
+    margin-top: 0;
+}
+
+.accounting-module-page .summary-card {
+    border-radius: 18px;
+    border-left: 0;
+    border-top: 4px solid var(--color-accent);
+}
+
+.accounting-module-page .forms-grid,
+.accounting-module-page .section-grid {
+    gap: 18px;
+}
+
+.accounting-module-page .table-container {
+    padding: 0;
+    overflow-x: auto;
+}
+
+.accounting-module-page .table-container table {
+    min-width: 900px;
+}
+
+:root[data-theme="dark"] .module-page {
+    background:
+        radial-gradient(circle at top left, rgba(232, 202, 78, 0.10), transparent 34%),
+        linear-gradient(135deg, #0B1220, #111827 60%, #0F172A);
+}
+
+:root[data-theme="dark"] .module-hero {
+    background:
+        linear-gradient(135deg, rgba(232, 202, 78, 0.12), transparent 42%),
+        linear-gradient(135deg, rgba(31, 41, 55, 0.98), rgba(17, 24, 39, 0.96));
+}
+
+@media (max-width: 980px) {
+    .module-shell {
+        width: min(100% - 24px, 1480px);
+    }
+
+    .module-hero {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .project-module-page .detail-grid,
+    .project-detail-full,
+    .project-module-page.project-full-view .detail-grid.project-detail-full {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ============================================================
+   Ajustes v30 - Leyenda de gráfico con check activo/inactivo
+   ============================================================ */
+
+.chart-toggle-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin: 4px 0 8px;
+}
+
+.chart-toggle-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    font-family: inherit;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 5px 8px;
+    border-radius: 999px;
+}
+
+.chart-toggle-item:hover {
+    background: var(--color-surface-alt);
+}
+
+.chart-toggle-check {
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    border: 2px solid var(--legend-color, var(--color-accent));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--legend-color, var(--color-accent));
+    background: transparent;
+    transition: background-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.chart-toggle-check svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 1;
+}
+
+.chart-toggle-item:not(.is-active) {
+    opacity: 0.58;
+}
+
+.chart-toggle-item:not(.is-active) .chart-toggle-check svg {
+    opacity: 0;
+}
+
+.chart-toggle-item.is-active .chart-toggle-check {
+    background: color-mix(in srgb, var(--legend-color, var(--color-accent)) 16%, transparent);
+}
+
+.chart-toggle-item:active .chart-toggle-check {
+    transform: scale(0.92);
+}
+
+
+/* ============================================================
+   Ajustes v31 - Dashboard final y alineación de módulos
+   ============================================================ */
+
+.dashboard-brand-nav {
+    min-width: 110px;
+}
+
+.dashboard-hero {
+    align-items: stretch;
+}
+
+.dashboard-hero > div:first-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.dashboard-hero-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 14px;
+    min-width: 310px;
+}
+
+.hero-task-card {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px;
+    border-radius: 16px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.08);
+}
+
+.hero-task-label {
+    display: block;
+    margin-bottom: 4px;
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.hero-task-card strong {
+    color: var(--color-text);
+    font-size: 16px;
+}
+
+.btn-small {
+    padding: 8px 11px !important;
+    font-size: 12px !important;
+}
+
+.analytics-kpi-grid {
+    align-items: stretch;
+}
+
+.analytics-kpi-card {
+    height: 100%;
+    min-height: 132px;
+}
+
+.analytics-kpi-card > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.analytics-kpi-card h2 {
+    line-height: 1.1;
+}
+
+.analytics-layout {
+    align-items: stretch;
+}
+
+.analytics-panel {
+    height: 100%;
+}
+
+.panel-header {
+    min-height: 58px;
+}
+
+.panel-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project-module-page #tablaProyectos .btn-warning,
+.project-module-page a.btn-warning[href*="editar-proyecto"],
+.project-module-page a.btn-warning[href*="editar"] {
+    background: var(--color-accent) !important;
+    color: var(--color-dark) !important;
+}
+
+.project-module-page #tablaProyectos .btn-warning:hover,
+.project-module-page a.btn-warning[href*="editar-proyecto"]:hover,
+.project-module-page a.btn-warning[href*="editar"]:hover {
+    filter: brightness(0.96);
+}
+
+.project-create-view .section-heading-spaced {
+    margin-top: 14px;
+}
+
+.project-create-view .project-table-container {
+    margin-top: 8px;
+}
+
+.project-create-view .project-actions-row {
+    margin-top: 12px;
+}
+
+.project-create-view .project-create-card {
+    padding-top: 18px;
+}
+
+.project-create-view textarea {
+    min-height: 105px;
+}
+
+:root[data-theme="dark"] .hero-task-card {
+    background: rgba(31, 41, 55, 0.88);
+}
+
+@media (max-width: 980px) {
+    .dashboard-hero {
+        align-items: flex-start;
+    }
+
+    .dashboard-hero-side {
+        width: 100%;
+        min-width: 0;
+        align-items: stretch;
+    }
+
+    .dashboard-hero-actions {
+        justify-content: flex-start;
+    }
+
+    .analytics-kpi-card {
+        min-height: 120px;
+    }
+}
+
+
+/* ============================================================
+   Ajustes v32 - Actividad en navbar y movimientos extendidos
+   ============================================================ */
+
+.dashboard-brand-nav {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.navbar-task-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(232, 202, 78, 0.12);
+    border: 1px solid rgba(232, 202, 78, 0.32);
+    color: var(--color-text);
+    white-space: nowrap;
+}
+
+.navbar-task-pill span {
+    color: var(--color-text-secondary);
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.navbar-task-pill strong {
+    color: var(--color-text);
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.dashboard-hero {
+    align-items: center;
+}
+
+.dashboard-hero-side {
+    justify-content: center;
+    min-width: auto;
+}
+
+.dashboard-hero-actions {
+    align-items: center;
+}
+
+.analytics-panel-movements-wide {
+    grid-column: span 2;
+}
+
+.analytics-panel-movements-wide .activity-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.analytics-panel-movements-wide .activity-item {
+    min-height: 92px;
+}
+
+@media (max-width: 1180px) {
+    .analytics-panel-movements-wide {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 900px) {
+    .navbar-task-pill {
+        order: 3;
+        width: 100%;
+        justify-content: space-between;
+        border-radius: 14px;
+    }
+
+    .analytics-panel-movements-wide {
+        grid-column: span 1;
+    }
+
+    .analytics-panel-movements-wide .activity-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ============================================================
+   Ajustes v33 - Movimientos full width y colores diferenciados
+   ============================================================ */
+
+/* Íconos KPI con colores distintos */
+.icon-projects {
+    color: #3B82F6;
+    background: rgba(59, 130, 246, 0.16);
+    border-color: rgba(59, 130, 246, 0.34);
+}
+
+.icon-tasks {
+    color: #A855F7;
+    background: rgba(168, 85, 247, 0.15);
+    border-color: rgba(168, 85, 247, 0.34);
+}
+
+.icon-income {
+    color: #22C55E;
+    background: rgba(34, 197, 94, 0.14);
+    border-color: rgba(34, 197, 94, 0.34);
+}
+
+.icon-expense {
+    color: #EF4444;
+    background: rgba(239, 68, 68, 0.14);
+    border-color: rgba(239, 68, 68, 0.34);
+}
+
+/* Actividad operativa en navbar con color propio */
+.navbar-task-pill {
+    background: rgba(34, 197, 94, 0.13);
+    border-color: rgba(34, 197, 94, 0.36);
+}
+
+.navbar-task-pill span {
+    color: #86EFAC;
+}
+
+.navbar-task-pill strong {
+    color: var(--color-text);
+}
+
+:root:not([data-theme="dark"]) .navbar-task-pill span {
+    color: #15803D;
+}
+
+:root[data-theme="dark"] .navbar-task-pill {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(134, 239, 172, 0.30);
+}
+
+/* Últimos movimientos ocupa todo el ancho del dashboard */
+.analytics-panel-movements-wide {
+    grid-column: 1 / -1;
+}
+
+.analytics-panel-movements-wide .activity-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(260px, 1fr));
+    gap: 12px;
+}
+
+.analytics-panel-movements-wide .activity-item {
+    min-height: 92px;
+}
+
+/* Alineación visual de paneles superiores */
+.analytics-layout {
+    align-items: stretch;
+}
+
+.analytics-panel {
+    min-height: 100%;
+}
+
+/* Ajuste responsive */
+@media (max-width: 1180px) {
+    .analytics-panel-movements-wide {
+        grid-column: 1 / -1;
+    }
+
+    .analytics-panel-movements-wide .activity-list {
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .analytics-panel-movements-wide .activity-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ============================================================
+   Ajustes v34 - Contraste de botones en modo oscuro/claro
+   ============================================================ */
+
+/* Botones de acciones principales tipo guardar/terminar */
+.btn-secondary,
+button.btn-secondary,
+a.btn-secondary,
+.module-page .btn-secondary,
+.module-page button.btn-secondary,
+.module-page a.btn-secondary,
+.project-module-page .btn-secondary,
+.project-module-page button.btn-secondary,
+.project-module-page a.btn-secondary,
+.accounting-module-page .btn-secondary,
+.accounting-module-page button.btn-secondary,
+.accounting-module-page a.btn-secondary {
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: 1px solid #3B82F6 !important;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22) !important;
+}
+
+/* Botones primarios y de editar con amarillo oficial y texto oscuro */
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+.btn-warning,
+button.btn-warning,
+a.btn-warning,
+.module-page .btn-primary,
+.module-page button.btn-primary,
+.module-page a.btn-primary,
+.module-page .btn-warning,
+.module-page button.btn-warning,
+.module-page a.btn-warning {
+    background: var(--color-accent) !important;
+    color: var(--color-dark) !important;
+    border: 1px solid var(--color-accent) !important;
+}
+
+/* Botones peligrosos siempre legibles */
+.btn-danger,
+button.btn-danger,
+a.btn-danger {
+    background: #DC2626 !important;
+    color: #FFFFFF !important;
+    border: 1px solid #DC2626 !important;
+}
+
+/* Estados hover sin perder contraste */
+.btn-secondary:hover,
+button.btn-secondary:hover,
+a.btn-secondary:hover {
+    background: #1D4ED8 !important;
+    color: #FFFFFF !important;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover,
+a.btn-primary:hover,
+.btn-warning:hover,
+button.btn-warning:hover,
+a.btn-warning:hover {
+    background: var(--color-accent-soft) !important;
+    color: var(--color-dark) !important;
+}
+
+.btn-danger:hover,
+button.btn-danger:hover,
+a.btn-danger:hover {
+    background: #B91C1C !important;
+    color: #FFFFFF !important;
+}
+
+/* Botones dentro de tablas y formularios */
+.table-container .btn-secondary,
+.table-container .btn-warning,
+.table-container .btn-primary,
+.form-actions-row .btn-secondary,
+.form-actions-row .btn-warning,
+.form-actions-row .btn-primary,
+.project-actions-row .btn-secondary,
+.project-actions-row .btn-warning,
+.project-actions-row .btn-primary {
+    font-weight: 900;
+}
+
+/* Modo oscuro: mantener fondos claros/saturados para evitar oscuro sobre oscuro */
+:root[data-theme="dark"] .btn-secondary,
+:root[data-theme="dark"] button.btn-secondary,
+:root[data-theme="dark"] a.btn-secondary {
+    background: #3B82F6 !important;
+    color: #FFFFFF !important;
+    border-color: #60A5FA !important;
+}
+
+:root[data-theme="dark"] .btn-primary,
+:root[data-theme="dark"] button.btn-primary,
+:root[data-theme="dark"] a.btn-primary,
+:root[data-theme="dark"] .btn-warning,
+:root[data-theme="dark"] button.btn-warning,
+:root[data-theme="dark"] a.btn-warning {
+    background: #E8CA4E !important;
+    color: #111827 !important;
+    border-color: #F4DE8A !important;
+}
+
+
+/* ============================================================
+   Ajustes v35 - Botones usando solo paleta oficial CEGA
+   Paleta:
+   #E8CA4E, #F4DE8A, #111827, #1F2937, #374151, #F9FAFB, #D1D5DB
+   ============================================================ */
+
+/* Acción principal: amarillo oficial */
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+.btn-warning,
+button.btn-warning,
+a.btn-warning,
+.module-page .btn-primary,
+.module-page button.btn-primary,
+.module-page a.btn-primary,
+.module-page .btn-warning,
+.module-page button.btn-warning,
+.module-page a.btn-warning {
+    background: #E8CA4E !important;
+    color: #111827 !important;
+    border: 1px solid #E8CA4E !important;
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.16) !important;
+}
+
+/* Acción de guardar/terminar/confirmar: gris oficial con texto claro */
+.btn-secondary,
+button.btn-secondary,
+a.btn-secondary,
+.module-page .btn-secondary,
+.module-page button.btn-secondary,
+.module-page a.btn-secondary,
+.project-module-page .btn-secondary,
+.project-module-page button.btn-secondary,
+.project-module-page a.btn-secondary,
+.accounting-module-page .btn-secondary,
+.accounting-module-page button.btn-secondary,
+.accounting-module-page a.btn-secondary {
+    background: #374151 !important;
+    color: #F9FAFB !important;
+    border: 1px solid #D1D5DB !important;
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.18) !important;
+}
+
+/* Acción de cancelar/eliminar: oscuro oficial con texto claro */
+.btn-danger,
+button.btn-danger,
+a.btn-danger {
+    background: #111827 !important;
+    color: #F9FAFB !important;
+    border: 1px solid #374151 !important;
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.20) !important;
+}
+
+/* Hover con colores de la misma paleta */
+.btn-primary:hover,
+button.btn-primary:hover,
+a.btn-primary:hover,
+.btn-warning:hover,
+button.btn-warning:hover,
+a.btn-warning:hover {
+    background: #F4DE8A !important;
+    color: #111827 !important;
+    border-color: #F4DE8A !important;
+}
+
+.btn-secondary:hover,
+button.btn-secondary:hover,
+a.btn-secondary:hover {
+    background: #1F2937 !important;
+    color: #F9FAFB !important;
+    border-color: #D1D5DB !important;
+}
+
+.btn-danger:hover,
+button.btn-danger:hover,
+a.btn-danger:hover {
+    background: #374151 !important;
+    color: #F9FAFB !important;
+    border-color: #D1D5DB !important;
+}
+
+/* Modo oscuro: mantener contraste con la misma paleta oficial */
+:root[data-theme="dark"] .btn-primary,
+:root[data-theme="dark"] button.btn-primary,
+:root[data-theme="dark"] a.btn-primary,
+:root[data-theme="dark"] .btn-warning,
+:root[data-theme="dark"] button.btn-warning,
+:root[data-theme="dark"] a.btn-warning {
+    background: #E8CA4E !important;
+    color: #111827 !important;
+    border-color: #F4DE8A !important;
+}
+
+:root[data-theme="dark"] .btn-secondary,
+:root[data-theme="dark"] button.btn-secondary,
+:root[data-theme="dark"] a.btn-secondary {
+    background: #F4DE8A !important;
+    color: #111827 !important;
+    border-color: #E8CA4E !important;
+}
+
+:root[data-theme="dark"] .btn-danger,
+:root[data-theme="dark"] button.btn-danger,
+:root[data-theme="dark"] a.btn-danger {
+    background: #374151 !important;
+    color: #F9FAFB !important;
+    border-color: #D1D5DB !important;
+}
+
+/* Botón cerrar sesión: sobrio, sin rojo externo */
+.session-box .btn-danger,
+:root[data-theme="dark"] .session-box .btn-danger {
+    background: #111827 !important;
+    color: #F9FAFB !important;
+    border: 1px solid #D1D5DB !important;
+}
+
+.session-box .btn-danger:hover,
+:root[data-theme="dark"] .session-box .btn-danger:hover {
+    background: #374151 !important;
+    color: #F9FAFB !important;
+}
+
+/* Botones pequeños de tablas */
+.btn-small {
+    font-weight: 900;
+}
+
+
+/* ============================================================
+   Ajustes v36 - Botones consistentes
+   Regla visual:
+   - Acciones generales: amarillo brillante
+   - Agregar/crear/registrar: verde
+   - Quitar/eliminar/cancelar: rojo
+   ============================================================ */
+
+:root {
+    --btn-yellow: #F4DE8A;
+    --btn-yellow-border: #E8CA4E;
+    --btn-yellow-text: #111827;
+    --btn-green: #16A34A;
+    --btn-green-hover: #15803D;
+    --btn-green-border: #22C55E;
+    --btn-red: #DC2626;
+    --btn-red-hover: #B91C1C;
+    --btn-red-border: #EF4444;
+}
+
+/* Por defecto, todos los botones de acción usan el mismo amarillo brillante */
+.btn-primary,
+button.btn-primary,
+a.btn-primary,
+.btn-secondary,
+button.btn-secondary,
+a.btn-secondary,
+.btn-warning,
+button.btn-warning,
+a.btn-warning,
+.module-page .btn-primary,
+.module-page button.btn-primary,
+.module-page a.btn-primary,
+.module-page .btn-secondary,
+.module-page button.btn-secondary,
+.module-page a.btn-secondary,
+.module-page .btn-warning,
+.module-page button.btn-warning,
+.module-page a.btn-warning {
+    background: var(--btn-yellow) !important;
+    color: var(--btn-yellow-text) !important;
+    border: 1px solid var(--btn-yellow-border) !important;
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.15) !important;
+    font-weight: 900;
+}
+
+/* Acciones de agregar / crear / registrar: mismo verde en todo el sistema */
+#btnNuevoProyecto,
+#linkCrearProyecto,
+a[href*="crear-proyecto"],
+a[href*="crear-tarea"],
+button[onclick*="crear"],
+button[onclick*="Crear"],
+button[onclick*="registrar"],
+button[onclick*="Registrar"],
+button[onclick*="subir"],
+button[onclick*="Subir"],
+.project-create-view button[onclick*="crearProyecto"],
+.accounting-module-page button[onclick*="registrarIngreso"],
+.accounting-module-page button[onclick*="registrarEgreso"],
+.accounting-module-page button[onclick*="procesarNomina"] {
+    background: var(--btn-green) !important;
+    color: #FFFFFF !important;
+    border: 1px solid var(--btn-green-border) !important;
+    box-shadow: 0 8px 18px rgba(22, 163, 74, 0.22) !important;
+}
+
+/* Acciones de quitar / eliminar / cancelar: mismo rojo en todo el sistema */
+.btn-danger,
+button.btn-danger,
+a.btn-danger,
+button[onclick*="eliminar"],
+button[onclick*="Eliminar"],
+button[onclick*="remover"],
+button[onclick*="Remover"],
+button[onclick*="cancelar"],
+button[onclick*="Cancelar"],
+a[href*="cancelar"] {
+    background: var(--btn-red) !important;
+    color: #FFFFFF !important;
+    border: 1px solid var(--btn-red-border) !important;
+    box-shadow: 0 8px 18px rgba(220, 38, 38, 0.22) !important;
+    font-weight: 900;
+}
+
+/* Cerrar sesión se mantiene sobrio, no rojo de eliminación */
+.session-box .btn-danger,
+:root[data-theme="dark"] .session-box .btn-danger {
+    background: #374151 !important;
+    color: #F9FAFB !important;
+    border: 1px solid #D1D5DB !important;
+    box-shadow: none !important;
+}
+
+/* Hover consistente */
+.btn-primary:hover,
+button.btn-primary:hover,
+a.btn-primary:hover,
+.btn-secondary:hover,
+button.btn-secondary:hover,
+a.btn-secondary:hover,
+.btn-warning:hover,
+button.btn-warning:hover,
+a.btn-warning:hover {
+    background: #E8CA4E !important;
+    color: #111827 !important;
+    border-color: #F4DE8A !important;
+}
+
+#btnNuevoProyecto:hover,
+#linkCrearProyecto:hover,
+a[href*="crear-proyecto"]:hover,
+a[href*="crear-tarea"]:hover,
+button[onclick*="crear"]:hover,
+button[onclick*="Crear"]:hover,
+button[onclick*="registrar"]:hover,
+button[onclick*="Registrar"]:hover,
+button[onclick*="subir"]:hover,
+button[onclick*="Subir"]:hover {
+    background: var(--btn-green-hover) !important;
+    color: #FFFFFF !important;
+    border-color: var(--btn-green-border) !important;
+}
+
+.btn-danger:hover,
+button.btn-danger:hover,
+a.btn-danger:hover,
+button[onclick*="eliminar"]:hover,
+button[onclick*="Eliminar"]:hover,
+button[onclick*="remover"]:hover,
+button[onclick*="Remover"]:hover,
+button[onclick*="cancelar"]:hover,
+button[onclick*="Cancelar"]:hover {
+    background: var(--btn-red-hover) !important;
+    color: #FFFFFF !important;
+    border-color: var(--btn-red-border) !important;
+}
+
+.session-box .btn-danger:hover,
+:root[data-theme="dark"] .session-box .btn-danger:hover {
+    background: #1F2937 !important;
+    color: #F9FAFB !important;
+    border-color: #D1D5DB !important;
+}
+
+/* Modo oscuro: conservar los mismos tonos para consistencia */
+:root[data-theme="dark"] .btn-primary,
+:root[data-theme="dark"] button.btn-primary,
+:root[data-theme="dark"] a.btn-primary,
+:root[data-theme="dark"] .btn-secondary,
+:root[data-theme="dark"] button.btn-secondary,
+:root[data-theme="dark"] a.btn-secondary,
+:root[data-theme="dark"] .btn-warning,
+:root[data-theme="dark"] button.btn-warning,
+:root[data-theme="dark"] a.btn-warning {
+    background: var(--btn-yellow) !important;
+    color: #111827 !important;
+    border-color: var(--btn-yellow-border) !important;
+}
+
+:root[data-theme="dark"] #btnNuevoProyecto,
+:root[data-theme="dark"] #linkCrearProyecto,
+:root[data-theme="dark"] a[href*="crear-proyecto"],
+:root[data-theme="dark"] a[href*="crear-tarea"],
+:root[data-theme="dark"] button[onclick*="crear"],
+:root[data-theme="dark"] button[onclick*="Crear"],
+:root[data-theme="dark"] button[onclick*="registrar"],
+:root[data-theme="dark"] button[onclick*="Registrar"],
+:root[data-theme="dark"] button[onclick*="subir"],
+:root[data-theme="dark"] button[onclick*="Subir"] {
+    background: var(--btn-green) !important;
+    color: #FFFFFF !important;
+    border-color: var(--btn-green-border) !important;
+}
+
+:root[data-theme="dark"] .btn-danger,
+:root[data-theme="dark"] button.btn-danger,
+:root[data-theme="dark"] a.btn-danger,
+:root[data-theme="dark"] button[onclick*="eliminar"],
+:root[data-theme="dark"] button[onclick*="Eliminar"],
+:root[data-theme="dark"] button[onclick*="remover"],
+:root[data-theme="dark"] button[onclick*="Remover"],
+:root[data-theme="dark"] button[onclick*="cancelar"],
+:root[data-theme="dark"] button[onclick*="Cancelar"] {
+    background: var(--btn-red) !important;
+    color: #FFFFFF !important;
+    border-color: var(--btn-red-border) !important;
+}
+
+
+/* ============================================================
+   Ajustes v37 - Nómina sin aura verde y edición de transacciones
+   ============================================================ */
+
+/* Procesar nómina no es agregar/quitar: usa amarillo general y sin aura verde */
+button[onclick*="procesarNomina"],
+.accounting-module-page button[onclick*="procesarNomina"],
+:root[data-theme="dark"] button[onclick*="procesarNomina"],
+:root[data-theme="dark"] .accounting-module-page button[onclick*="procesarNomina"] {
+    background: var(--btn-yellow, #F4DE8A) !important;
+    color: #111827 !important;
+    border: 1px solid var(--btn-yellow-border, #E8CA4E) !important;
+    box-shadow: 0 8px 18px rgba(17, 24, 39, 0.15) !important;
+}
+
+/* Botones de edición del historial: amarillo general, consistente y clickeable */
+#tablaTransacciones button[onclick*="editarTransaccion"],
+#tablaTransaccionesProyecto button[onclick*="editarTransaccion"] {
+    background: var(--btn-yellow, #F4DE8A) !important;
+    color: #111827 !important;
+    border: 1px solid var(--btn-yellow-border, #E8CA4E) !important;
+    box-shadow: 0 6px 14px rgba(17, 24, 39, 0.12) !important;
+    cursor: pointer;
+}

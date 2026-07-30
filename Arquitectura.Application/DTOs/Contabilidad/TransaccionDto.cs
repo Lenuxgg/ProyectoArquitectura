@@ -4,6 +4,7 @@ public class TransaccionDto
 {
     public int Id { get; set; }
     public string Tipo { get; set; } = string.Empty;
+    public int CategoriaId { get; set; }
     public decimal Monto { get; set; }
     public string? Descripcion { get; set; }
     public DateTime Fecha { get; set; }

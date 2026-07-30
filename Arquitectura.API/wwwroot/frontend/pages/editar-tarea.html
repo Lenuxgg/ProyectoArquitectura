@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/theme.js?v=18"></script>
+    <script src="../js/theme.js?v=37"></script>
     <title>Editar Tarea - CEGA</title>
-    <link rel="stylesheet" href="../css/styles.css?v=18">
+    <link rel="stylesheet" href="../css/styles.css?v=37">
 </head>
-<body>
+<body class="module-page project-module-page wide-form-view">
 
-    <header class="main-header">
+    <header class="main-header module-hidden-header">
         <h1>Editar Tarea</h1>
-        <p>Actualización de información y estado de la tarea</p>
+        <p>Actualización de información, estado y documentos de la tarea</p>
     </header>
 
-        <nav class="navbar">
+    <nav class="navbar">
         <div class="navbar-left">
             <a href="../index.html">Inicio</a>
             <a href="proyectos.html">Proyectos</a>
@@ -28,61 +28,77 @@
         </div>
     </nav>
 
-    <main class="container">
-        <section class="form-card">
+    <main class="dashboard-shell module-shell">
+        <section class="module-hero">
+            <div>
+                <p class="eyebrow">Edición de tarea</p>
+                <h1>Editar Tarea</h1>
+                <p>Actualización de información, estado y documentos de la tarea.</p>
+            </div>
+        </section>
+        <section class="form-card wide-form-card">
             <h2>Datos de la tarea</h2>
 
             <input type="hidden" id="tareaId">
             <input type="hidden" id="proyectoId">
 
-            <div class="form-group">
-                <label>Título</label>
-                <input type="text" id="titulo">
+            <div class="wide-form-grid">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="titulo">
+                </div>
+
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="estado">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En Progreso">En Progreso</option>
+                        <option value="Terminada">Terminada</option>
+                        <option value="Cancelada">Cancelada</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha de inicio</label>
+                    <input type="date" id="fechaInicio">
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha de fin</label>
+                    <input type="date" id="fechaFin">
+                </div>
+
+                <div class="form-group full-span">
+                    <label>Descripción</label>
+                    <textarea id="descripcion"></textarea>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Estado</label>
-                <select id="estado">
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="En Progreso">En Progreso</option>
-                    <option value="Terminada">Terminada</option>
-                    <option value="Cancelada">Cancelada</option>
-                </select>
+            <div class="form-actions-row">
+                <button class="btn-secondary" onclick="editarTarea()">Guardar Cambios</button>
+                <a id="btnCancelar" class="btn-danger" href="#">Cancelar</a>
             </div>
-
-            <div class="form-group">
-                <label>Descripción</label>
-                <textarea id="descripcion"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Fecha de inicio</label>
-                <input type="date" id="fechaInicio">
-            </div>
-
-            <div class="form-group">
-                <label>Fecha de fin</label>
-                <input type="date" id="fechaFin">
-            </div>
-
-            <button class="btn-secondary" onclick="editarTarea()">Guardar Cambios</button>
-            <a id="btnCancelar" class="btn-danger" href="#">Cancelar</a>
 
             <p id="mensajeTarea" class="message"></p>
         </section>
 
-        <section class="form-card" style="margin-top: 24px;">
+        <section class="form-card wide-form-card document-card">
             <h2>Documento de la tarea</h2>
             <p>
                 Desde esta sección puedes adjuntar documentos o imágenes relacionados con la tarea.
             </p>
 
-            <div class="form-group">
-                <label>Subir documento</label>
-                <input type="file" id="archivoTarea">
+            <div class="wide-form-grid">
+                <div class="form-group full-span">
+                    <label>Subir documento</label>
+                    <input type="file" id="archivoTarea">
+                </div>
             </div>
 
-            <button class="btn-secondary" onclick="subirDocumentoTarea()">Subir documento</button>
+            <div class="form-actions-row">
+                <button class="btn-secondary" onclick="subirDocumentoTarea()">Subir documento</button>
+            </div>
+
             <p id="mensajeDocumentoTarea" class="message"></p>
 
             <div class="table-container" style="margin-top: 16px;">
@@ -105,14 +121,17 @@
         </section>
     </main>
 
-    <script src="../js/api.js?v=18"></script>
-    <script src="../js/auth.js?v=18"></script>
-    <script src="../js/tareas.js?v=18"></script>
+    <footer>
+        <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
+    </footer>
+
+    <script src="../js/api.js?v=37"></script>
+    <script src="../js/auth.js?v=37"></script>
+    <script src="../js/tareas.js?v=37"></script>
     <script>
-        
         validarSesion();
         pintarUsuarioEnNavbar();
-cargarTareaParaEditar();
+        cargarTareaParaEditar();
     </script>
 
 </body>

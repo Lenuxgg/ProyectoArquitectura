@@ -1,6 +1,9 @@
 const CONTABILIDAD_API_BASE = (typeof API_BASE !== "undefined") ? API_BASE : `${window.location.origin}/api`;
 
 let proyectosPermitidosContabilidad = [];
+let transaccionesContabilidadActuales = [];
+let transaccionEditandoId = null;
+let transaccionEditandoTipo = null;
 
 // ============================================================
 // SESIÓN / TOKEN
@@ -233,7 +236,6 @@ function aplicarPermisosContabilidad() {
 
     const seccionesAdmin = [
         "seccionResumenAdmin",
-        "seccionRegistroAdmin",
         "seccionCierreAdmin",
         "seccionCategoriasAdmin",
         "seccionNominaAdmin"
@@ -256,7 +258,7 @@ function aplicarPermisosContabilidad() {
     const descripcion = document.getElementById("descripcionContabilidad");
 
     if (descripcion) {
-        descripcion.textContent = "Consulta los movimientos financieros relacionados únicamente con los proyectos asignados.";
+        descripcion.textContent = "Consulta, registra y edita ingresos y egresos de sus proyectos asignados.";
     }
 }
 
@@ -514,8 +516,10 @@ async function cargarTransaccionesFrontend() {
             });
         }
 
+        transaccionesContabilidadActuales = transaccionesFiltradas || [];
+
         if (!transaccionesFiltradas || transaccionesFiltradas.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="8">No hay transacciones registradas para sus proyectos asignados.</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="9">No hay transacciones registradas para sus proyectos asignados.</td></tr>`;
             actualizarResumenFinanciero(0, 0, 0, 0);
             return [];
         }
@@ -543,6 +547,9 @@ async function cargarTransaccionesFrontend() {
                     <td>${formatearFechaContabilidad(fecha)}</td>
                     <td class="text-right">${formatearMoneda(monto)}</td>
                     <td>${usuarioId}</td>
+                    <td>
+                        <button class="btn-warning btn-small" type="button" onclick="editarTransaccionDesdeTabla(${id})">Editar</button>
+                    </td>
                 </tr>
             `;
         });
@@ -551,18 +558,13 @@ async function cargarTransaccionesFrontend() {
         return transaccionesFiltradas;
 
     } catch (error) {
-        tabla.innerHTML = `<tr><td colspan="8">Error: ${error.message}</td></tr>`;
+        tabla.innerHTML = `<tr><td colspan="9">Error: ${error.message}</td></tr>`;
         actualizarResumenFinanciero(0, 0, 0, 0);
         return [];
     }
 }
 
 async function registrarIngresoFrontend() {
-    if (!usuarioEsAdmin()) {
-        mostrarMensaje("mensajeIngreso", "No tiene permisos para registrar ingresos.", "error");
-        return;
-    }
-
     const dto = {
         categoriaId: parseInt(document.getElementById("categoriaIngreso").value),
         monto: parseFloat(document.getElementById("montoIngreso").value),
@@ -587,9 +589,13 @@ async function registrarIngresoFrontend() {
     }
 
     try {
-        await apiEnviarContabilidad("/Contabilidad/ingresos", "POST", dto, true);
-
-        mostrarMensaje("mensajeIngreso", "Ingreso registrado correctamente.", "success");
+        if (transaccionEditandoId && transaccionEditandoTipo === "Ingreso") {
+            await apiEnviarContabilidad(`/Contabilidad/${transaccionEditandoId}`, "PUT", dto, true);
+            mostrarMensaje("mensajeIngreso", "Ingreso actualizado correctamente.", "success");
+        } else {
+            await apiEnviarContabilidad("/Contabilidad/ingresos", "POST", dto, true);
+            mostrarMensaje("mensajeIngreso", "Ingreso registrado correctamente.", "success");
+        }
 
         document.getElementById("montoIngreso").value = "";
         document.getElementById("descripcionIngreso").value = "";
@@ -598,6 +604,7 @@ async function registrarIngresoFrontend() {
             document.getElementById("ingresoProyectoId").value = "";
         }
 
+        limpiarEdicionTransaccion("Ingreso");
         await cargarPanelContabilidad();
 
     } catch (error) {
@@ -606,11 +613,6 @@ async function registrarIngresoFrontend() {
 }
 
 async function registrarEgresoFrontend() {
-    if (!usuarioEsAdmin()) {
-        mostrarMensaje("mensajeEgreso", "No tiene permisos para registrar egresos.", "error");
-        return;
-    }
-
     const dto = {
         categoriaId: parseInt(document.getElementById("categoriaEgreso").value),
         monto: parseFloat(document.getElementById("montoEgreso").value),
@@ -635,9 +637,13 @@ async function registrarEgresoFrontend() {
     }
 
     try {
-        await apiEnviarContabilidad("/Contabilidad/egresos", "POST", dto, true);
-
-        mostrarMensaje("mensajeEgreso", "Egreso registrado correctamente.", "success");
+        if (transaccionEditandoId && transaccionEditandoTipo === "Egreso") {
+            await apiEnviarContabilidad(`/Contabilidad/${transaccionEditandoId}`, "PUT", dto, true);
+            mostrarMensaje("mensajeEgreso", "Egreso actualizado correctamente.", "success");
+        } else {
+            await apiEnviarContabilidad("/Contabilidad/egresos", "POST", dto, true);
+            mostrarMensaje("mensajeEgreso", "Egreso registrado correctamente.", "success");
+        }
 
         document.getElementById("montoEgreso").value = "";
         document.getElementById("descripcionEgreso").value = "";
@@ -646,11 +652,143 @@ async function registrarEgresoFrontend() {
             document.getElementById("egresoProyectoId").value = "";
         }
 
+        limpiarEdicionTransaccion("Egreso");
         await cargarPanelContabilidad();
 
     } catch (error) {
         mostrarMensaje("mensajeEgreso", error.message, "error");
     }
+}
+
+
+
+// ============================================================
+// EDICIÓN DE TRANSACCIONES DESDE HISTORIAL
+// ============================================================
+
+function unirTransaccionesSinDuplicados(actuales, nuevas) {
+    const mapa = new Map();
+
+    (actuales || []).forEach(t => {
+        mapa.set(Number(obtenerValor(t, "id", "Id")), t);
+    });
+
+    (nuevas || []).forEach(t => {
+        mapa.set(Number(obtenerValor(t, "id", "Id")), t);
+    });
+
+    return Array.from(mapa.values());
+}
+
+function editarTransaccionDesdeTabla(id) {
+    const transaccion = (transaccionesContabilidadActuales || [])
+        .find(t => Number(obtenerValor(t, "id", "Id")) === Number(id));
+
+    if (!transaccion) {
+        mostrarMensaje("mensajeReporteProyecto", "No se encontró la transacción para editar. Recargue el historial.", "error");
+        return;
+    }
+
+    cargarTransaccionEnFormulario(transaccion);
+}
+
+function cargarTransaccionEnFormulario(transaccion) {
+    const tipo = obtenerTexto(transaccion, "tipo", "Tipo");
+    const id = Number(obtenerValor(transaccion, "id", "Id"));
+    const categoriaId = Number(obtenerValor(transaccion, "categoriaId", "CategoriaId"));
+    const monto = obtenerNumero(transaccion, "monto", "Monto");
+    const descripcion = obtenerValor(transaccion, "descripcion", "Descripcion") || "";
+    const fecha = normalizarFechaInput(obtenerValor(transaccion, "fecha", "Fecha"));
+    const proyectoId = obtenerValor(transaccion, "proyectoId", "ProyectoId") || "";
+
+    transaccionEditandoId = id;
+    transaccionEditandoTipo = tipo;
+
+    if (tipo === "Ingreso") {
+        if (categoriaId) setValorSeguro("categoriaIngreso", categoriaId);
+        setValorSeguro("montoIngreso", monto);
+        setValorSeguro("fechaIngreso", fecha);
+        setValorSeguro("descripcionIngreso", descripcion);
+        setValorSeguro("ingresoProyectoId", proyectoId);
+
+        const boton = document.getElementById("btnGuardarIngreso");
+        const cancelar = document.getElementById("btnCancelarIngreso");
+
+        if (boton) boton.textContent = "Actualizar ingreso";
+        if (cancelar) cancelar.style.display = "inline-block";
+
+        document.getElementById("categoriaIngreso")?.closest(".form-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        mostrarMensaje("mensajeIngreso", `Editando ingreso #${id}.`, "success");
+        return;
+    }
+
+    if (tipo === "Egreso") {
+        if (categoriaId) setValorSeguro("categoriaEgreso", categoriaId);
+        setValorSeguro("montoEgreso", monto);
+        setValorSeguro("fechaEgreso", fecha);
+        setValorSeguro("descripcionEgreso", descripcion);
+        setValorSeguro("egresoProyectoId", proyectoId);
+
+        const boton = document.getElementById("btnGuardarEgreso");
+        const cancelar = document.getElementById("btnCancelarEgreso");
+
+        if (boton) boton.textContent = "Actualizar egreso";
+        if (cancelar) cancelar.style.display = "inline-block";
+
+        document.getElementById("categoriaEgreso")?.closest(".form-card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        mostrarMensaje("mensajeEgreso", `Editando egreso #${id}.`, "success");
+    }
+}
+
+function limpiarEdicionTransaccion(tipo) {
+    if (tipo && transaccionEditandoTipo !== tipo) {
+        return;
+    }
+
+    transaccionEditandoId = null;
+    transaccionEditandoTipo = null;
+
+    const btnIngreso = document.getElementById("btnGuardarIngreso");
+    const btnEgreso = document.getElementById("btnGuardarEgreso");
+    const cancelarIngreso = document.getElementById("btnCancelarIngreso");
+    const cancelarEgreso = document.getElementById("btnCancelarEgreso");
+
+    if (btnIngreso) btnIngreso.textContent = "Guardar ingreso";
+    if (btnEgreso) btnEgreso.textContent = "Guardar egreso";
+    if (cancelarIngreso) cancelarIngreso.style.display = "none";
+    if (cancelarEgreso) cancelarEgreso.style.display = "none";
+}
+
+function cancelarEdicionTransaccion(tipo) {
+    limpiarEdicionTransaccion(tipo);
+
+    if (tipo === "Ingreso") {
+        setValorSeguro("montoIngreso", "");
+        setValorSeguro("descripcionIngreso", "");
+        setValorSeguro("fechaIngreso", fechaHoyInput());
+        mostrarMensaje("mensajeIngreso", "Edición cancelada.", "success");
+    }
+
+    if (tipo === "Egreso") {
+        setValorSeguro("montoEgreso", "");
+        setValorSeguro("descripcionEgreso", "");
+        setValorSeguro("fechaEgreso", fechaHoyInput());
+        mostrarMensaje("mensajeEgreso", "Edición cancelada.", "success");
+    }
+}
+
+function normalizarFechaInput(valor) {
+    if (!valor) {
+        return fechaHoyInput();
+    }
+
+    const texto = String(valor);
+
+    if (texto.includes("T")) {
+        return texto.split("T")[0];
+    }
+
+    return texto.substring(0, 10);
 }
 
 // ============================================================
@@ -698,12 +836,14 @@ async function consultarReporteProyecto() {
 function renderTransaccionesProyecto(transacciones) {
     const tabla = document.getElementById("tablaTransaccionesProyecto");
 
+    transaccionesContabilidadActuales = unirTransaccionesSinDuplicados(transaccionesContabilidadActuales, transacciones || []);
+
     if (!tabla) return;
 
     if (!transacciones || transacciones.length === 0) {
         tabla.innerHTML = `
             <tr>
-                <td colspan="6">Este proyecto no tiene transacciones registradas.</td>
+                <td colspan="7">Este proyecto no tiene transacciones registradas.</td>
             </tr>
         `;
         return;
@@ -723,6 +863,9 @@ function renderTransaccionesProyecto(transacciones) {
                 <td>${obtenerValor(t, "descripcion", "Descripcion") || ""}</td>
                 <td>${formatearFechaContabilidad(obtenerValor(t, "fecha", "Fecha"))}</td>
                 <td class="text-right">${formatearMoneda(obtenerNumero(t, "monto", "Monto"))}</td>
+                <td>
+                    <button class="btn-warning btn-small" type="button" onclick="editarTransaccionDesdeTabla(${obtenerValor(t, "id", "Id")})">Editar</button>
+                </td>
             </tr>
         `;
     });

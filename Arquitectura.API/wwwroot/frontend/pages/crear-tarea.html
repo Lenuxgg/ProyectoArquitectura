@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/theme.js?v=18"></script>
+    <script src="../js/theme.js?v=37"></script>
     <title>Crear Tarea - CEGA</title>
-    <link rel="stylesheet" href="../css/styles.css?v=18">
+    <link rel="stylesheet" href="../css/styles.css?v=37">
 </head>
-<body>
+<body class="module-page project-module-page wide-form-view">
 
-    <header class="main-header">
+    <header class="main-header module-hidden-header">
         <h1>Crear Tarea</h1>
         <p>Registro de tarea asociada a un proyecto</p>
     </header>
 
-        <nav class="navbar">
+    <nav class="navbar">
         <div class="navbar-left">
             <a href="../index.html">Inicio</a>
             <a href="proyectos.html">Proyectos</a>
@@ -28,52 +28,66 @@
         </div>
     </nav>
 
-    <main class="container">
-        <section class="form-card">
+    <main class="dashboard-shell module-shell">
+        <section class="module-hero">
+            <div>
+                <p class="eyebrow">Nueva tarea</p>
+                <h1>Crear Tarea</h1>
+                <p>Registro de tarea asociada a un proyecto.</p>
+            </div>
+        </section>
+        <section class="form-card wide-form-card">
             <h2>Datos de la tarea</h2>
 
             <input type="hidden" id="proyectoId">
 
-            <div class="form-group">
-                <label>Proyecto ID</label>
-                <input type="number" id="proyectoIdVisible" disabled>
+            <div class="wide-form-grid">
+                <div class="form-group">
+                    <label>Proyecto ID</label>
+                    <input type="number" id="proyectoIdVisible" disabled>
+                </div>
+
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="titulo" placeholder="Ejemplo: Revisión de planos">
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha de inicio</label>
+                    <input type="date" id="fechaInicio">
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha de fin</label>
+                    <input type="date" id="fechaFin">
+                </div>
+
+                <div class="form-group full-span">
+                    <label>Descripción</label>
+                    <textarea id="descripcion" placeholder="Descripción de la tarea"></textarea>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Título</label>
-                <input type="text" id="titulo" placeholder="Ejemplo: Revisión de planos">
+            <div class="form-actions-row">
+                <button class="btn-secondary" onclick="crearTarea()">Guardar Tarea</button>
+                <a id="btnCancelar" class="btn-danger" href="#">Cancelar</a>
             </div>
-
-            <div class="form-group">
-                <label>Descripción</label>
-                <textarea id="descripcion" placeholder="Descripción de la tarea"></textarea>
-            </div>
-
-            <div class="form-group">
-                <label>Fecha de inicio</label>
-                <input type="date" id="fechaInicio">
-            </div>
-
-            <div class="form-group">
-                <label>Fecha de fin</label>
-                <input type="date" id="fechaFin">
-            </div>
-
-            <button class="btn-secondary" onclick="crearTarea()">Guardar Tarea</button>
-            <a id="btnCancelar" class="btn-danger" href="#">Cancelar</a>
 
             <p id="mensajeTarea" class="message"></p>
         </section>
     </main>
 
-    <script src="../js/api.js?v=18"></script>
-    <script src="../js/auth.js?v=18"></script>
-    <script src="../js/tareas.js?v=18"></script>
+    <footer>
+        <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
+    </footer>
+
+    <script src="../js/api.js?v=37"></script>
+    <script src="../js/auth.js?v=37"></script>
+    <script src="../js/tareas.js?v=37"></script>
     <script>
-    
         validarSesion();
         pintarUsuarioEnNavbar();
-prepararFormularioCrearTarea();
+        prepararFormularioCrearTarea();
     </script>
 
 </body>

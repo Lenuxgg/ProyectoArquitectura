@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/theme.js?v=17"></script>
+    <script src="../js/theme.js?v=37"></script>
     <title>Proyectos - CEGA</title>
-    <link rel="stylesheet" href="../css/styles.css?v=17">
+    <link rel="stylesheet" href="../css/styles.css?v=37">
 </head>
-<body>
+<body class="module-page project-module-page">
 
-    <header class="main-header">
-        <h1>Gestión de Proyectos</h1>
-        <p id="subtituloProyectos">Listado general de proyectos registrados</p>
-    </header>
-
-        <nav class="navbar">
+    <nav class="navbar dashboard-navbar">
         <div class="navbar-left">
             <a href="../index.html">Inicio</a>
             <a href="proyectos.html">Proyectos</a>
@@ -28,41 +23,54 @@
         </div>
     </nav>
 
-    <main class="container">
-        <div class="actions">
-            <h2 id="tituloListado">Proyectos</h2>
+    <main class="dashboard-shell module-shell">
+        <section class="module-hero">
+            <div>
+                <p class="eyebrow">Seguimiento de proyectos</p>
+                <h1>Gestión de Proyectos</h1>
+                <p id="subtituloProyectos">Listado general de proyectos registrados.</p>
+            </div>
             <a id="btnNuevoProyecto" class="btn-primary" href="crear-proyecto.html">Nuevo Proyecto</a>
-        </div>
+        </section>
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Nombre</th>
-                        <th>Descripción</th>
-                        <th>Fecha Inicio</th>
-                        <th>Fecha Fin</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="tablaProyectos">
-                    <tr>
-                        <td colspan="7">Cargando proyectos...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <section class="analytics-panel">
+            <div class="panel-header">
+                <div>
+                    <h2 id="tituloListado">Proyectos</h2>
+                    <p>Consulta de proyectos, fechas, estado y acciones disponibles según el rol.</p>
+                </div>
+            </div>
+
+            <div class="table-container module-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Descripción</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProyectos">
+                        <tr>
+                            <td colspan="7">Cargando proyectos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <footer>
         <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
     </footer>
 
-    <script src="../js/api.js?v=17"></script>
-    <script src="../js/auth.js?v=17"></script>
-    <script src="../js/proyectos.js?v=17"></script>
+    <script src="../js/api.js?v=37"></script>
+    <script src="../js/auth.js?v=37"></script>
+    <script src="../js/proyectos.js?v=37"></script>
 
     <script>
         validarSesion();
@@ -74,21 +82,10 @@
             const subtituloProyectos = document.getElementById("subtituloProyectos");
             const tituloListado = document.getElementById("tituloListado");
 
-            if (btnNuevoProyecto) {
-                btnNuevoProyecto.style.display = "none";
-            }
-
-            if (linkCrearProyecto) {
-                linkCrearProyecto.style.display = "none";
-            }
-
-            if (subtituloProyectos) {
-                subtituloProyectos.textContent = "Proyectos asignados al empleado";
-            }
-
-            if (tituloListado) {
-                tituloListado.textContent = "Mis proyectos asignados";
-            }
+            if (btnNuevoProyecto) btnNuevoProyecto.style.display = "none";
+            if (linkCrearProyecto) linkCrearProyecto.style.display = "none";
+            if (subtituloProyectos) subtituloProyectos.textContent = "Proyectos asignados al empleado.";
+            if (tituloListado) tituloListado.textContent = "Mis proyectos asignados";
         }
 
         cargarProyectos();

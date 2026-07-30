@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/theme.js?v=17"></script>
+    <script src="../js/theme.js?v=37"></script>
     <title>Crear Proyecto - CEGA</title>
-    <link rel="stylesheet" href="../css/styles.css?v=17">
+    <link rel="stylesheet" href="../css/styles.css?v=37">
 </head>
-<body>
+<body class="module-page project-module-page project-full-view project-create-view">
 
-    <header class="main-header">
+    <header class="main-header module-hidden-header">
         <h1>Crear Nuevo Proyecto</h1>
         <p>Registro de proyecto y asignación inicial de empleados</p>
     </header>
 
-        <nav class="navbar">
+    <nav class="navbar">
         <div class="navbar-left">
             <a href="../index.html">Inicio</a>
             <a href="proyectos.html">Proyectos</a>
@@ -27,45 +27,65 @@
         </div>
     </nav>
 
-    <main class="container">
-        <section class="form-card">
-            <h2>Datos del proyecto</h2>
-
-            <div class="form-group">
-                <label>Nombre</label>
-                <input type="text" id="nombre" placeholder="Ejemplo: Proyecto Casa Moderna">
+    <main class="dashboard-shell module-shell project-page-container">
+        <section class="module-hero">
+            <div>
+                <p class="eyebrow">Nuevo proyecto</p>
+                <h1>Crear Proyecto</h1>
+                <p>Registro de proyecto y asignación inicial de empleados.</p>
+            </div>
+        </section>
+        <section class="form-card project-create-card">
+            <div class="section-heading">
+                <h2>Datos del proyecto</h2>
+                <p>Complete la información principal del proyecto antes de asignar empleados.</p>
             </div>
 
-            <div class="form-group">
-                <label>Descripción</label>
-                <textarea id="descripcion" placeholder="Descripción general del proyecto"></textarea>
+            <div class="project-form-grid">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" id="nombre" placeholder="Ejemplo: Proyecto Casa Moderna">
+                </div>
+
+                <div class="form-group">
+                    <label>Fecha de inicio</label>
+                    <input type="date" id="fechaInicio">
+                </div>
+
+                <div class="form-group full-span">
+                    <label>Descripción</label>
+                    <textarea id="descripcion" placeholder="Descripción general del proyecto"></textarea>
+                </div>
             </div>
 
-            <div class="form-group">
-                <label>Fecha de inicio</label>
-                <input type="date" id="fechaInicio">
+            <div class="section-heading section-heading-spaced">
+                <h2>Asignar empleados al proyecto</h2>
+                <p>
+                    Seleccione los empleados que participarán en el proyecto.
+                    El rol se guardará como parte de la asignación.
+                </p>
             </div>
 
-            <h2 style="margin-top: 25px;">Asignar empleados al proyecto</h2>
-            <p>
-                Seleccione los empleados que participarán en el proyecto.
-                El rol se guardará como parte de la asignación.
-            </p>
-
-            <div id="listaEmpleadosAsignar" class="table-container">
+            <div id="listaEmpleadosAsignar" class="table-container project-table-container">
                 Cargando empleados...
             </div>
 
-            <button class="btn-secondary" onclick="crearProyectoConAsignaciones()">Guardar Proyecto</button>
-            <a class="btn-danger" href="proyectos.html">Cancelar</a>
+            <div class="project-actions-row">
+                <button class="btn-secondary" onclick="crearProyectoConAsignaciones()">Guardar Proyecto</button>
+                <a class="btn-danger" href="proyectos.html">Cancelar</a>
+            </div>
 
             <p id="mensajeProyecto" class="message"></p>
         </section>
-    </main>
+        </main>
 
-    <script src="../js/api.js?v=17"></script>
-    <script src="../js/auth.js?v=17"></script>
-    <script src="../js/proyectos.js?v=17"></script>
+    <script src="../js/api.js?v=37"></script>
+    <script src="../js/auth.js?v=37"></script>
+    <script src="../js/proyectos.js?v=37"></script>
+
+    <footer>
+        <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
+    </footer>
 
     <script>
         validarSesion();

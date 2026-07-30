@@ -111,6 +111,7 @@ public partial class ContabilidadService
                 Monto = t.Monto,
                 Descripcion = t.Descripcion,
                 Fecha = t.Fecha,
+                CategoriaId = t.CategoriaId,
                 Categoria = t.Categoria.Nombre,
                 UsuarioId = t.UsuarioId,
                 ProyectoId = t.ProyectoId,
@@ -233,6 +234,7 @@ public partial class ContabilidadService
                 Monto = t.Monto,
                 Descripcion = t.Descripcion,
                 Fecha = t.Fecha,
+                CategoriaId = t.CategoriaId,
                 Categoria = t.Categoria.Nombre,
                 UsuarioId = t.UsuarioId
             })

@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/theme.js?v=18"></script>
+    <script src="../js/theme.js?v=37"></script>
     <title>Detalle Proyecto - CEGA</title>
-    <link rel="stylesheet" href="../css/styles.css?v=18">
+    <link rel="stylesheet" href="../css/styles.css?v=37">
 </head>
-<body>
+<body class="module-page project-module-page project-full-view">
 
-    <header class="main-header">
+    <header class="main-header module-hidden-header">
         <h1>Detalle del Proyecto</h1>
         <p>Información, documentos y tareas asociadas</p>
     </header>
@@ -27,7 +27,14 @@
         </div>
     </nav>
 
-    <main class="container">
+    <main class="dashboard-shell module-shell">
+        <section class="module-hero">
+            <div>
+                <p class="eyebrow">Detalle de proyecto</p>
+                <h1>Información del Proyecto</h1>
+                <p>Documentos, tareas y seguimiento asociado.</p>
+            </div>
+        </section>
 
         <section class="card">
             <h2 id="tituloProyecto">Proyecto</h2>
@@ -43,7 +50,7 @@
             </div>
         </section>
 
-        <section class="detail-grid">
+        <section class="detail-grid project-detail-full">
 
             <div class="card">
                 <h2>Documentos del Proyecto</h2>
@@ -100,10 +107,14 @@
 
     </main>
 
-    <script src="../js/api.js?v=18"></script>
-    <script src="../js/auth.js?v=18"></script>
-    <script src="../js/proyectos.js?v=18"></script>
-    <script src="../js/tareas.js?v=18"></script>
+    <script src="../js/api.js?v=37"></script>
+    <script src="../js/auth.js?v=37"></script>
+    <script src="../js/proyectos.js?v=37"></script>
+    <script src="../js/tareas.js?v=37"></script>
+    <footer>
+        <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
+    </footer>
+
     <script>
     
         validarSesion();

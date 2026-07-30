@@ -41,7 +41,30 @@ public class ContabilidadController : ControllerBase
         });
     }
 
-    [Authorize(Roles = "Administrador")]
+    private async Task<IActionResult?> ValidarPermisoProyectoContabilidad(RegistrarTransaccionDto dto)
+    {
+        if (UsuarioEsAdministrador())
+            return null;
+
+        var usuarioId = ObtenerUsuarioIdAutenticado();
+
+        if (usuarioId == null)
+            return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+        if (!dto.ProyectoId.HasValue)
+            return Prohibido("Debe seleccionar uno de sus proyectos asignados.");
+
+        var tieneAcceso = await _contabilidadService.UsuarioTieneAccesoAProyectoAsync(
+            usuarioId.Value,
+            dto.ProyectoId.Value);
+
+        if (!tieneAcceso)
+            return Prohibido("No puede registrar o editar movimientos de un proyecto no asignado.");
+
+        return null;
+    }
+
+
     [HttpPost("ingresos")]
     public async Task<IActionResult> RegistrarIngreso([FromBody] RegistrarTransaccionDto dto)
     {
@@ -51,6 +74,11 @@ public class ContabilidadController : ControllerBase
 
             if (usuarioId == null)
                 return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+            var validacionPermiso = await ValidarPermisoProyectoContabilidad(dto);
+
+            if (validacionPermiso != null)
+                return validacionPermiso;
 
             var id = await _contabilidadService.RegistrarIngresoAsync(dto, usuarioId.Value);
 
@@ -69,7 +97,6 @@ public class ContabilidadController : ControllerBase
         }
     }
 
-    [Authorize(Roles = "Administrador")]
     [HttpPost("egresos")]
     public async Task<IActionResult> RegistrarEgreso([FromBody] RegistrarTransaccionDto dto)
     {
@@ -79,6 +106,11 @@ public class ContabilidadController : ControllerBase
 
             if (usuarioId == null)
                 return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+            var validacionPermiso = await ValidarPermisoProyectoContabilidad(dto);
+
+            if (validacionPermiso != null)
+                return validacionPermiso;
 
             var id = await _contabilidadService.RegistrarEgresoAsync(dto, usuarioId.Value);
 
@@ -131,6 +163,47 @@ public class ContabilidadController : ControllerBase
 
         var listaEmpleado = await _contabilidadService.ObtenerEgresosPorUsuarioAsync(usuarioId.Value);
         return Ok(listaEmpleado);
+    }
+
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> ActualizarTransaccion(
+        int id,
+        [FromBody] RegistrarTransaccionDto dto)
+    {
+        try
+        {
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+            var actualizado = await _contabilidadService.ActualizarTransaccionAsync(
+                id,
+                dto,
+                usuarioId.Value,
+                UsuarioEsAdministrador());
+
+            if (!actualizado)
+                return NotFound("Transacción no encontrada.");
+
+            return Ok(new
+            {
+                mensaje = "Transacción actualizada correctamente.",
+                id
+            });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Prohibido(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                mensaje = ex.Message
+            });
+        }
     }
 
     [Authorize(Roles = "Administrador")]

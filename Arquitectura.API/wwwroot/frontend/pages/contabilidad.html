@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/theme.js?v=17"></script>
+    <script src="../js/theme.js?v=37"></script>
     <title>Contabilidad - CEGA</title>
-    <link rel="stylesheet" href="../css/styles.css?v=17">
+    <link rel="stylesheet" href="../css/styles.css?v=37">
 </head>
-<body>
+<body class="module-page accounting-module-page">
 
-    <header class="main-header">
+    <header class="main-header module-hidden-header">
         <h1 id="tituloContabilidad">Gestión de Contabilidad</h1>
         <p id="descripcionContabilidad">
             Ingresos, egresos, reportes financieros, cierres de caja y nómina
@@ -29,7 +29,14 @@
         </div>
     </nav>
 
-    <main class="container">
+    <main class="dashboard-shell module-shell">
+        <section class="module-hero">
+            <div>
+                <p class="eyebrow">Control financiero</p>
+                <h1 id="tituloContabilidad">Contabilidad</h1>
+                <p id="descripcionContabilidad">Resumen financiero, registro de movimientos y reportes por proyecto.</p>
+            </div>
+        </section>
 
         <!-- ===================================================== -->
         <!-- RESUMEN FINANCIERO GENERAL - SOLO ADMIN -->
@@ -119,11 +126,12 @@
                             <th>Descripción</th>
                             <th>Fecha</th>
                             <th class="text-right">Monto</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaTransaccionesProyecto">
                         <tr>
-                            <td colspan="6">Seleccione un proyecto para consultar.</td>
+                            <td colspan="7">Seleccione un proyecto para consultar.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -134,7 +142,7 @@
         <!-- REGISTRO DE INGRESOS Y EGRESOS - ADMIN Y EMPLEADO -->
         <!-- EMPLEADO SOLO VERÁ SUS PROYECTOS ASIGNADOS -->
         <!-- ===================================================== -->
-        <section class="forms-grid" id="seccionRegistroAdmin">
+        <section class="forms-grid" id="seccionRegistroMovimientos">
 
             <article class="form-card">
                 <h2>Registrar ingreso</h2>
@@ -142,9 +150,10 @@
                 <div class="form-group">
                     <label for="categoriaIngreso">Categoría</label>
                     <select id="categoriaIngreso">
-                        <option value="1">Honorarios por proyecto</option>
-                        <option value="2">Consultoría externa</option>
-                        <option value="3">Otros ingresos</option>
+                        <option value="1">Anticipo de cliente</option>
+                        <option value="2">Cobro de honorarios</option>
+                        <option value="3">Venta de planos</option>
+                        <option value="4">Otros ingresos</option>
                     </select>
                 </div>
 
@@ -170,7 +179,8 @@
                     <textarea id="descripcionIngreso" placeholder="Detalle del ingreso"></textarea>
                 </div>
 
-                <button class="btn-primary" onclick="registrarIngresoFrontend()">Guardar ingreso</button>
+                <button id="btnGuardarIngreso" class="btn-primary" onclick="registrarIngresoFrontend()">Guardar ingreso</button>
+                <button id="btnCancelarIngreso" class="btn-secondary" type="button" onclick="cancelarEdicionTransaccion('Ingreso')" style="display:none;">Cancelar edición</button>
                 <p id="mensajeIngreso" class="message"></p>
             </article>
 
@@ -180,10 +190,12 @@
                 <div class="form-group">
                     <label for="categoriaEgreso">Categoría</label>
                     <select id="categoriaEgreso">
-                        <option value="4">Pago de nómina</option>
-                        <option value="5">Gastos operativos</option>
-                        <option value="6">Licencias de software</option>
-                        <option value="7">Otros egresos</option>
+                        <option value="5">Materiales de construcción</option>
+                        <option value="6">Subcontratos</option>
+                        <option value="7">Salarios y planilla</option>
+                        <option value="8">Servicios públicos y oficina</option>
+                        <option value="9">Software y licencias</option>
+                        <option value="10">Otros egresos</option>
                     </select>
                 </div>
 
@@ -209,7 +221,8 @@
                     <textarea id="descripcionEgreso" placeholder="Detalle del egreso"></textarea>
                 </div>
 
-                <button class="btn-danger" onclick="registrarEgresoFrontend()">Guardar egreso</button>
+                <button id="btnGuardarEgreso" class="btn-danger" onclick="registrarEgresoFrontend()">Guardar egreso</button>
+                <button id="btnCancelarEgreso" class="btn-secondary" type="button" onclick="cancelarEdicionTransaccion('Egreso')" style="display:none;">Cancelar edición</button>
                 <p id="mensajeEgreso" class="message"></p>
             </article>
 
@@ -351,11 +364,12 @@
                             <th>Fecha</th>
                             <th class="text-right">Monto</th>
                             <th>Usuario</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tablaTransacciones">
                         <tr>
-                            <td colspan="8">Cargando transacciones...</td>
+                            <td colspan="9">Cargando transacciones...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -459,9 +473,9 @@
         <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
     </footer>
 
-    <script src="../js/api.js?v=17"></script>
-    <script src="../js/auth.js?v=17"></script>
-    <script src="../js/contabilidad.js?v=18"></script>
+    <script src="../js/api.js?v=37"></script>
+    <script src="../js/auth.js?v=37"></script>
+    <script src="../js/contabilidad.js?v=37"></script>
 
     <script>
         inicializarContabilidad();

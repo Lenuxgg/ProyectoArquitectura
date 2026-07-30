@@ -10,29 +10,15 @@ public partial class ContabilidadService
         RegistrarTransaccionDto dto,
         int usuarioId)
     {
-        var usuarioExiste = await _context.Usuario
-            .AnyAsync(u => u.Id == usuarioId && u.Estado != "Baja");
+        await ValidarUsuarioActivoAsync(usuarioId);
 
-        if (!usuarioExiste)
-            throw new Exception("El usuario autenticado no existe o está dado de baja. Inicie sesión nuevamente.");
-
-        var categoria = await _context.CategoriaFinanciera
-            .FirstOrDefaultAsync(c =>
-                c.Id == dto.CategoriaId &&
-                c.Tipo == "Ingreso" &&
-                c.Activo);
+        var categoria = await ObtenerCategoriaValidaAsync(dto.CategoriaId, "Ingreso");
 
         if (categoria == null)
             throw new Exception("La categoría de ingreso no existe o está inactiva.");
 
         if (dto.ProyectoId.HasValue)
-        {
-            var proyectoExiste = await _context.Proyectos
-                .AnyAsync(p => p.Id == dto.ProyectoId.Value);
-
-            if (!proyectoExiste)
-                throw new Exception("El proyecto seleccionado no existe.");
-        }
+            await ValidarProyectoExisteAsync(dto.ProyectoId.Value);
 
         var transaccion = new Transaccion
         {
@@ -48,7 +34,6 @@ public partial class ContabilidadService
         };
 
         _context.Transacciones.Add(transaccion);
-
         await _context.SaveChangesAsync();
 
         return transaccion.Id;
@@ -58,29 +43,15 @@ public partial class ContabilidadService
         RegistrarTransaccionDto dto,
         int usuarioId)
     {
-        var usuarioExiste = await _context.Usuario
-            .AnyAsync(u => u.Id == usuarioId && u.Estado != "Baja");
+        await ValidarUsuarioActivoAsync(usuarioId);
 
-        if (!usuarioExiste)
-            throw new Exception("El usuario autenticado no existe o está dado de baja. Inicie sesión nuevamente.");
-
-        var categoria = await _context.CategoriaFinanciera
-            .FirstOrDefaultAsync(c =>
-                c.Id == dto.CategoriaId &&
-                c.Tipo == "Egreso" &&
-                c.Activo);
+        var categoria = await ObtenerCategoriaValidaAsync(dto.CategoriaId, "Egreso");
 
         if (categoria == null)
             throw new Exception("La categoría de egreso no existe o está inactiva.");
 
         if (dto.ProyectoId.HasValue)
-        {
-            var proyectoExiste = await _context.Proyectos
-                .AnyAsync(p => p.Id == dto.ProyectoId.Value);
-
-            if (!proyectoExiste)
-                throw new Exception("El proyecto seleccionado no existe.");
-        }
+            await ValidarProyectoExisteAsync(dto.ProyectoId.Value);
 
         var transaccion = new Transaccion
         {
@@ -96,10 +67,54 @@ public partial class ContabilidadService
         };
 
         _context.Transacciones.Add(transaccion);
-
         await _context.SaveChangesAsync();
 
         return transaccion.Id;
+    }
+
+    public async Task<bool> ActualizarTransaccionAsync(
+        int id,
+        RegistrarTransaccionDto dto,
+        int usuarioId,
+        bool esAdministrador)
+    {
+        await ValidarUsuarioActivoAsync(usuarioId);
+
+        var transaccion = await _context.Transacciones
+            .FirstOrDefaultAsync(t => t.Id == id && t.Activo);
+
+        if (transaccion == null)
+            return false;
+
+        if (!esAdministrador)
+        {
+            if (!dto.ProyectoId.HasValue)
+                throw new UnauthorizedAccessException("Debe seleccionar un proyecto asignado para editar la transacción.");
+
+            var tieneAcceso = await UsuarioTieneAccesoAProyectoAsync(usuarioId, dto.ProyectoId.Value);
+
+            if (!tieneAcceso)
+                throw new UnauthorizedAccessException("No tiene permiso para editar transacciones de ese proyecto.");
+        }
+
+        if (dto.ProyectoId.HasValue)
+            await ValidarProyectoExisteAsync(dto.ProyectoId.Value);
+
+        var categoria = await ObtenerCategoriaValidaAsync(dto.CategoriaId, transaccion.Tipo);
+
+        if (categoria == null)
+            throw new Exception($"La categoría de {transaccion.Tipo.ToLower()} no existe o está inactiva.");
+
+        transaccion.CategoriaId = dto.CategoriaId;
+        transaccion.Monto = dto.Monto;
+        transaccion.Descripcion = dto.Descripcion;
+        transaccion.Fecha = dto.Fecha == default ? DateTime.Today : dto.Fecha;
+        transaccion.ProyectoId = dto.ProyectoId;
+        transaccion.FechaModificacion = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return true;
     }
 
     public async Task<List<TransaccionDto>> ObtenerIngresosAsync()
@@ -169,7 +184,6 @@ public partial class ContabilidadService
             return false;
 
         transaccion.Activo = false;
-
         await _context.SaveChangesAsync();
 
         return true;
@@ -196,6 +210,33 @@ public partial class ContabilidadService
         await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    private async Task ValidarUsuarioActivoAsync(int usuarioId)
+    {
+        var usuarioExiste = await _context.Usuario
+            .AnyAsync(u => u.Id == usuarioId && u.Estado != "Baja");
+
+        if (!usuarioExiste)
+            throw new Exception("El usuario autenticado no existe o está dado de baja. Inicie sesión nuevamente.");
+    }
+
+    private async Task<CategoriaFinanciera?> ObtenerCategoriaValidaAsync(int categoriaId, string tipo)
+    {
+        return await _context.CategoriaFinanciera
+            .FirstOrDefaultAsync(c =>
+                c.Id == categoriaId &&
+                c.Tipo == tipo &&
+                c.Activo);
+    }
+
+    private async Task ValidarProyectoExisteAsync(int proyectoId)
+    {
+        var proyectoExiste = await _context.Proyectos
+            .AnyAsync(p => p.Id == proyectoId);
+
+        if (!proyectoExiste)
+            throw new Exception("El proyecto seleccionado no existe.");
     }
 
     private IQueryable<Transaccion> CrearQueryBaseTransacciones()
@@ -226,6 +267,7 @@ public partial class ContabilidadService
         {
             Id = t.Id,
             Tipo = t.Tipo,
+            CategoriaId = t.CategoriaId,
             Categoria = t.Categoria.Nombre,
             Monto = t.Monto,
             Descripcion = t.Descripcion,

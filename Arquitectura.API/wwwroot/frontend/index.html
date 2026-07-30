@@ -3,22 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="js/theme.js?v=17"></script>
-    <title>CEGA - Panel Administrador</title>
-    <link rel="stylesheet" href="css/styles.css?v=17">
+    <script src="js/theme.js?v=37"></script>
+    <title>CEGA - Dashboard Analítico</title>
+    <link rel="stylesheet" href="css/styles.css?v=37">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body class="dashboard-analytics-page">
 
-    <header class="main-header">
-        <h1>CEGA - Sistema de Administración</h1>
-        <p>Panel inicial de administración de proyectos, tareas y contabilidad</p>
-    </header>
-
-        <nav class="navbar">
-        <div class="navbar-left">
+    <nav class="navbar dashboard-navbar">
+        <div class="navbar-left dashboard-brand-nav">
             <a href="index.html">Inicio</a>
-            <a href="pages/proyectos.html">Proyectos</a>
-            <a id="linkContabilidad" href="pages/contabilidad.html">Contabilidad</a>
+            <div class="navbar-task-pill">
+                <span>Actividad operativa</span>
+                <strong id="heroTareasPendientes">0 tareas pendientes</strong>
+            </div>
         </div>
 
         <div class="navbar-right">
@@ -27,62 +25,161 @@
         </div>
     </nav>
 
-    <main class="home-container">
+    <main class="dashboard-shell">
+        <section class="dashboard-hero">
+            <div>
+                <p class="eyebrow">CEGA Arquitectura</p>
+                <h1>Dashboard analítico</h1>
+                <p id="dashboardSubtitulo">Resumen ejecutivo de proyectos, tareas y movimientos financieros.</p>
+            </div>
 
-        <section class="card">
-            <h2>Gestión de Proyectos</h2>
-            <p>
-                Desde este módulo se pueden consultar proyectos, crear nuevos proyectos,
-                editar información, revisar tareas asociadas y administrar documentos.
-            </p>
-
-            <a class="btn-primary" href="pages/proyectos.html">Ingresar a Proyectos</a>
+            <div class="dashboard-hero-side">
+                <div class="dashboard-hero-actions">
+                    <a class="btn-primary" href="pages/proyectos.html">Ver proyectos</a>
+                    <a class="btn-primary" href="pages/contabilidad.html">Ver contabilidad</a>
+                </div>
+            </div>
         </section>
 
-        <section class="card" id="cardContabilidad">
-            <h2>Gestión de Contabilidad</h2>
-            <p>
-                Desde este módulo se pueden registrar ingresos, egresos, consultar reportes
-                financieros por proyecto y revisar el historial de transacciones.
-            </p>
+        <section class="analytics-kpi-grid">
+            <article class="analytics-kpi-card">
+                <span class="metric-icon icon-projects" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 10v9h12v-9"/><path d="M10 19v-5h4v5"/></svg></span>
+                <div>
+                    <p>Proyectos activos</p>
+                    <h2 id="kpiProyectosActivos">0</h2>
+                    <small id="kpiProyectosTexto">Cargando proyectos...</small>
+                </div>
+            </article>
 
-            <a class="btn-primary" href="pages/contabilidad.html">Ingresar a Contabilidad</a>
+            <article class="analytics-kpi-card">
+                <span class="metric-icon icon-tasks" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h11"/><path d="M8 12h11"/><path d="M8 18h11"/><path d="m3.5 6 1 1 2-2"/><path d="m3.5 12 1 1 2-2"/><path d="m3.5 18 1 1 2-2"/></svg></span>
+                <div>
+                    <p>Tareas pendientes</p>
+                    <h2 id="kpiTareasPendientes">0</h2>
+                    <small id="kpiTareasTexto">Cargando tareas...</small>
+                </div>
+            </article>
+
+            <article class="analytics-kpi-card">
+                <span class="metric-icon icon-income" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20V4"/><path d="m6 10 6-6 6 6"/><path d="M5 20h14"/></svg></span>
+                <div>
+                    <p>Ingresos</p>
+                    <h2 id="kpiIngresos">₡0</h2>
+                    <small>Movimientos visibles para el usuario</small>
+                </div>
+            </article>
+
+            <article class="analytics-kpi-card">
+                <span class="metric-icon icon-expense" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16"/><path d="m18 14-6 6-6-6"/><path d="M5 4h14"/></svg></span>
+                <div>
+                    <p>Egresos</p>
+                    <h2 id="kpiEgresos">₡0</h2>
+                    <small>Movimientos visibles para el usuario</small>
+                </div>
+            </article>
+
+            <article class="analytics-kpi-card analytics-kpi-highlight">
+                <span class="metric-icon icon-balance" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M7 16l3-4 3 2 4-7"/><path d="M17 7h-4"/><path d="M17 7v4"/></svg></span>
+                <div>
+                    <p>Balance</p>
+                    <h2 id="kpiBalance">₡0</h2>
+                    <small id="kpiBalanceTexto">Balance general</small>
+                </div>
+            </article>
         </section>
 
-        <section class="card">
-            <h2>Vista según rol</h2>
-            <p>
-                El administrador puede ver todos los módulos y todos los proyectos.
-                El empleado solamente visualiza los proyectos y movimientos financieros
-                relacionados con sus proyectos asignados.
-            </p>
-        </section>
+        <section class="analytics-layout">
+            <article class="analytics-panel analytics-panel-wide">
+                <div class="panel-header">
+                    <div>
+                        <h2>Ingresos vs egresos</h2>
+                        <p>Comparativo mensual basado en el historial contable.</p>
+                    </div>
+                    <a class="panel-badge" href="pages/contabilidad.html">Finanzas</a>
+                </div>
+                <div id="legendIngresosEgresos" class="chart-toggle-legend" aria-label="Controles del gráfico"></div>
+                <div class="chart-box">
+                    <canvas id="chartIngresosEgresos"></canvas>
+                </div>
+            </article>
 
+            <article class="analytics-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Distribución de gastos</h2>
+                        <p>Egresos agrupados por categoría.</p>
+                    </div>
+                </div>
+                <div class="chart-box chart-box-small">
+                    <canvas id="chartGastos"></canvas>
+                </div>
+            </article>
+
+            <article class="analytics-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Proyectos por estado</h2>
+                        <p>Estado actual de los proyectos visibles.</p>
+                    </div>
+                </div>
+                <div class="chart-box chart-box-small">
+                    <canvas id="chartProyectosEstado"></canvas>
+                </div>
+            </article>
+
+            <article class="analytics-panel analytics-panel-wide">
+                <div class="panel-header">
+                    <div>
+                        <h2>Proyectos recientes</h2>
+                        <p>Vista rápida del avance administrativo.</p>
+                    </div>
+                    <a href="pages/proyectos.html">Abrir módulo</a>
+                </div>
+                <div class="analytics-table-wrap">
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th>Proyecto</th>
+                                <th>Estado</th>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaDashboardProyectos">
+                            <tr>
+                                <td colspan="4">Cargando proyectos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="analytics-panel analytics-panel-movements-wide">
+                <div class="panel-header">
+                    <div>
+                        <h2>Últimos movimientos</h2>
+                        <p>Ingresos y egresos más recientes.</p>
+                    </div>
+                    <a href="pages/contabilidad.html">Ver detalle</a>
+                </div>
+                <div id="listaMovimientosRecientes" class="activity-list">
+                    <p>Cargando movimientos...</p>
+                </div>
+            </article>
+        </section>
     </main>
 
     <footer>
         <p>CEGA Arquitectura — Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
     </footer>
 
-    <script src="js/auth.js?v=17"></script>
-
+    <script src="js/api.js?v=37"></script>
+    <script src="js/auth.js?v=37"></script>
+    <script src="js/dashboard.js?v=37"></script>
     <script>
         validarSesion();
         pintarUsuarioEnNavbar();
-
-        /*
-            Importante:
-            Ya NO se oculta Contabilidad para empleados.
-            El filtro se aplica dentro de contabilidad.js.
-        */
-
-        if (!usuarioEsAdmin()) {
-            const textoAdmin = document.querySelector(".card:last-child h2");
-
-            if (textoAdmin) {
-                textoAdmin.textContent = "Vista Empleado";
-            }
-        }
+        inicializarDashboardAnalitico();
     </script>
 
 </body>

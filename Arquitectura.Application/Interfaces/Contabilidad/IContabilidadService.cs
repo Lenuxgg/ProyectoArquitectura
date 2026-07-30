@@ -15,6 +15,7 @@ public interface IContabilidadService
     Task<List<TransaccionDto>> ObtenerEgresosPorUsuarioAsync(int usuarioId);
     Task<List<TransaccionDto>> ObtenerTransaccionesPorUsuarioAsync(int usuarioId);
 
+    Task<bool> ActualizarTransaccionAsync(int id, RegistrarTransaccionDto dto, int usuarioId, bool esAdministrador);
     Task<bool> EliminarTransaccionAsync(int id);
 
     Task<ReporteFinancieroDto> ObtenerReporteFinancieroAsync();
