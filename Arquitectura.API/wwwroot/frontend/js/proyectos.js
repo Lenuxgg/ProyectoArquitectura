@@ -9,10 +9,61 @@ function obtenerHeadersArchivo() {
 async function leerErrorFrontend(respuesta, mensajeDefault) {
     try {
         const texto = await respuesta.text();
-        return texto || mensajeDefault;
+        const detalle = texto ? ` ${texto}` : "";
+        return `${mensajeDefault} Código HTTP: ${respuesta.status}.${detalle}`;
     } catch {
-        return mensajeDefault;
+        return `${mensajeDefault} Código HTTP: ${respuesta.status}.`;
     }
+}
+
+async function obtenerProyectoPorIdSeguro(id) {
+    const idNumerico = Number(id);
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
+            headers: obtenerHeadersAuth()
+        });
+
+        if (respuesta.ok) {
+            return await respuesta.json();
+        }
+
+        const errorDirecto = await leerErrorFrontend(
+            respuesta,
+            "No se pudo consultar el proyecto directamente."
+        );
+
+        console.warn("Fallo consulta directa del proyecto. Se intentará consulta por listado.", errorDirecto);
+
+    } catch (error) {
+        console.warn("Error consultando proyecto directo. Se intentará consulta por listado.", error);
+    }
+
+    const esAdmin = usuarioEsAdmin();
+    const usuarioId = obtenerUsuarioIdActual();
+    const urlListado = esAdmin
+        ? `${API_BASE}/Proyectos`
+        : `${API_BASE}/Proyectos/usuario/${usuarioId}`;
+
+    const respuestaListado = await fetch(urlListado, {
+        headers: obtenerHeadersAuth()
+    });
+
+    if (!respuestaListado.ok) {
+        throw new Error(await leerErrorFrontend(
+            respuestaListado,
+            "No se pudo cargar la información del proyecto."
+        ));
+    }
+
+    const proyectos = await respuestaListado.json();
+    const proyecto = (proyectos || []).find(p => Number(p.id) === idNumerico || Number(p.Id) === idNumerico);
+
+    if (!proyecto) {
+        throw new Error("No se encontró el proyecto en los proyectos disponibles para este usuario.");
+    }
+
+    return proyecto;
 }
 
 async function cargarProyectos() {
@@ -165,22 +216,14 @@ async function cargarProyectoParaEditar() {
     }
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
-            headers: obtenerHeadersAuth()
-        });
+        const p = await obtenerProyectoPorIdSeguro(id);
 
-        if (!respuesta.ok) {
-            throw new Error(await leerErrorFrontend(respuesta, "No se encontró el proyecto."));
-        }
-
-        const p = await respuesta.json();
-
-        document.getElementById("proyectoId").value = p.id;
-        document.getElementById("nombre").value = p.nombre;
-        document.getElementById("descripcion").value = p.descripcion ?? "";
-        document.getElementById("fechaInicio").value = convertirFechaInput(p.fechaInicio);
-        document.getElementById("fechaFin").value = p.fechaFin ? convertirFechaInput(p.fechaFin) : "";
-        document.getElementById("estado").value = p.estado;
+        document.getElementById("proyectoId").value = p.id ?? p.Id;
+        document.getElementById("nombre").value = p.nombre ?? p.Nombre ?? "";
+        document.getElementById("descripcion").value = p.descripcion ?? p.Descripcion ?? "";
+        document.getElementById("fechaInicio").value = convertirFechaInput(p.fechaInicio ?? p.FechaInicio);
+        document.getElementById("fechaFin").value = (p.fechaFin ?? p.FechaFin) ? convertirFechaInput(p.fechaFin ?? p.FechaFin) : "";
+        document.getElementById("estado").value = p.estado ?? p.Estado ?? "Activo";
 
     } catch (error) {
         mostrarMensaje("mensajeProyecto", error.message, "error");
@@ -242,40 +285,39 @@ async function cargarDetalleProyecto() {
     }
 
     try {
-        const respuesta = await fetch(`${API_BASE}/Proyectos/${id}`, {
-            headers: obtenerHeadersAuth()
-        });
+        const p = await obtenerProyectoPorIdSeguro(id);
 
-        if (!respuesta.ok) {
-            throw new Error(await leerErrorFrontend(respuesta, "No se encontró el proyecto."));
-        }
+        const proyectoId = p.id ?? p.Id;
+        const nombre = p.nombre ?? p.Nombre ?? "";
+        const descripcion = p.descripcion ?? p.Descripcion ?? "";
+        const estado = p.estado ?? p.Estado ?? "";
+        const fechaInicio = p.fechaInicio ?? p.FechaInicio;
+        const fechaFin = p.fechaFin ?? p.FechaFin;
 
-        const p = await respuesta.json();
-
-        document.getElementById("tituloProyecto").textContent = p.nombre;
-        document.getElementById("detalleId").textContent = p.id;
-        document.getElementById("detalleDescripcion").textContent = p.descripcion ?? "";
-        document.getElementById("detalleEstado").textContent = p.estado;
-        document.getElementById("detalleFechaInicio").textContent = formatearFecha(p.fechaInicio);
-        document.getElementById("detalleFechaFin").textContent = p.fechaFin ? formatearFecha(p.fechaFin) : "Sin fecha final";
+        document.getElementById("tituloProyecto").textContent = nombre;
+        document.getElementById("detalleId").textContent = proyectoId;
+        document.getElementById("detalleDescripcion").textContent = descripcion;
+        document.getElementById("detalleEstado").textContent = estado;
+        document.getElementById("detalleFechaInicio").textContent = formatearFecha(fechaInicio);
+        document.getElementById("detalleFechaFin").textContent = fechaFin ? formatearFecha(fechaFin) : "Sin fecha final";
 
         const btnEditarProyecto = document.getElementById("btnEditarProyecto");
         const btnCrearTarea = document.getElementById("btnCrearTarea");
 
         if (usuarioEsAdmin()) {
-            btnEditarProyecto.href = `editar-proyecto.html?id=${p.id}`;
-            btnCrearTarea.href = `crear-tarea.html?proyectoId=${p.id}`;
+            btnEditarProyecto.href = `editar-proyecto.html?id=${proyectoId}`;
+            btnCrearTarea.href = `crear-tarea.html?proyectoId=${proyectoId}`;
         } else {
             btnEditarProyecto.style.display = "none";
             btnCrearTarea.style.display = "none";
         }
 
-        cargarDocumentosProyecto(p.id);
-        cargarTareasDelProyecto(p.id);
+        cargarDocumentosProyecto(proyectoId);
+        cargarTareasDelProyecto(proyectoId);
 
     } catch (error) {
-        alert(error.message);
-        window.location.href = "proyectos.html";
+        console.error("Error cargando detalle del proyecto:", error);
+        alert(`No se pudo cargar la información del proyecto.\n\nDetalle: ${error.message}`);
     }
 }
 
