@@ -71,7 +71,6 @@ public class EmpleadoService : IEmpleadoService
         _context.Usuario.Add(empleado);
         await _context.SaveChangesAsync();
 
-        // Asignar rol Empleado (Id = 2) automáticamente
         _context.UserRoles.Add(new UserRoles { UserId = empleado.Id, RolesId = 2 });
         await _context.SaveChangesAsync();
 

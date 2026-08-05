@@ -22,7 +22,6 @@ public class ArquitecturaDbContext : DbContext
 
     public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
 
-    // Seguimiento
     public DbSet<Proyecto> Proyectos => Set<Proyecto>();
     public DbSet<Tarea> Tareas => Set<Tarea>();
     public DbSet<ComentarioProyecto> ComentarioProyectos => Set<ComentarioProyecto>();

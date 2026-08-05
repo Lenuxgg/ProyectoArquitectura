@@ -3,53 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <title>Login - CEGA</title>
-    <script src="js/theme.js?v=39"></script>
-    <link rel="stylesheet" href="css/styles.css?v=39">
+    <script src="js/theme.js?v=41"></script>
+    <link rel="stylesheet" href="css/styles.css?v=41">
 </head>
-<body>
+<body class="login-page">
 
-    <header class="main-header">
-        <h1>CEGA - Inicio de Sesión</h1>
-        <p>Ingrese sus credenciales para acceder al sistema</p>
+    <header class="main-header login-header">
+        <h1>CEGA Arquitectura</h1>
+        <p>Sistema de Administración de Proyectos, Tareas y Contabilidad</p>
     </header>
 
-    <main class="home-container login-layout">
-        <section class="card login-card">
+    <main class="login-shell">
+        <section class="card login-card login-card-single">
             <div class="login-theme-row">
                 <button class="theme-toggle" type="button" data-theme-toggle>Modo oscuro</button>
             </div>
-            <h2>Acceso al sistema</h2>
 
-            <div class="form-group">
-                <label>Correo electrónico</label>
-                <input type="email" id="email" placeholder="Ingrese su correo">
+            <div class="login-title-block">
+                <p class="eyebrow">Acceso seguro</p>
+                <h2>Inicio de sesión</h2>
+                <p>Ingrese sus credenciales para continuar.</p>
             </div>
 
             <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" id="password" placeholder="Ingrese su contraseña">
+                <label for="email">Correo electrónico</label>
+                <input type="email" id="email" placeholder="admin@cega.cr" autocomplete="username">
             </div>
 
-            <button class="btn-primary" onclick="iniciarSesion()">Ingresar</button>
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" placeholder="Ingrese su contraseña" autocomplete="current-password">
+            </div>
+
+            <button class="btn-primary login-submit" type="button" onclick="iniciarSesion()">Ingresar</button>
 
             <p id="mensajeLogin" class="message"></p>
         </section>
-
-        <section class="card login-help-card">
-            <h2>Acceso según rol</h2>
-            <p>
-                El sistema permite ingresar como administrador o empleado.
-            </p>
-            <p>
-                El administrador puede consultar todos los módulos y todos los proyectos.
-            </p>
-            <p>
-                El empleado solo podrá visualizar los proyectos donde se encuentre asignado.
-            </p>
-        </section>
     </main>
 
-    <script src="js/auth.js?v=39"></script>
+    <script src="js/auth.js?v=41"></script>
 
 </body>
 </html>

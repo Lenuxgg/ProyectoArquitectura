@@ -26,7 +26,6 @@ using Arquitectura.Application.Services.Cuenta;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── RNF-002 - Compresión de respuestas ─────────────────────────
 builder.Services.AddResponseCompression(options =>
 {
     options.EnableForHttps = true;
@@ -38,7 +37,6 @@ builder.Services.Configure<GzipCompressionProviderOptions>(options =>
     options.Level = CompressionLevel.Fastest;
 });
 
-// ── Base de datos ─────────────────────────────────────────────
 builder.Services.AddDbContext<ArquitecturaDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -50,34 +48,25 @@ builder.Services.AddDbContext<ArquitecturaDbContext>(options =>
                 errorNumbersToAdd: null);
         }));
 
-// ── Servicios - Módulo Administración ─────────────────────────
 builder.Services.AddScoped<IRolService, RolService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
-// ── Servicios - Módulo Empleados ──────────────────────────────
 builder.Services.AddScoped<IEmpleadoService, EmpleadoService>();
 
-// ── Servicios - Módulo Seguimiento ────────────────────────────
 builder.Services.AddScoped<IProyectoService, ProyectoService>();
 builder.Services.AddScoped<IComentarioProyectoService, ComentarioProyectoService>();
 builder.Services.AddScoped<ITareaService, TareaService>();
 
-// ── Servicios - Módulo Contabilidad ───────────────────────────
 builder.Services.AddScoped<IContabilidadService, ContabilidadService>();
 
-// ── Servicios - Módulo Auth ───────────────────────────────────
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// ── Servicios - Módulo Exportaciones ──────────────────────────
 builder.Services.AddScoped<IExportacionService, ExportacionService>();
 
-// ── Servicios - Módulo Notificaciones ─────────────────────────
 builder.Services.AddScoped<INotificacionService, NotificacionService>();
 
-// ── Servicios - Módulo Cuenta ────────────────────────────────
 builder.Services.AddScoped<ICuentaService, CuentaService>();
 
-// ── JWT ───────────────────────────────────────────────────────
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -96,7 +85,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// ── Controllers + Swagger ─────────────────────────────────────
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
@@ -109,7 +97,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API del Sistema de Administración General para Firma de Arquitectura"
     });
 
-    // Evita errores de Swagger si existen DTOs con nombres repetidos en namespaces distintos.
     c.CustomSchemaIds(type => type.FullName?.Replace("+", ".") ?? type.Name);
 
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -138,7 +125,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ── CORS ──────────────────────────────────────────────────────
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -149,7 +135,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// ── Middlewares ───────────────────────────────────────────────
 app.UseCors("AllowAll");
 
 app.UseResponseCompression();
@@ -172,7 +157,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// ── Ruta inicial hacia Login ──────────────────────────────────
 app.MapGet("/", context =>
 {
     context.Response.Redirect("/frontend/login.html");

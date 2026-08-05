@@ -27,23 +27,33 @@ public class AuthService : IAuthService
 
     private static string HashPassword(string password)
     {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+        var passwordLimpio = (password ?? string.Empty).Trim();
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(passwordLimpio));
         return Convert.ToHexString(bytes);
     }
 
     public async Task<LoginResponseDto?> LoginAsync(LoginDto dto)
     {
+        var email = (dto.Email ?? string.Empty).Trim().ToLowerInvariant();
+        var password = (dto.Password ?? string.Empty).Trim();
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+            return null;
+
         var usuario = await _context.Usuario
             .Include(u => u.UserRoles)
             .ThenInclude(ur => ur.Roles)
             .FirstOrDefaultAsync(u =>
-                u.Email == dto.Email &&
+                u.Email.ToLower() == email &&
                 u.Estado != "Baja");
 
         if (usuario == null)
             return null;
 
-        if (usuario.PasswordHash != HashPassword(dto.Password))
+        var hashEsperado = HashPassword(password);
+        var hashActual = (usuario.PasswordHash ?? string.Empty).Trim();
+
+        if (!string.Equals(hashActual, hashEsperado, StringComparison.OrdinalIgnoreCase))
             return null;
 
         var rol = usuario.UserRoles
@@ -59,7 +69,7 @@ public class AuthService : IAuthService
             Nombre = $"{usuario.Nombre} {usuario.Apellidos}",
             Email = usuario.Email,
             Rol = rol,
-            EsAdministrador = rol == "Administrador" || usuario.Admin
+            EsAdministrador = string.Equals(rol, "Administrador", StringComparison.OrdinalIgnoreCase) || usuario.Admin
         };
     }
 

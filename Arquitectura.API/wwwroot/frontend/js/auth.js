@@ -83,7 +83,18 @@ async function iniciarSesion() {
         });
 
         if (!respuesta.ok) {
-            throw new Error("Credenciales inválidas.");
+            let mensajeError = "Credenciales inválidas.";
+
+            try {
+                const dataError = await respuesta.json();
+                mensajeError = dataError.message || dataError.mensaje || mensajeError;
+            } catch {
+                mensajeError = respuesta.status === 0
+                    ? "No se pudo conectar con el servidor."
+                    : mensajeError;
+            }
+
+            throw new Error(mensajeError);
         }
 
         const data = await respuesta.json();

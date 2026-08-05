@@ -5,9 +5,6 @@ let transaccionesContabilidadActuales = [];
 let transaccionEditandoId = null;
 let transaccionEditandoTipo = null;
 
-// ============================================================
-// SESIÓN / TOKEN
-// ============================================================
 
 function obtenerTokenContabilidad() {
     return localStorage.getItem("cega_token") || localStorage.getItem("cega_token_jwt") || "";
@@ -60,9 +57,6 @@ function obtenerHeadersJson(requiereToken = false) {
     return headers;
 }
 
-// ============================================================
-// HELPERS API
-// ============================================================
 
 async function leerContenidoRespuesta(respuesta) {
     const texto = await respuesta.text();
@@ -138,9 +132,6 @@ async function apiEnviarContabilidad(ruta, metodo, datos, requiereToken = true) 
     return await leerContenidoRespuesta(respuesta);
 }
 
-// ============================================================
-// HELPERS GENERALES
-// ============================================================
 
 function setTextoSeguro(id, valor) {
     const elemento = document.getElementById(id);
@@ -225,9 +216,6 @@ function proyectoPermitidoParaEmpleado(proyectoId) {
     return proyectosPermitidosContabilidad.some(p => p.id === proyectoId);
 }
 
-// ============================================================
-// PERMISOS DE VISTA
-// ============================================================
 
 function aplicarPermisosContabilidad() {
     if (usuarioEsAdmin()) {
@@ -262,9 +250,6 @@ function aplicarPermisosContabilidad() {
     }
 }
 
-// ============================================================
-// RESUMEN FINANCIERO
-// ============================================================
 
 function actualizarResumenFinanciero(totalIngresos, totalEgresos, cantidadIngresos, cantidadEgresos) {
     const balance = totalIngresos - totalEgresos;
@@ -316,9 +301,6 @@ function reporteTieneDatos(reporte) {
         obtenerNumero(reporte, "cantidadEgresos", "CantidadEgresos") > 0;
 }
 
-// ============================================================
-// PROYECTOS PARA CONTABILIDAD
-// ============================================================
 
 async function cargarProyectosContabilidad() {
     try {
@@ -372,9 +354,6 @@ function llenarSelectProyectos(idSelect, proyectos, textoInicial) {
     });
 }
 
-// ============================================================
-// INICIALIZACIÓN
-// ============================================================
 
 async function inicializarContabilidad() {
     validarSesion();
@@ -420,9 +399,6 @@ async function cargarPanelContabilidad() {
     }
 }
 
-// ============================================================
-// REPORTE GENERAL / CATEGORÍAS
-// ============================================================
 
 async function cargarReporteFinanciero(transaccionesLocales = []) {
     if (!usuarioEsAdmin()) {
@@ -493,9 +469,6 @@ function renderCategorias(idTabla, categorias) {
     });
 }
 
-// ============================================================
-// TRANSACCIONES
-// ============================================================
 
 async function cargarTransaccionesFrontend() {
     const tabla = document.getElementById("tablaTransacciones");
@@ -662,9 +635,6 @@ async function registrarEgresoFrontend() {
 
 
 
-// ============================================================
-// EDICIÓN DE TRANSACCIONES DESDE HISTORIAL
-// ============================================================
 
 function unirTransaccionesSinDuplicados(actuales, nuevas) {
     const mapa = new Map();
@@ -791,9 +761,6 @@ function normalizarFechaInput(valor) {
     return texto.substring(0, 10);
 }
 
-// ============================================================
-// REPORTE FINANCIERO POR PROYECTO
-// ============================================================
 
 async function consultarReporteProyecto() {
     const proyectoId = obtenerProyectoIdDesdeSelect("proyectoReporteId");
@@ -871,9 +838,6 @@ function renderTransaccionesProyecto(transacciones) {
     });
 }
 
-// ============================================================
-// CIERRES DE CAJA
-// ============================================================
 
 function cambiarCamposCierre() {
     const tipo = document.getElementById("tipoCierre")?.value;
@@ -947,9 +911,6 @@ function renderCierre(cierre) {
     `;
 }
 
-// ============================================================
-// NÓMINA
-// ============================================================
 
 async function revisarInconsistenciasNominaFrontend() {
     if (!usuarioEsAdmin()) {
