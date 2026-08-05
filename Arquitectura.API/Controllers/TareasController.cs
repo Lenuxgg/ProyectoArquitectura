@@ -84,10 +84,22 @@ public class TareasController : ControllerBase
         return Ok(tareas);
     }
 
-    [Authorize(Roles = "Administrador")]
     [HttpPost]
     public async Task<IActionResult> Crear([FromBody] CrearTareaDto dto)
     {
+        if (!UsuarioEsAdministrador())
+        {
+            var usuarioId = ObtenerUsuarioIdAutenticado();
+
+            if (usuarioId == null)
+                return Unauthorized("No se pudo identificar el usuario autenticado.");
+
+            var tieneAcceso = await _tareaService.UsuarioTieneAccesoAProyectoAsync(dto.ProyectoId, usuarioId.Value);
+
+            if (!tieneAcceso)
+                return StatusCode(403, "No puede crear tareas en un proyecto que no tiene asignado.");
+        }
+
         var tarea = await _tareaService.CrearAsync(dto);
         return Ok(tarea);
     }

@@ -309,7 +309,8 @@ async function cargarDetalleProyecto() {
             btnCrearTarea.href = `crear-tarea.html?proyectoId=${proyectoId}`;
         } else {
             btnEditarProyecto.style.display = "none";
-            btnCrearTarea.style.display = "none";
+            btnCrearTarea.href = `crear-tarea.html?proyectoId=${proyectoId}`;
+            btnCrearTarea.style.display = "inline-flex";
         }
 
         cargarDocumentosProyecto(proyectoId);

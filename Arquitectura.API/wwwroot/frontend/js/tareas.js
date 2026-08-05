@@ -96,12 +96,6 @@ async function cargarTareasDelProyecto(proyectoId) {
 }
 
 function prepararFormularioCrearTarea() {
-    if (!esAdminFrontend()) {
-        alert("Solo un administrador puede crear tareas.");
-        window.location.href = "proyectos.html";
-        return;
-    }
-
     const proyectoId = obtenerParametro("proyectoId");
 
     if (!proyectoId) {
@@ -118,11 +112,6 @@ function prepararFormularioCrearTarea() {
 }
 
 async function crearTarea() {
-    if (!esAdminFrontend()) {
-        mostrarMensaje("mensajeTarea", "Solo un administrador puede crear tareas.", "error");
-        return;
-    }
-
     const proyectoId = document.getElementById("proyectoId").value;
 
     const tarea = {
@@ -146,7 +135,7 @@ async function crearTarea() {
         });
 
         if (!respuesta.ok) {
-            throw new Error(await leerErrorTareas(respuesta, "No se pudo crear la tarea."));
+            throw new Error(await leerErrorTareas(respuesta, "No se pudo crear la tarea. Verifique que el proyecto esté asignado al usuario."));
         }
 
         mostrarMensaje("mensajeTarea", "Tarea creada correctamente.", "success");
