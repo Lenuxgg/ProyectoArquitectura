@@ -110,7 +110,18 @@ public class TareaService : ITareaService
         if (tarea == null)
             return false;
 
+        var asignaciones = await _context.TareaAsignaciones
+            .Where(a => a.TareaId == id)
+            .ToListAsync();
+
+        var comentarios = await _context.ComentarioTareas
+            .Where(c => c.TareaId == id)
+            .ToListAsync();
+
+        _context.TareaAsignaciones.RemoveRange(asignaciones);
+        _context.ComentarioTareas.RemoveRange(comentarios);
         _context.Tareas.Remove(tarea);
+
         await _context.SaveChangesAsync();
 
         return true;

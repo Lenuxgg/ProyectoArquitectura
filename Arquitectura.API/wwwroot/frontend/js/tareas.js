@@ -75,6 +75,7 @@ async function cargarTareasDelProyecto(proyectoId) {
                 ? `
                     <a class="btn-warning" href="editar-tarea.html?id=${t.id}&proyectoId=${t.proyectoId}">Editar</a>
                     <button class="btn-secondary" onclick="terminarTarea(${t.id}, ${t.proyectoId})">Terminar</button>
+                    <button class="btn-danger" onclick="eliminarTarea(${t.id}, ${t.proyectoId})">Eliminar</button>
                 `
                 : `
                     <a class="btn-secondary" href="editar-tarea.html?id=${t.id}&proyectoId=${t.proyectoId}">Ver documentos</a>
@@ -253,6 +254,35 @@ async function editarTarea() {
     }
 }
 
+
+async function eliminarTarea(tareaId, proyectoId) {
+    if (!esAdminFrontend()) {
+        alert("Solo un administrador puede eliminar tareas.");
+        return;
+    }
+
+    const confirmar = confirm("¿Desea eliminar esta tarea? También se eliminarán sus asignaciones y documentos relacionados.");
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Tareas/${tareaId}`, {
+            method: "DELETE",
+            headers: obtenerHeadersAuthTareas()
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(await leerErrorTareas(respuesta, "No se pudo eliminar la tarea."));
+        }
+
+        await cargarTareasDelProyecto(proyectoId);
+    } catch (error) {
+        alert("Error: " + error.message);
+    }
+}
+
 async function terminarTarea(tareaId, proyectoId) {
     if (!esAdminFrontend()) {
         alert("Solo un administrador puede terminar tareas.");
@@ -394,10 +424,3 @@ async function eliminarDocumentoTarea(documentoId) {
     }
 }
 
-
-document.addEventListener("DOMContentLoaded", function () {
-    if (!esAdminFrontend()) {
-        const btnCrearTarea = document.getElementById("btnCrearTarea");
-        if (btnCrearTarea) btnCrearTarea.style.display = "none";
-    }
-});

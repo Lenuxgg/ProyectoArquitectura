@@ -133,7 +133,7 @@ async function eliminarProyecto(id) {
         return;
     }
 
-    const confirmar = confirm("¿Desea eliminar este proyecto? Esta acción puede fallar si el proyecto tiene tareas, documentos o transacciones relacionadas.");
+    const confirmar = confirm("¿Desea eliminar este proyecto? También se eliminarán sus tareas, documentos, comentarios y asignaciones. Las transacciones quedarán como movimientos generales sin proyecto.");
 
     if (!confirmar) {
         return;
@@ -165,6 +165,7 @@ async function crearProyecto() {
     const nombre = document.getElementById("nombre").value.trim();
     const descripcion = document.getElementById("descripcion").value.trim();
     const fechaInicio = document.getElementById("fechaInicio").value;
+    const fechaFin = document.getElementById("fechaFin")?.value || null;
 
     if (!nombre || !fechaInicio) {
         mostrarMensaje("mensajeProyecto", "Debe ingresar nombre y fecha de inicio.", "error");
@@ -174,7 +175,8 @@ async function crearProyecto() {
     const proyecto = {
         nombre,
         descripcion,
-        fechaInicio
+        fechaInicio,
+        fechaFin
     };
 
     try {
@@ -372,24 +374,58 @@ async function cargarDocumentosProyecto(proyectoId) {
         const documentos = await respuesta.json();
 
         if (documentos.length === 0) {
-            tabla.innerHTML = `<tr><td colspan="3">No hay documentos registrados.</td></tr>`;
+            tabla.innerHTML = `<tr><td colspan="4">No hay documentos registrados.</td></tr>`;
             return;
         }
 
         tabla.innerHTML = "";
 
         documentos.forEach(d => {
+            const acciones = usuarioEsAdmin()
+                ? `<button class="btn-danger" onclick="eliminarDocumentoProyecto(${d.id}, ${proyectoId})">Eliminar</button>`
+                : `<span class="text-muted">Sin acciones</span>`;
+
             tabla.innerHTML += `
                 <tr>
                     <td>${d.nombre}</td>
                     <td><a href="${d.rutaArchivo}" target="_blank">Abrir</a></td>
                     <td>${formatearFecha(d.fechaCarga)}</td>
+                    <td>${acciones}</td>
                 </tr>
             `;
         });
 
     } catch (error) {
-        tabla.innerHTML = `<tr><td colspan="3">Error: ${error.message}</td></tr>`;
+        tabla.innerHTML = `<tr><td colspan="4">Error: ${error.message}</td></tr>`;
+    }
+}
+
+async function eliminarDocumentoProyecto(documentoId, proyectoId) {
+    if (!usuarioEsAdmin()) {
+        mostrarMensaje("mensajeDocumento", "Solo el administrador puede eliminar documentos.", "error");
+        return;
+    }
+
+    const confirmar = confirm("¿Desea eliminar este documento del proyecto?");
+
+    if (!confirmar) {
+        return;
+    }
+
+    try {
+        const respuesta = await fetch(`${API_BASE}/Proyectos/documentos/${documentoId}`, {
+            method: "DELETE",
+            headers: obtenerHeadersAuth()
+        });
+
+        if (!respuesta.ok) {
+            throw new Error(await leerErrorFrontend(respuesta, "No se pudo eliminar el documento."));
+        }
+
+        mostrarMensaje("mensajeDocumento", "Documento eliminado correctamente.", "success");
+        await cargarDocumentosProyecto(proyectoId);
+    } catch (error) {
+        mostrarMensaje("mensajeDocumento", error.message, "error");
     }
 }
 
@@ -494,6 +530,7 @@ async function crearProyectoConAsignaciones() {
     const nombre = document.getElementById("nombre").value.trim();
     const descripcion = document.getElementById("descripcion").value.trim();
     const fechaInicio = document.getElementById("fechaInicio").value;
+    const fechaFin = document.getElementById("fechaFin")?.value || null;
 
     if (!nombre || !fechaInicio) {
         mostrarMensaje("mensajeProyecto", "Debe ingresar nombre y fecha de inicio.", "error");
@@ -503,7 +540,8 @@ async function crearProyectoConAsignaciones() {
     const proyecto = {
         nombre: nombre,
         descripcion: descripcion,
-        fechaInicio: fechaInicio
+        fechaInicio: fechaInicio,
+        fechaFin: fechaFin
     };
 
     try {

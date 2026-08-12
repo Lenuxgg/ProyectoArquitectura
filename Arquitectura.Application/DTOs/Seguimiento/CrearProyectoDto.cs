@@ -7,4 +7,6 @@ public class CrearProyectoDto
     public string? Descripcion { get; set; }
 
     public DateTime FechaInicio { get; set; } = DateTime.Now;
+
+    public DateTime? FechaFin { get; set; }
 }

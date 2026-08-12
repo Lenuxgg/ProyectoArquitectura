@@ -59,6 +59,7 @@ public class ProyectoService : IProyectoService
             Nombre = dto.Nombre,
             Descripcion = dto.Descripcion,
             FechaInicio = dto.FechaInicio,
+            FechaFin = dto.FechaFin,
             Estado = "Activo",
             FechaCreacion = DateTime.Now
         };
@@ -122,12 +123,58 @@ public class ProyectoService : IProyectoService
 
     public async Task<bool> EliminarAsync(int id)
     {
-        var proyecto = await _context.Proyectos.FindAsync(id);
+        var proyecto = await _context.Proyectos
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (proyecto == null)
             return false;
 
+        var tareasIds = await _context.Tareas
+            .Where(t => t.ProyectoId == id)
+            .Select(t => t.Id)
+            .ToListAsync();
+
+        var asignacionesTareas = await _context.TareaAsignaciones
+            .Where(a => tareasIds.Contains(a.TareaId))
+            .ToListAsync();
+
+        var comentariosTareas = await _context.ComentarioTareas
+            .Where(c => tareasIds.Contains(c.TareaId))
+            .ToListAsync();
+
+        var tareas = await _context.Tareas
+            .Where(t => t.ProyectoId == id)
+            .ToListAsync();
+
+        var asignacionesProyecto = await _context.ProyectoEmpleados
+            .Where(pe => pe.ProyectoId == id)
+            .ToListAsync();
+
+        var comentariosProyecto = await _context.ComentarioProyectos
+            .Where(c => c.ProyectoId == id)
+            .ToListAsync();
+
+        var documentosProyecto = await _context.DocumentoProyectos
+            .Where(d => d.ProyectoId == id)
+            .ToListAsync();
+
+        var transaccionesProyecto = await _context.Transacciones
+            .Where(t => t.ProyectoId == id)
+            .ToListAsync();
+
+        foreach (var transaccion in transaccionesProyecto)
+        {
+            transaccion.ProyectoId = null;
+        }
+
+        _context.TareaAsignaciones.RemoveRange(asignacionesTareas);
+        _context.ComentarioTareas.RemoveRange(comentariosTareas);
+        _context.Tareas.RemoveRange(tareas);
+        _context.ProyectoEmpleados.RemoveRange(asignacionesProyecto);
+        _context.ComentarioProyectos.RemoveRange(comentariosProyecto);
+        _context.DocumentoProyectos.RemoveRange(documentosProyecto);
         _context.Proyectos.Remove(proyecto);
+
         await _context.SaveChangesAsync();
 
         return true;
